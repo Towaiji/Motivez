@@ -1,0 +1,13 @@
+{
+    "name": "motivez-frontend",
+    "version": "1.0.0",
+    "dependencies": {
+      "react": "latest",
+      "react-native": "latest",
+      "axios": "latest",
+      "react-navigation": "latest",
+      "@react-navigation/native": "latest",
+      "@react-navigation/stack": "latest"
+    }
+  }
+  
