@@ -30,10 +30,10 @@ Many people struggle with **finding something to do** when they're bored. Motive
 ---
 
 ## **🛠 Tech Stack**
-- **Frontend:** React Native (Expo)
+- **Frontend:** Flutter (Dart)
 - **Backend:** Node.js + Express + MongoDB
 - **APIs Used:** Google Maps API, OpenWeather API (optional for weather-based recommendations)
-- **Authentication:** Firebase Auth (for user login & friend invites)
+- **Authentication:** Firebase Auth (for user login, business owner login, & friend invites)
 
 ---
 
@@ -42,6 +42,7 @@ Many people struggle with **finding something to do** when they're bored. Motive
 - **User Reviews & Ratings** for recommendations.
 - **Gamification & Rewards** for exploring new places.
 - **Integration with Ride Services (Uber, Lyft, Public Transport).**
+- **Web & Desktop Versions** using Flutter's cross-platform capabilities.
 
 ---
 
@@ -50,5 +51,8 @@ Many people struggle with **finding something to do** when they're bored. Motive
 ✔️ **Groups of Friends** – Wanting to plan outings easily.  
 ✔️ **Travelers & Explorers** – Searching for local attractions.  
 ✔️ **People on a Budget** – Finding affordable experiences.  
+✔️ **Business Owners** – Managing activity listings and promotions through a separate dashboard.  
 
 ---
+
+## **📌 Project Structure (Flutter)**
