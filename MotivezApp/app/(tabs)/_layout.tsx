@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -27,7 +28,14 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{
         headerTitle: "Motivez",
         tabBarShowLabel: false,
-        tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
+        tabBarIcon: ({ color }) => (
+          <Ionicons name="home" size={24} color={color} />
+        ),
+        headerRight: () => (
+          <TouchableOpacity onPress={() => console.log("Add Friend pressed")} style={{ marginRight: 15 }}>
+            <Ionicons name="person-add-outline" size={24} color="black" />
+          </TouchableOpacity>
+        ),
       }} />
       <Tabs.Screen name="user" options={{
         headerTitle: "My Profile",

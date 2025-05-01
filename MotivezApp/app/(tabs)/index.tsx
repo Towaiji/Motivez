@@ -1,4 +1,6 @@
 import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
 
 const activities = [
   "Go Karting",
@@ -35,6 +37,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     backgroundColor: "#efe7ee",
     alignItems: "center",
+    justifyContent: "flex-start",
   },
   header: {
     fontSize: 26,
