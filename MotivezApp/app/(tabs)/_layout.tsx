@@ -47,9 +47,15 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         tabBarIcon: ({ color }) => <Ionicons name="search" size={24} color={color} />,
       }} />
-      <Tabs.Screen name="+not-found" options={{
-        headerTitle: "Not Found",
-      }} />
+      <Tabs.Screen
+        name="maps/index"
+        options={{
+          headerTitle: "Map",
+          tabBarShowLabel: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="map-outline" size={24} color={color} />
+          ),
+        }} />
     </Tabs>
   );
 }
