@@ -37,16 +37,21 @@ export default function TabsLayout() {
           </TouchableOpacity>
         ),
       }} />
-      <Tabs.Screen name="user" options={{
-        headerTitle: "My Profile",
-        tabBarShowLabel: false,
-        tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
-      }} />
       <Tabs.Screen name="motives" options={{
         headerTitle: "Find Motivez",
         tabBarShowLabel: false,
         tabBarIcon: ({ color }) => <Ionicons name="search" size={24} color={color} />,
       }} />
+      <Tabs.Screen
+        name="create-motive"
+        options={{
+          headerTitle: "Create Motive",
+          tabBarShowLabel: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="add-circle-outline" size={30} color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="maps/index"
         options={{
@@ -56,6 +61,11 @@ export default function TabsLayout() {
             <Ionicons name="map-outline" size={24} color={color} />
           ),
         }} />
+        <Tabs.Screen name="user" options={{
+        headerTitle: "My Profile",
+        tabBarShowLabel: false,
+        tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
+      }} />
     </Tabs>
   );
 }
