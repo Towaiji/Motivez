@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -61,11 +61,27 @@ export default function TabsLayout() {
             <Ionicons name="map-outline" size={24} color={color} />
           ),
         }} />
-        <Tabs.Screen name="user" options={{
-        headerTitle: "My Profile",
-        tabBarShowLabel: false,
-        tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
-      }} />
+        <Tabs.Screen
+  name="user"
+  options={{
+    headerTitle: "My Profile",
+    tabBarShowLabel: false,
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="person" size={24} color={color} />
+    ),
+    headerRight: () => (
+      <View style={{ flexDirection: "row", gap: 16, marginRight: 15 }}>
+        <TouchableOpacity onPress={() => console.log("Calendar tapped")}>
+          <Ionicons name="calendar-outline" size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => console.log("Settings tapped")}>
+          <Ionicons name="menu-outline" size={26} color="#333" />
+        </TouchableOpacity>
+      </View>
+    ),
+  }}
+/>
+
     </Tabs>
   );
 }
