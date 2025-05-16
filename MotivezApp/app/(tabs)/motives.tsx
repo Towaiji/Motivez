@@ -1,4 +1,12 @@
-import { Text, View, StyleSheet, FlatList, Image } from "react-native";
+import { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 
 const dummyMotives = [
   {
@@ -6,26 +14,61 @@ const dummyMotives = [
     user: "@sara",
     title: "Late night go-karting 🏎️🔥",
     image: "https://picsum.photos/id/237/300/200",
+    type: "close-friends",
   },
   {
     id: "2",
     user: "@jay",
     title: "Spontaneous beach day ☀️",
     image: "https://picsum.photos/id/1018/300/200",
+    type: "public",
   },
   {
     id: "3",
     user: "@lee",
     title: "Board game night with the crew 🎲",
     image: "https://picsum.photos/id/1025/300/200",
+    type: "featured",
   },
 ];
 
 export default function Motives() {
+  const [selected, setSelected] = useState<"close-friends" | "featured" | "public">("public");
+
+  const filteredMotives = dummyMotives.filter(
+    (motive) => motive.type === selected
+  );
+
   return (
     <View style={styles.container}>
+      <View style={styles.toggleContainer}>
+        {["close-friends", "featured", "public"].map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[
+              styles.toggleButton,
+              selected === type && styles.activeButton,
+            ]}
+            onPress={() => setSelected(type as typeof selected)}
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                selected === type && styles.activeText,
+              ]}
+            >
+              {type === "close-friends"
+                ? "Close Friends"
+                : type === "featured"
+                ? "Featured"
+                : "Public"}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={dummyMotives}
+        data={filteredMotives}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
@@ -44,7 +87,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#efe7ee",
-    paddingTop: 60,
+    paddingTop:40
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  toggleButton: {
+    backgroundColor: "#ddd",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  activeButton: {
+    backgroundColor: "#e91e63",
+  },
+  toggleText: {
+    color: "#444",
+    fontWeight: "500",
+    fontSize: 14,
+  },
+  activeText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   list: {
     paddingHorizontal: 16,
