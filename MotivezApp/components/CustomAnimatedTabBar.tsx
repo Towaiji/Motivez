@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet, Dimensions, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const { width } = Dimensions.get("window");
 
 const ICONS = [
-  "home",
+  "custom-cards",
   "search",
   "add-circle",
   "map",
@@ -15,7 +16,6 @@ const ICONS = [
 
 export default function CustomAnimatedTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const translateX = useRef(new Animated.Value(0)).current;
-  //const TAB_WIDTH = width / 5;
   const TAB_BAR_WIDTH = 340;
   const TAB_WIDTH = TAB_BAR_WIDTH / 5;
   const pillOffset = (TAB_WIDTH - TAB_WIDTH * 0.8) / 2;
@@ -63,11 +63,19 @@ export default function CustomAnimatedTabBar({ state, descriptors, navigation }:
             style={styles.tabButton}
             activeOpacity={0.8}
           >
+          {ICONS[index] === "custom-cards" ? (
+            <MaterialCommunityIcons
+              name="cards"
+              size={24}
+              color={isFocused ? "#e91e63" : "#aaa"}
+            />
+          ) : (
             <Ionicons
               name={ICONS[index] as any}
               size={24}
               color={isFocused ? "#e91e63" : "#aaa"}
             />
+          )}
           </TouchableOpacity>
         );
       })}
@@ -83,7 +91,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#fff",
     borderRadius: 35,
-    //marginHorizontal: 20,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -93,8 +100,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     position: "absolute",
-    //left: 0,
-    //right: 0,
     bottom: 0,
     overflow: "hidden",
   },

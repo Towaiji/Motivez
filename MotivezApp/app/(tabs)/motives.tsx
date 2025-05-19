@@ -6,7 +6,9 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  TextInput
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const dummyMotives = [
   {
@@ -34,6 +36,7 @@ const dummyMotives = [
 
 export default function Motives() {
   const [selected, setSelected] = useState<"close-friends" | "featured" | "public">("public");
+  const [search, setSearch] = useState("");
 
   const filteredMotives = dummyMotives.filter(
     (motive) => motive.type === selected
@@ -41,6 +44,17 @@ export default function Motives() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+        <TextInput
+          placeholder="Search motives..."
+          placeholderTextColor="#999"
+          style={styles.input}
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+
       <View style={styles.toggleContainer}>
         {["close-friends", "featured", "public"].map((type) => (
           <TouchableOpacity
@@ -140,5 +154,22 @@ const styles = StyleSheet.create({
   user: {
     fontSize: 14,
     color: "#666",
+  },
+  searchBar: {
+    width: "90%",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f1f1f1",
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
   },
 });
