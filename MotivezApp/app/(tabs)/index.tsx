@@ -2,33 +2,20 @@ import { Text, View, StyleSheet, TouchableOpacity, } from "react-native";
 import DeckSwiper from "../../components/DeckSwiper";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import MenuDrawer from "../../components/MenuDrawer";
+import { useLayoutEffect } from "react";
+import { useNavigation } from "expo-router";
 
 export default function Home() {
-  const [menuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => setMenuVisible((prev) => !prev)}
-        style={{
-          position: "absolute",
-          top: 50,
-          left: 20,
-          zIndex: 20,
-        }}
-      >
-        <Ionicons name="person-circle-outline" size={40} color="black" />
-      </TouchableOpacity>
-
       <Text style={styles.header}>Welcome to Motivez!</Text>
       <Text style={styles.subtext}>What do you feel like doing today?</Text>
 
       <View style={styles.swiperContainer}>
         <DeckSwiper />
       </View>
-
-      <MenuDrawer isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
     </View>
   );
 }

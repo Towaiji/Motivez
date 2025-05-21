@@ -1,14 +1,27 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 import CustomAnimatedTabBar from "../../components/CustomAnimatedTabBar";
+import {  useState } from "react";
+import MenuDrawer from "../../components/MenuDrawer";
 
 export default function TabsLayout() {
+  const [menuVisible, setMenuVisible] = useState(false);
+
   return (
+    <View style={styles.container}>
     <Tabs
       tabBar={(props) => <CustomAnimatedTabBar {...props} />}
       screenOptions={{
         tabBarShowLabel: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => setMenuVisible((prev) => !prev)}
+              style={{ marginLeft: 15 }}
+            >
+              <Ionicons name="person-circle-outline" size={34} color="black" />
+            </TouchableOpacity>
+          ),
       }}
     >
       {/* 🃏 CardSwiper */}
@@ -27,7 +40,7 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* 🔍 Search */}
+      {/* 🔍 Search */} 
       <Tabs.Screen
         name="motives"
         options={{
@@ -43,5 +56,15 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+
+    {/* 🗂️ Menu Drawer */}
+    <MenuDrawer isVisible={menuVisible} onClose={() => setMenuVisible(false)} />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
