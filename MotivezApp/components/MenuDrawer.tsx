@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, Animated, TouchableWithoutFeedback, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Animated, TouchableWithoutFeedback, TouchableOpacity, Dimensions, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -39,26 +39,43 @@ export default function MenuDrawer({
   if (!drawerMounted) return null;
 
   return (
-    <View style={styles.drawerWrapper}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdropTouchArea} />
-      </TouchableWithoutFeedback>
+      <View style={styles.drawerWrapper}>
+        {/* Backdrop */}
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.backdropTouchArea} />
+        </TouchableWithoutFeedback>
 
-      <Animated.View style={[styles.drawer, { left: slideAnim }]}>
-        // Close button
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Ionicons name="close" size={33} color="#333" />    
-        </TouchableOpacity>                                   
+        {/* Drawer */}
+        {/* Animated drawer that slides in from the left */}
+        <Animated.View style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}>
+          
+          {/* Close button */}
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={33} color="#333" />
+          </TouchableOpacity>
 
-        <View style={styles.drawerContent}>
-          <Text style={styles.drawerItem}>Profile</Text>
-          <Text style={styles.drawerItem}>Settings</Text>
-          <Text style={styles.drawerItem}>Saved</Text>
-          <Text style={styles.drawerItem}>Logout</Text>
-        </View>
-      </Animated.View>
-    </View>
+          <View style={styles.drawerContent}>
+            <View style={styles.profileSection}>
+              <Image
+                source={{ uri: "https://i.pravatar.cc/100" }}
+                style={styles.profileImage}
+              />
+              <View>
+                <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
+                <Text style={styles.profileSubtitle}>View Profile</Text>
+              </View>
+            </View>
+
+            {/* Drawer items */}
+            <Text style={styles.drawerItem}>Profile</Text>
+            <Text style={styles.drawerItem}>Settings</Text>
+            <Text style={styles.drawerItem}>Saved</Text>
+            <Text style={styles.drawerItem}>Logout</Text>
+          </View>
+        </Animated.View>
+      </View>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -97,8 +114,33 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 60,
+    top: 50,
     right: 20,
-    zIndex: 100
+    backgroundColor: "#f1f1f1",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    zIndex: 20,
+  },
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  profileSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 20,
   },
 });

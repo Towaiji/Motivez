@@ -19,7 +19,7 @@ export default function TabsLayout() {
               onPress={() => setMenuVisible((prev) => !prev)}
               style={{ marginLeft: 15 }}
             >
-              <Ionicons name="person-circle-outline" size={34} color="black" />
+              <Ionicons name="person-circle-outline" size={40} color="black" />
             </TouchableOpacity>
           ),
       }}
@@ -45,6 +45,14 @@ export default function TabsLayout() {
         name="motives"
         options={{
           headerTitle: "Find Motivez",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => console.log("Add Friend pressed")}
+              style={{ marginRight: 15 }}
+            >
+              <Ionicons name="person-add-outline" size={30} color="black" />
+            </TouchableOpacity>
+          ),
         }}
       />
 

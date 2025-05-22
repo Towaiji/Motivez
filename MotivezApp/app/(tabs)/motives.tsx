@@ -9,7 +9,6 @@ import {
   TextInput
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 
 const dummyMotives = [
@@ -43,21 +42,6 @@ export default function Motives() {
   const filteredMotives = dummyMotives.filter(
     (motive) => motive.type === selected
   );
-
-  const navigation = useNavigation();
-  
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => console.log("Profile tapped")}
-          style={{ marginLeft: 15 }}
-        >
-          <Ionicons name="person-circle-outline" size={40} color="black" />
-        </TouchableOpacity>
-      ),
-    });
-  }, []);
 
   return (
     <View style={styles.container}>
