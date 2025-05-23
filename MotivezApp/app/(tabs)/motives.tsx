@@ -9,7 +9,7 @@ import {
   TextInput
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const dummyMotives = [
   {
@@ -44,7 +44,12 @@ export default function Motives() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerRow}> 
+        <Text style={styles.pageTitle}>Search</Text>
+      </View>
+
+      {/* Search Bar */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
         <TextInput
@@ -94,7 +99,7 @@ export default function Motives() {
           </View>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -102,7 +107,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#efe7ee",
-    paddingTop:40
+    paddingTop: 60,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -172,5 +177,19 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "#333",
+  },
+  pageTitle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginLeft: 20,
+    color: "#000",
+    marginBottom: 16,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: -47,
+    marginLeft: 46,
+    marginBottom: 16,
   },
 });

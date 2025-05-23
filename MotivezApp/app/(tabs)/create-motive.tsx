@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CreateMotiveScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -56,53 +57,62 @@ export default function CreateMotiveScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Create Motive</Text>
-
-      <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <Text style={styles.imagePlaceholder}>Pick a photo</Text>
-        )}
-      </TouchableOpacity>
-
-      <TextInput
-        placeholder="Location"
-        style={styles.input}
-        value={location}
-        onChangeText={setLocation}
-      />
-
-      <TextInput
-        placeholder="Price (CAD)"
-        style={styles.input}
-        keyboardType="numeric"
-        value={price}
-        onChangeText={setPrice}
-      />
-
-      <TextInput
-        placeholder="Description (optional)"
-        style={[styles.input, { height: 80 }]}
-        multiline
-        value={description}
-        onChangeText={setDescription}
-      />
-
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>Public</Text>
-        <Switch
-          value={isPublic}
-          onValueChange={() => setIsPublic(!isPublic)}
-        />
-        <Text style={styles.label}>Friends Only</Text>
+    // SafeAreaView to avoid notches and status bar
+    // on Android and iOS devices
+    <SafeAreaView style={styles.safeContainer}>
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>Create Motive</Text>
       </View>
 
-      <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Post Motive</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      {/* ScrollView to allow scrolling on smaller screens */}
+      {/* and to avoid keyboard overlap */}
+      <ScrollView contentContainerStyle={styles.container}>
+
+        <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>Pick a photo</Text>
+          )}
+        </TouchableOpacity>
+
+        <TextInput
+          placeholder="Location"
+          style={styles.input}
+          value={location}
+          onChangeText={setLocation}
+        />
+
+        <TextInput
+          placeholder="Price (CAD)"
+          style={styles.input}
+          keyboardType="numeric"
+          value={price}
+          onChangeText={setPrice}
+        />
+
+        <TextInput
+          placeholder="Description (optional)"
+          style={[styles.input, { height: 80 }]}
+          multiline
+          value={description}
+          onChangeText={setDescription}
+        />
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>Public</Text>
+          <Switch
+            value={isPublic}
+            onValueChange={() => setIsPublic(!isPublic)}
+          />
+          <Text style={styles.label}>Friends Only</Text>
+        </View>
+
+        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+          <Text style={styles.submitText}>Post Motive</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -112,11 +122,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#efe7ee',
     flexGrow: 1,
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginVertical: 16,
   },
   imagePicker: {
     width: '100%',
@@ -164,5 +169,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#efe7ee',
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 15,
+    marginLeft: 46,
+    marginBottom: 0,
+  },
+  headerTitle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginLeft: 20,
+    color: "#000",
+    marginBottom: 12,
   },
 });
