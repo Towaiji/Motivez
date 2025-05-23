@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet, Platform, StatusBar } from "react-native";
 import CustomAnimatedTabBar from "../../components/CustomAnimatedTabBar";
 import {  useState } from "react";
 import MenuDrawer from "../../components/MenuDrawer";
@@ -10,18 +10,20 @@ export default function TabsLayout() {
 
   return (
     <View style={styles.container}>
+      {/* 👤 Floating User Icon (no white box) */}
+      <TouchableOpacity
+        onPress={() => setMenuVisible((prev) => !prev)}
+        style={styles.floatingIcon}
+      >
+        <Ionicons name="person-circle-outline" size={40} color="black" />
+      </TouchableOpacity>
+
+
     <Tabs
       tabBar={(props) => <CustomAnimatedTabBar {...props} />}
       screenOptions={{
         tabBarShowLabel: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => setMenuVisible((prev) => !prev)}
-              style={{ marginLeft: 15 }}
-            >
-              <Ionicons name="person-circle-outline" size={40} color="black" />
-            </TouchableOpacity>
-          ),
+        headerShown: false,
       }}
     >
       {/* 🃏 CardSwiper */}
@@ -74,5 +76,12 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fffdf8",
+  },
+  floatingIcon: {
+    position: "absolute",
+    top: Platform.OS === "android" ? (StatusBar.currentHeight || 30) + 10 : 60,
+    left: 15,
+    zIndex: 100,
   },
 });

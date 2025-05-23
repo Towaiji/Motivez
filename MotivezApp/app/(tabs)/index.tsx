@@ -1,22 +1,24 @@
-import { Text, View, StyleSheet, TouchableOpacity, } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Platform, StatusBar } from "react-native";
 import DeckSwiper from "../../components/DeckSwiper";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
   const navigation = useNavigation();
+  const TOP_SPACE = Platform.OS === "android" ? (StatusBar.currentHeight || 30) + 50 : 30;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: TOP_SPACE }]}>
       <Text style={styles.header}>Welcome to Motivez!</Text>
       <Text style={styles.subtext}>What do you feel like doing today?</Text>
 
       <View style={styles.swiperContainer}>
         <DeckSwiper />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
   
@@ -25,7 +27,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 150,
     backgroundColor: "#efe7ee",
     alignItems: "center",
     justifyContent: "flex-start",
