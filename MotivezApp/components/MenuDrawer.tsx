@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, Animated, TouchableWithoutFeedback, TouchableOpacity, Dimensions, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_WIDTH = Dimensions.get("window").width; 
 
 // This component is a sliding menu drawer that appears from the left side of the screen.
 export default function MenuDrawer({
@@ -14,7 +15,7 @@ export default function MenuDrawer({
 }) {
   const [drawerMounted, setDrawerMounted] = useState(isVisible);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
-
+  const router = useRouter();
 
   useEffect(() => {
     if (isVisible) {
@@ -67,9 +68,17 @@ export default function MenuDrawer({
             </View>
 
             {/* Drawer items */}
-            <Text style={styles.drawerItem}>Profile</Text>
-            <Text style={styles.drawerItem}>Settings</Text>
-            <Text style={styles.drawerItem}>Saved</Text>
+            <TouchableOpacity onPress={() => { router.push("/menu/profile"); }}>
+              <Text style={styles.drawerItem}>Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => { router.push("/menu/settings"); }}>
+              <Text style={styles.drawerItem}>Settings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => { router.push("/menu/saved"); }}>
+              <Text style={styles.drawerItem}>Saved</Text>
+            </TouchableOpacity>
             <Text style={styles.drawerItem}>Logout</Text>
           </View>
         </Animated.View>
