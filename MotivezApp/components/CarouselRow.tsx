@@ -8,8 +8,8 @@ import {
   Animated,
   StyleSheet,
   Image,
+  ScrollView,
 } from "react-native";
-import { BlurView } from "expo-blur"; // Ensure you have expo-blur installed
 import { LinearGradient } from "expo-linear-gradient"; // Ensure you have expo-linear-gradient installed
 
 const { width } = Dimensions.get("window");
@@ -85,18 +85,24 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
             <Animated.View style={[styles.shadowContainer, { transform: [{ scale }], opacity }]}>
             <View style={styles.card}>
                 <Image source={{ uri: activityItem.image }} style={styles.image} />
-                <BlurView intensity={50} tint="dark" style={styles.overlay}>
-                <LinearGradient
-                    colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.1)", "transparent"]}
-                    style={StyleSheet.absoluteFill}
-                />
-                <View style={{ position: "relative" }}>
-                    <Text style={styles.eventTitle}>{activityItem.title}</Text>
-                    {activityItem.description && (
-                    <Text style={styles.description}>{activityItem.description}</Text>
-                    )}
-                </View>
-                </BlurView>
+                    <View style={styles.overlay}>
+                        <LinearGradient
+                            colors={[
+                            "rgba(0,0,0,0.8)",  // most dark at bottom
+                            "rgba(0,0,0,0.4)",  // less dark
+                            "rgba(0,0,0,0)",    // transparent at top
+                            ]}
+                            style={[StyleSheet.absoluteFill, { transform: [{ rotate: "180deg" }] }]}
+                        />
+
+
+            <View style={{ position: "relative", zIndex: 2 }}>
+                <Text style={styles.eventTitle}>{activityItem.title}</Text>
+                {activityItem.description && (
+                <Text style={styles.description}>{activityItem.description}</Text>
+                )}
+            </View>
+            </View>
             </View>
             </Animated.View>
         );
