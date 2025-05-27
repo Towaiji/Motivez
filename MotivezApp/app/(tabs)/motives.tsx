@@ -98,25 +98,22 @@ export default function Motives() {
         ))}
       </View>
 
-      {/* 🎠 Carousel Rows */}
-      <CarouselRow title="What's Popular in the Area" data={popularActivities} />
-      <CarouselRow title="Festival Themed" data={festivalActivities} />
-      <CarouselRow title="Sport Themed" data={sportActivities} />
+      {/* 🗂️ Motives List */}
+      <FlatList
+        data={[
+          { id: "popular", title: "What's Popular in the Area", data: popularActivities },
+          { id: "festival", title: "Festival Themed", data: festivalActivities },
+          { id: "sport", title: "Sport Themed", data: sportActivities },
+        ]}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <CarouselRow title={item.title} data={item.data} />
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 60 }}
+      />
 
-      {/* 📜 Original Motives List */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
-        <CarouselRow title="What's Popular in the Area" data={popularActivities} />
-        <CarouselRow title="Festival Themed" data={festivalActivities} />
-        <CarouselRow title="Sport Themed" data={sportActivities} />
 
-        {filteredMotives.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.user}>{item.user}</Text>
-          </View>
-        ))}
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -128,13 +125,17 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   headerRow: {
-    alignItems: "center",
-    marginBottom: 10,
+  flexDirection: "row", // 🟢 makes it horizontal
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingHorizontal: 70,
+  marginBottom: 10,
   },
   pageTitle: {
     fontSize: 30,
     fontWeight: "bold",
     color: "#000",
+    marginTop: -55,
   },
   searchBar: {
     width: "90%",
