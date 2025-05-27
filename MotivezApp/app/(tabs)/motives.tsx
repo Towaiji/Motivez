@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -6,11 +6,15 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CarouselRow from "../../components/CarouselRow";
+import { useRouter } from "expo-router";
 
+// 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
   {
     id: "1",
@@ -35,9 +39,26 @@ const dummyMotives = [
   },
 ];
 
+// 🔹 Mock data for carousels
+const popularActivities = [
+  { id: "1", title: "Go Karting", description: "4.8 ⭐️ · 2.1km", image: "https://i.imgur.com/UYiroysl.jpg" },
+  { id: "2", title: "Karaoke Night", description: "4.5 ⭐️ · 3.7km", image: "https://i.imgur.com/UPrs1EWl.jpg" },
+];
+
+const festivalActivities = [
+  { id: "3", title: "Lantern Fest", description: "5.0 ⭐️ · 1.2km", image: "https://i.imgur.com/MABUbpDl.jpg" },
+  { id: "4", title: "Food Street", description: "4.6 ⭐️ · 3.2km", image: "https://i.imgur.com/KZsmUi2l.jpg" },
+];
+
+const sportActivities = [
+  { id: "5", title: "Pickup Soccer", description: "4.2 ⭐️ · 1.8km", image: "https://i.imgur.com/2nCt3Sbl.jpg" },
+  { id: "6", title: "Basketball Run", description: "4.9 ⭐️ · 2.5km", image: "https://i.imgur.com/lceHsT6l.jpg" },
+];
+
 export default function Motives() {
   const [selected, setSelected] = useState<"close-friends" | "featured" | "public">("public");
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   const filteredMotives = dummyMotives.filter(
     (motive) => motive.type === selected
@@ -45,11 +66,12 @@ export default function Motives() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerRow}> 
+      {/* Page Title */}
+      <View style={styles.headerRow}>
         <Text style={styles.pageTitle}>Search</Text>
       </View>
 
-      {/* Search Bar */}
+      {/* 🔍 Search Bar */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
         <TextInput
@@ -61,44 +83,40 @@ export default function Motives() {
         />
       </View>
 
+      {/* 🎯 Filter Buttons */}
       <View style={styles.toggleContainer}>
         {["close-friends", "featured", "public"].map((type) => (
           <TouchableOpacity
             key={type}
-            style={[
-              styles.toggleButton,
-              selected === type && styles.activeButton,
-            ]}
+            style={[styles.toggleButton, selected === type && styles.activeButton]}
             onPress={() => setSelected(type as typeof selected)}
           >
-            <Text
-              style={[
-                styles.toggleText,
-                selected === type && styles.activeText,
-              ]}
-            >
-              {type === "close-friends"
-                ? "Close Friends"
-                : type === "featured"
-                ? "Featured"
-                : "Public"}
+            <Text style={[styles.toggleText, selected === type && styles.activeText]}>
+              {type === "close-friends" ? "Close Friends" : type === "featured" ? "Featured" : "Public"}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <FlatList
-        data={filteredMotives}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
+      {/* 🎠 Carousel Rows */}
+      <CarouselRow title="What's Popular in the Area" data={popularActivities} />
+      <CarouselRow title="Festival Themed" data={festivalActivities} />
+      <CarouselRow title="Sport Themed" data={sportActivities} />
+
+      {/* 📜 Original Motives List */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
+        <CarouselRow title="What's Popular in the Area" data={popularActivities} />
+        <CarouselRow title="Festival Themed" data={festivalActivities} />
+        <CarouselRow title="Sport Themed" data={sportActivities} />
+
+        {filteredMotives.map((item) => (
+          <View key={item.id} style={styles.card}>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.user}>{item.user}</Text>
           </View>
-        )}
-      />
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -108,6 +126,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#efe7ee",
     paddingTop: 60,
+  },
+  headerRow: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  pageTitle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  searchBar: {
+    width: "90%",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f1f1f1",
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
   },
   toggleContainer: {
     flexDirection: "row",
@@ -160,36 +204,5 @@ const styles = StyleSheet.create({
   user: {
     fontSize: 14,
     color: "#666",
-  },
-  searchBar: {
-    width: "90%",
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f1f1f1",
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333",
-  },
-  pageTitle: {
-    fontSize: 30,
-    fontWeight: "bold",
-    marginLeft: 20,
-    color: "#000",
-    marginBottom: 16,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: -47,
-    marginLeft: 46,
-    marginBottom: 16,
   },
 });
