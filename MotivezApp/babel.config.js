@@ -7,7 +7,7 @@ module.exports = function (api) {
         'module-resolver',
         {
           alias: {
-            '@': './', // 👈 allows '@/components/CustomTabBar' to work
+            '@': './',
           },
         },
       ],
