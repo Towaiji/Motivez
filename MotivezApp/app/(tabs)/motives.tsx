@@ -69,6 +69,13 @@ export default function Motives() {
       {/* Page Title */}
       <View style={styles.headerRow}>
         <Text style={styles.pageTitle}>Search</Text>
+
+        <TouchableOpacity
+          onPress={() => router.push("../maps/_index")}
+          style={styles.mapButton}
+        >
+          <Ionicons name="map-outline" size={24} color="#e91e63" />
+        </TouchableOpacity>
       </View>
 
       {/* 🔍 Search Bar */}
@@ -206,4 +213,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
+  mapButton: {
+  backgroundColor: "#fff",
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  borderRadius: 20,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 2,
+  marginTop: -55,
+  marginRight: -30,
+},
 });

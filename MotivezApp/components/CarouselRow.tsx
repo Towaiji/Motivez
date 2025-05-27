@@ -36,7 +36,7 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
 
   return (
      <View style={{ marginBottom: 24 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 16, marginBottom: 8 }}>
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 16, marginBottom: 19 }}>
         {title}
       </Text>
 
