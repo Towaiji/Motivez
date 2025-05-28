@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, TextInput } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function MapScreen() {
 const [region, setRegion] = useState<{
@@ -13,6 +14,7 @@ const [region, setRegion] = useState<{
 } | null>(null);
 
 const [errorMsg, setErrorMsg] = useState<string | null>(null);
+const router = useRouter();
 
 
   useEffect(() => {
@@ -59,17 +61,34 @@ const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   return (
     <>
-    <Stack.Screen options={{ headerShown: false }} />
-    <MapView
-      style={styles.map}
-      provider={PROVIDER_GOOGLE}
-      region={region}
-      showsUserLocation={true}
-      showsMyLocationButton={true}
-    >
-    </MapView> 
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={{ flex: 1 }}>
+        <MapView
+          style={styles.map}
+          provider={PROVIDER_GOOGLE}
+          region={region}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+        />
+
+        <View style={styles.topBar}>
+          {/* Back Button */}
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+
+          {/* Search Bar */}
+          <View style={styles.searchWrapper}>
+            <TextInput
+              placeholder="Search a location..."
+              placeholderTextColor="#ccc"
+              style={styles.searchInput}
+            />
+          </View>
+        </View>
+      </View>
     </>
-  ); 
+  );
 }
 
 const styles = StyleSheet.create({
@@ -80,5 +99,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  topBar: {
+    position: "absolute",
+    top: 60,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 2,
+  },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  searchWrapper: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 30,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  searchInput: {
+    fontSize: 16,
+    color: "white",
   },
 });
