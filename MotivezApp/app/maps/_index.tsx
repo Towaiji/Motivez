@@ -4,6 +4,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MapScreen() {
 const [region, setRegion] = useState<{
@@ -71,6 +72,7 @@ const router = useRouter();
           showsMyLocationButton={true}
         />
 
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.topBar}>
           {/* Back Button */}
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -86,6 +88,8 @@ const router = useRouter();
             />
           </View>
         </View>
+        </SafeAreaView>
+
       </View>
     </>
   );
@@ -99,6 +103,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  safeArea: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 3,
   },
   topBar: {
     position: "absolute",

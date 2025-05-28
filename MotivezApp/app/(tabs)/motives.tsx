@@ -74,7 +74,7 @@ export default function Motives() {
           onPress={() => router.push("../maps/_index")}
           style={styles.mapButton}
         >
-          <Ionicons name="map-outline" size={24} color="#e91e63" />
+          <Ionicons name="map-outline" size={26} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -214,11 +214,11 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   mapButton: {
-  backgroundColor: "#fff",
+  
   paddingVertical: 8,
-  paddingHorizontal: 12,
+  paddingHorizontal: 4,
   borderRadius: 20,
-  shadowColor: "#000",
+ 
   shadowOpacity: 0.1,
   shadowRadius: 4,
   elevation: 2,
