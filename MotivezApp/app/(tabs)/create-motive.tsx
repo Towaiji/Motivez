@@ -22,6 +22,10 @@ export default function CreateMotiveScreen() {
   const [isPublic, setIsPublic] = useState(true);
   const [description, setDescription] = useState('');
 
+  // categories/chips state
+  const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
@@ -38,11 +42,18 @@ export default function CreateMotiveScreen() {
   };
 
   const handleSubmit = () => {
-    if (!image || !location || !price) {
-      return Alert.alert('Missing Info', 'Please fill out all required fields.');
+    if (!image || !location || !price || !selectedCategory) {
+      return Alert.alert('Missing Info', 'Please fill out all required fields and choose a vibe.');
     }
     // your submit logic here...
-    console.log({ image, location, price, privacy: isPublic, description });
+    console.log({
+      image,
+      location,
+      price,
+      privacy: isPublic ? 'Public' : 'Friends Only',
+      description,
+      category: selectedCategory,
+    });
     Alert.alert('Success', 'Motive posted!');
   };
 
@@ -111,6 +122,37 @@ export default function CreateMotiveScreen() {
               value={description}
               onChangeText={setDescription}
             />
+
+            {/* Category Chips */}
+            <Text style={styles.subheading}>Choose a vibe</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.chipRow}
+            >
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[
+                    styles.chip,
+                    selectedCategory === cat && styles.chipSelected,
+                  ]}
+                  onPress={() =>
+                    setSelectedCategory(selectedCategory === cat ? null : cat)
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedCategory === cat && styles.chipTextSelected,
+                    ]}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
             <View style={styles.switchRow}>
               <Text style={styles.label}>Friends Only</Text>
               <Switch value={isPublic} onValueChange={setIsPublic} />
@@ -123,11 +165,22 @@ export default function CreateMotiveScreen() {
         {step === 2 && (
           <View style={styles.preview}>
             {image && <Image source={{ uri: image }} style={styles.previewImage} />}
-            <Text style={styles.previewText}><Text style={styles.bold}>Location:</Text> {location}</Text>
-            <Text style={styles.previewText}><Text style={styles.bold}>Price:</Text> ${price}</Text>
-            <Text style={styles.previewText}><Text style={styles.bold}>Privacy:</Text> {isPublic ? 'Public' : 'Friends Only'}</Text>
+            <Text style={styles.previewText}>
+              <Text style={styles.bold}>Location:</Text> {location}
+            </Text>
+            <Text style={styles.previewText}>
+              <Text style={styles.bold}>Price:</Text> ${price}
+            </Text>
+            <Text style={styles.previewText}>
+              <Text style={styles.bold}>Privacy:</Text> {isPublic ? 'Public' : 'Friends Only'}
+            </Text>
+            <Text style={styles.previewText}>
+              <Text style={styles.bold}>Vibe:</Text> {selectedCategory}
+            </Text>
             {description.length > 0 && (
-              <Text style={styles.previewText}><Text style={styles.bold}>Description:</Text> {description}</Text>
+              <Text style={styles.previewText}>
+                <Text style={styles.bold}>Description:</Text> {description}
+              </Text>
             )}
           </View>
         )}
@@ -136,7 +189,10 @@ export default function CreateMotiveScreen() {
       {/* Navigation Buttons */}
       <View style={styles.navRow}>
         {step > 0 && (
-          <TouchableOpacity onPress={() => setStep(step - 1)} style={styles.navBtn}>
+          <TouchableOpacity
+            onPress={() => setStep(step - 1)}
+            style={styles.navBtn}
+          >
             <Text style={styles.navText}>Back</Text>
           </TouchableOpacity>
         )}
@@ -148,7 +204,10 @@ export default function CreateMotiveScreen() {
             <Text style={[styles.navText, styles.nextText]}>Next</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={handleSubmit} style={[styles.navBtn, styles.submitBtn]}>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            style={[styles.navBtn, styles.submitBtn]}
+          >
             <Text style={[styles.navText, styles.submitText]}>Post</Text>
           </TouchableOpacity>
         )}
@@ -200,6 +259,37 @@ const styles = StyleSheet.create({
     width: '100%', backgroundColor: '#fff',
     padding: 12, borderRadius: 8, marginBottom: 15, fontSize: 16,
   },
+  subheading: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  chipRow: {
+    width: '100%',
+    marginBottom: 20,
+    paddingVertical: 50,
+  },
+  chip: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  chipSelected: {
+    backgroundColor: '#e91e63',
+  },
+  chipText: {
+    color: '#444',
+    fontSize: 14,
+  },
+  chipTextSelected: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+
   switchRow: {
     flexDirection: 'row', alignItems: 'center',
     marginBottom: 20,
