@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#efe7ee' },
   backButton: {
     position: 'absolute',
-    top: 10,
+    top: 50,
     left: 16,
     zIndex: 10,
   },
