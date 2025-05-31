@@ -8,8 +8,8 @@ const { width } = Dimensions.get("window");
 
 const ICONS = [
   "custom-cards",
-  "search",
   "add-circle",
+  "search",
 ];
 
 export default function CustomAnimatedTabBar({ state, descriptors, navigation }: BottomTabBarProps) {

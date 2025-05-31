@@ -63,7 +63,7 @@ export default function MenuDrawer({
               />
               <View>
                 <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
-                <Text style={styles.profileSubtitle}>View Profile</Text>
+                <Text style={styles.profileSubtitle}>Switch Profile</Text>
               </View>
             </View>
 
