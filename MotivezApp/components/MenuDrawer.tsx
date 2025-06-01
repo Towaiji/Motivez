@@ -1,3 +1,5 @@
+// components/MenuDrawer.tsx
+
 import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   View,
@@ -8,6 +10,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -79,7 +82,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             <Ionicons name="close" size={33} color="#333" />
           </TouchableOpacity>
 
-          <View style={styles.drawerContent}>
+          {/* Wrap all menu items in a ScrollView */}
+          <ScrollView contentContainerStyle={styles.drawerContent}>
             {/* ==== 1) User Account Section ==== */}
             <View style={styles.profileSection}>
               <Image
@@ -287,7 +291,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
               <Ionicons name="log-out-outline" size={22} color="#e53935" />
               <Text style={[styles.drawerItemText, { color: "#e53935" }]}>Log Out</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </Animated.View>
       </View>
 
@@ -331,7 +335,7 @@ const styles = StyleSheet.create({
   drawerContent: {
     paddingTop: 100,
     paddingHorizontal: 20,
-    zIndex: 2,
+    paddingBottom: 40, // Add some bottom padding to avoid cut‐off content
   },
   closeButton: {
     position: "absolute",
