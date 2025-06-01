@@ -128,7 +128,7 @@ export default function Motives() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#efe7ee",
+    backgroundColor: "#f4f6f8",
     paddingTop: 60,
   },
   headerRow: {
