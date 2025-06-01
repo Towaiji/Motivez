@@ -18,7 +18,7 @@ export default function Saved() {
         </TouchableOpacity>
 
         {/* Saved content */}
-      <Text style={styles.text}>This is the groups page</Text>
+      <Text style={styles.text}>This is the Saved page</Text>
     </View>
     </SafeAreaView>
     </>

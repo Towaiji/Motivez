@@ -1,5 +1,4 @@
-// components/MenuDrawer.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,23 +15,11 @@ import BottomAccountDrawer from "./BottomAccountDrawer";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-// Sample accounts that have logged in
+// Dummy accounts for demonstration (replace with real data)
 const DUMMY_ACCOUNTS = [
-  {
-    id: "1",
-    name: "@motive_user",
-    avatarUri: "https://i.pravatar.cc/100?u=motive_user",
-  },
-  {
-    id: "2",
-    name: "@john_doe",
-    avatarUri: "https://i.pravatar.cc/100?u=john_doe",
-  },
-  {
-    id: "3",
-    name: "@jane_smith",
-    avatarUri: "https://i.pravatar.cc/100?u=jane_smith",
-  },
+  { id: "1", name: "@motive_user", avatarUri: "https://i.pravatar.cc/100?u=motive_user" },
+  { id: "2", name: "@john_doe",    avatarUri: "https://i.pravatar.cc/100?u=john_doe"    },
+  { id: "3", name: "@jane_smith",  avatarUri: "https://i.pravatar.cc/100?u=jane_smith"  },
 ];
 
 interface MenuDrawerProps {
@@ -41,13 +28,15 @@ interface MenuDrawerProps {
 }
 
 export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
+  // Keep the drawer mounted until its "slide-out" animation completes
   const [drawerMounted, setDrawerMounted] = useState(isVisible);
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isVisible) {
+      // Mount first, then slide in
       setDrawerMounted(true);
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -55,6 +44,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
         useNativeDriver: false,
       }).start();
     } else {
+      // Slide out, then unmount at end
       Animated.timing(slideAnim, {
         toValue: -SCREEN_WIDTH,
         duration: 300,
@@ -65,27 +55,32 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
     }
   }, [isVisible]);
 
+  // If nothing is mounted, render nothing
   if (!drawerMounted) return null;
 
   return (
     <>
-      {/* Left‐side Drawer */}
+      {/* Full-screen wrapper, including backdrop */}
       <View style={styles.drawerWrapper}>
-        {/* Backdrop */}
+        {/* Backdrop: clicking it closes the drawer */}
         <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.backdropTouchArea} />
+          <View style={styles.backdrop} />
         </TouchableWithoutFeedback>
 
+        {/* Animated drawer sliding in/out from left */}
         <Animated.View
-          style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
+          style={[
+            styles.drawer,
+            { transform: [{ translateX: slideAnim }] },
+          ]}
         >
-          {/* Close Button */}
+          {/* Close “X” button */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={33} color="#333" />
           </TouchableOpacity>
 
           <View style={styles.drawerContent}>
-            {/* Profile Section */}
+            {/* ==== 1) User Account Section ==== */}
             <View style={styles.profileSection}>
               <Image
                 source={{ uri: DUMMY_ACCOUNTS[0].avatarUri }}
@@ -93,98 +88,210 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
               />
               <View>
                 <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
-                {/* Switch Profile opens the bottom drawer */}
-                <TouchableOpacity
-                  onPress={() => setBottomVisible(true)}
-                >
+                <TouchableOpacity onPress={() => setBottomVisible(true)}>
                   <Text style={styles.profileSubtitle}>Switch Profile</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Drawer Items */}
+            {/* “Profile” */}
             <TouchableOpacity
+              style={styles.drawerItemRow}
               onPress={() => {
                 router.push("/menu/profile");
                 onClose();
               }}
             >
-              <Text style={styles.drawerItem}>Profile</Text>
+              <Ionicons name="person-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Profile</Text>
             </TouchableOpacity>
 
+            {/* “My Motives” */}
             <TouchableOpacity
+              style={styles.drawerItemRow}
               onPress={() => {
-                router.push("/menu/settings");
+                router.push("/menu/my-motives");
                 onClose();
               }}
             >
-              <Text style={styles.drawerItem}>Settings</Text>
+              <Ionicons name="list-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>My Motives</Text>
             </TouchableOpacity>
 
+            {/* “Add / Invite Friends” */}
             <TouchableOpacity
+              style={styles.drawerItemRow}
               onPress={() => {
-                router.push("/menu/saved");
+                /* Launch your “Add Friends” flow here */
                 onClose();
               }}
             >
-              <Text style={styles.drawerItem}>Saved</Text>
+              <Ionicons name="person-add-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Add / Invite Friends</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                router.push("/menu/notifications");
-                onClose();
-              }}
-            >
-              <Text style={styles.drawerItem}>Notifications</Text>
-            </TouchableOpacity>
+            <View style={styles.sectionDivider} />
 
+            {/* ==== 2) Social / Community Section ==== */}
             <TouchableOpacity
-              onPress={() => {
-                router.push("/menu/help");
-                onClose();
-              }}
-            >
-              <Text style={styles.drawerItem}>Help</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                router.push("/menu/calendar");
-                onClose();
-              }}
-            >
-              <Text style={styles.drawerItem}>Calendar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+              style={styles.drawerItemRow}
               onPress={() => {
                 router.push("/menu/friends");
                 onClose();
               }}
             >
-              <Text style={styles.drawerItem}>Friends</Text>
+              <Ionicons name="people-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Friends</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
+              style={styles.drawerItemRow}
               onPress={() => {
-                router.push("/menu/groups");
+                router.push("/menu/messages");
                 onClose();
               }}
             >
-              <Text style={styles.drawerItem}>Groups</Text>
+              <Ionicons name="chatbubble-ellipses-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Messages</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/saved");
+                onClose();
+              }}
+            >
+              <Ionicons name="bookmark-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Saved Motives</Text>
+            </TouchableOpacity>
 
+            <View style={styles.sectionDivider} />
 
-            <TouchableOpacity onPress={() => console.log("Logout tapped")}>
-              <Text style={styles.drawerItem}>Logout</Text>
+            {/* ==== 3) Find & Discover Section ==== */}
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/explore");
+                onClose();
+              }}
+            >
+              <Ionicons name="compass-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Explore / Trending</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/map");
+                onClose();
+              }}
+            >
+              <Ionicons name="map-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Nearby Map</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/categories");
+                onClose();
+              }}
+            >
+              <Ionicons name="pricetags-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Categories</Text>
+            </TouchableOpacity>
+
+            <View style={styles.sectionDivider} />
+
+            {/* ==== 4) Your Plans / Calendar Section ==== */}
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/calendar");
+                onClose();
+              }}
+            >
+              <Ionicons name="calendar-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Upcoming Events</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/memories");
+                onClose();
+              }}
+            >
+              <Ionicons name="time-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Past Memories</Text>
+            </TouchableOpacity>
+
+            <View style={styles.sectionDivider} />
+
+            {/* ==== 5) App Settings & Support Section ==== */}
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/settings");
+                onClose();
+              }}
+            >
+              <Ionicons name="settings-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Settings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/notifications");
+                onClose();
+              }}
+            >
+              <Ionicons name="notifications-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Notifications</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/help");
+                onClose();
+              }}
+            >
+              <Ionicons name="help-circle-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>Help & Feedback</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/about");
+                onClose();
+              }}
+            >
+              <Ionicons name="information-circle-outline" size={22} color="#333" />
+              <Text style={styles.drawerItemText}>About Motivez</Text>
+            </TouchableOpacity>
+
+            <View style={styles.sectionDivider} />
+
+            {/* ==== Log Out ==== */}
+            <TouchableOpacity
+              style={[styles.drawerItemRow, styles.logoutRow]}
+              onPress={() => {
+                /* Perform logout logic here */
+                console.log("Logging out...");
+              }}
+            >
+              <Ionicons name="log-out-outline" size={22} color="#e53935" />
+              <Text style={[styles.drawerItemText, { color: "#e53935" }]}>Log Out</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
       </View>
 
-      {/* Bottom Drawer for switching profiles */}
+      {/* Bottom sheet for “Switch Profile” */}
       <BottomAccountDrawer
         isVisible={bottomVisible}
         onClose={() => setBottomVisible(false)}
@@ -203,7 +310,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 9999,
   },
-  backdropTouchArea: {
+  backdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.2)",
   },
@@ -212,7 +319,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    width: SCREEN_WIDTH * 0.8, // Make it 80% of screen width
+    width: SCREEN_WIDTH * 0.8,
     backgroundColor: "#fff",
     zIndex: 10,
     shadowColor: "#000",
@@ -249,7 +356,7 @@ const styles = StyleSheet.create({
   },
   profileSubtitle: {
     fontSize: 14,
-    color: "#aaa",
+    color: "#007AFF",
     marginTop: 4,
   },
   profileImage: {
@@ -258,9 +365,22 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 20,
   },
-  drawerItem: {
-    fontSize: 18,
+  sectionDivider: {
+    height: 1,
+    backgroundColor: "#ececec",
+    marginVertical: 20,
+  },
+  drawerItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
+  },
+  drawerItemText: {
+    marginLeft: 14,
+    fontSize: 18,
     color: "#333",
+  },
+  logoutRow: {
+    marginTop: 16,
   },
 });
