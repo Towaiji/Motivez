@@ -18,7 +18,7 @@ export default function Saved() {
         </TouchableOpacity>
 
         {/* Saved content */}
-      <Text style={styles.text}>This is the Calendar page</Text>
+      <Text style={styles.text}>This is the notifications page</Text>
     </View>
     </SafeAreaView>
     </>
