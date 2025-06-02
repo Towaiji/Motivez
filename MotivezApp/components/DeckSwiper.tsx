@@ -1,6 +1,6 @@
 import { transform } from '@babel/core';
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -9,11 +9,11 @@ const { width, height } = Dimensions.get('window');
 
 // Mock data (can expand this list later)
 const cards = [
-  { id: '1', title: 'Axe Throwing', location: 'Downtown Arena', distance: '3.2 km', type: 'Experience' },
-  { id: '2', title: 'Board Game Cafe', location: 'Queen Street', distance: '1.5 km', type: 'Cafe' },
-  { id: '3', title: 'Art Gallery', location: 'King & Spadina', distance: '2.1 km', type: 'Culture' },
-  { id: '4', title: 'Escape Room', location: 'Bay & Dundas', distance: '4.0 km', type: 'Adventure' },
-  { id: '5', title: 'Jazz Night', location: 'Harbourfront Centre', distance: '2.8 km', type: 'Music' },
+  { id: '1', title: 'Axe Throwing', location: 'Downtown Arena', distance: '3.2 km', vibes: ['Adventure', 'Fun'] },
+  { id: '2', title: 'Board Game Cafe', location: 'Queen Street', distance: '1.5 km', vibes: ['Relaxing', 'Social'] },
+  { id: '3', title: 'Art Gallery', location: 'King & Spadina', distance: '2.1 km', vibes: ['Cultural', 'Inspiring'] },
+  { id: '4', title: 'Escape Room', location: 'Bay & Dundas', distance: '4.0 km', vibes: ['Mystery', 'Teamwork'] },
+  { id: '5', title: 'Jazz Night', location: 'Harbourfront Centre', distance: '2.8 km', vibes: ['Music', 'Chill'] },
 ];
 
 const DeckSwiper = () => {
@@ -31,21 +31,31 @@ const DeckSwiper = () => {
     // sendSwipeToBackend(cards[index], 'skip')
   };
 
-  const [allSwiped, setAllSwiped] = useState(false); 
+  const [allSwiped, setAllSwiped] = useState(false);
+  const [swiperKey, setSwiperKey] = useState(0);
+
+  const resetDeck = () => {
+    setAllSwiped(false);
+    setSwiperKey(prev => prev + 1); // Force re-render of swiper
+  };
 
     return (
     <View style={styles.container}>
         {allSwiped ? ( // Show a message when all cards are swiped
-        <View style={styles.card}>
+          <View style={styles.card}>
             <Text style={styles.title}>You're all caught up!</Text>
             <Text style={styles.details}>Come back later for more activities</Text>
-        </View> 
+            <TouchableOpacity style={styles.resetButton} onPress={resetDeck}>
+              <Text style={styles.resetButtonText}>Reset Deck</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
         <Swiper
+            key={swiperKey} // Force re-render when reset
             ref={swiperRef}
             cards={cards}
             renderCard={(card) => (
-                <View style={styles.card}>
+              <View style={styles.card}>
                 <Text style={styles.title}>{card.title}</Text>
 
                 <View style={styles.row}>
@@ -58,9 +68,13 @@ const DeckSwiper = () => {
                     <Text style={styles.details}>{card.distance}</Text>
                 </View>
 
-                <View style={styles.row}>
-                    <MaterialIcons name="category" size={16} color="black" style={styles.icon} />
-                    <Text style={styles.details}>{card.type}</Text>
+                {/* Vibe Pills replacing the type line */}
+                <View style={styles.vibePillsContainer}>
+                  {card.vibes.map((vibe) => (
+                    <View key={vibe} style={styles.vibePill}>
+                      <Text style={styles.vibePillText}>{vibe}</Text>
+                    </View>
+                  ))}
                 </View>
 
                 <MapView
@@ -85,7 +99,7 @@ const DeckSwiper = () => {
                         title="Activity Location"
                     />
                 </MapView>
-                </View>
+              </View>
             )}
         
         onSwiped={(index) => console.log('Swiped index:', index)}
@@ -122,13 +136,13 @@ const DeckSwiper = () => {
                 flexDirection: 'column',
                 alignItems: 'flex-end',
                 justifyContent: 'flex-start',
-                marginTop: -40,
+                marginTop: -25,
                 marginLeft: -35,
             },
             },
         },
         right: {
-            title: 'LIKE',
+            title: 'GO',
             style: {
             label: {
                 backgroundColor: 'green',
@@ -141,7 +155,7 @@ const DeckSwiper = () => {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 justifyContent: 'flex-start',
-                marginTop: -40,
+                marginTop: -25,
                 marginLeft: 20,
             },
             },
@@ -167,13 +181,13 @@ const styles = StyleSheet.create({
   card: {
     width: width * 0.85,
     height: height * 0.6,
-    borderRadius: 20,
+    borderRadius: 30,
     backgroundColor: '#f2f2f2',
     padding: 20,
-    marginTop: -60, //adjusts the heigh of the card
+    marginTop: -40, //adjusts the heigh of the card
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    paddingTop: 90,
+    paddingTop: 30,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
@@ -203,14 +217,48 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 8,
   },
-
   map: {
     width: '100%',
     height: 250,
-    borderRadius: 12,
+    borderRadius: 30,
     overflow: 'hidden',
     marginTop: 20,
-  }
+  }, 
+
+  vibePillsContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginBottom: 20,
+},
+
+vibePill: {
+  backgroundColor: 'rgba(100, 150, 240, 0.2)', // light pastel blue
+  borderRadius: 12,
+  paddingVertical: 4,
+  paddingHorizontal: 12,
+  marginRight: 6,
+  marginBottom: 6,
+},
+
+vibePillText: {
+  fontSize: 12,
+  color: '#264653', // dark teal blue
+  fontWeight: '600',
+},
+resetButton: {
+  marginTop: 20,
+  backgroundColor: '#007AFF',
+  paddingVertical: 12,
+  paddingHorizontal: 30,
+  borderRadius: 25,
+  alignSelf: 'center',
+},
+resetButtonText: {
+  color: '#fff',
+  fontWeight: '600',
+  fontSize: 16,
+  textAlign: 'center',
+},
 });
 
 export default DeckSwiper;
