@@ -35,7 +35,7 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
   ];
 
   return (
-     <View style={{ marginBottom: 24 }}>
+     <View style={{ marginBottom: 35 }}>
       <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 16, marginBottom: 19 }}>
         {title}
       </Text>
@@ -115,7 +115,7 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
 const styles = StyleSheet.create({
   card: {
     width: ITEM_WIDTH,
-    height: 180,
+    height: 300,
     marginHorizontal: 2,
     borderRadius: 14,
     overflow: "hidden",
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
 
 eventTitle: {
   color: "#fff",
-  fontSize: 16,
+  fontSize: 24,
   fontWeight: "600",
 },
 
