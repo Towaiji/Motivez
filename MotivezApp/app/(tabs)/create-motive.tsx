@@ -217,12 +217,12 @@ export default function CreateMotiveScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#efe7ee', paddingTop: 50 },
+  safeContainer: { flex: 1, backgroundColor: '#f4f6f8', paddingTop: 50 },
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#fff7fe',
+    backgroundColor: '#fff',
   },
   stepWrapper: { alignItems: 'center' },
   stepCircle: {
