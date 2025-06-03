@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ProgressBar from '../../components/ProgressBar';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -106,25 +107,7 @@ export default function CreateMotiveScreen() {
   return (
     <SafeAreaView style={styles.safeContainer}>
       {/* Step Indicator */}
-      <View style={styles.stepIndicator}>
-        {steps.map((label, i) => (
-          <View key={i} style={styles.stepWrapper}>
-            <View style={[
-              styles.stepCircle,
-              i === step && styles.stepCircleActive
-            ]}>
-              <Text style={[
-                styles.stepNumber,
-                i === step && styles.stepNumberActive
-              ]}>{i + 1}</Text>
-            </View>
-            <Text style={[
-              styles.stepLabel,
-              i === step && styles.stepLabelActive
-            ]}>{label}</Text>
-          </View>
-        ))}
-      </View>
+      <ProgressBar steps={steps} currentStep={step} />
 
       {/* Title */}
       <View style={styles.headerRow}>
