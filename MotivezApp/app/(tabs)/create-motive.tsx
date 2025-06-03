@@ -5,10 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Switch,
   StyleSheet,
   ScrollView,
   Alert,
+  Switch,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,8 +19,10 @@ export default function CreateMotiveScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
   const [description, setDescription] = useState('');
+  const [modeSelected, setModeSelected] = useState<'friends' | 'public' | null>(null);
+  const [requiresApproval, setRequiresApproval] = useState(false);
+
 
   // categories/chips state
   const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
@@ -50,14 +52,56 @@ export default function CreateMotiveScreen() {
       image,
       location,
       price,
-      privacy: isPublic ? 'Public' : 'Friends Only',
+      privacy: modeSelected === 'public' ? 'Public' : 'Friends Only',
       description,
       category: selectedCategory,
+      requiresApproval,
     });
     Alert.alert('Success', 'Motive posted!');
   };
 
   const steps = ['Photo', 'Details', 'Preview'];
+
+  if (!modeSelected) {
+    return (
+      <SafeAreaView style={styles.safeContainer}>
+        <View style={{ alignItems: 'center', marginTop: 150 }}>
+          <Text style={{ fontSize: 35, fontWeight: 'bold', marginBottom: 20 }}>
+            Create a Motive
+          </Text>
+
+          <Text style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' }}>
+            Is this just for the crew, or for the world?
+          </Text>
+
+
+          <View style={{ flexDirection: 'row', gap: 16, marginTop: 40 }}>
+            <TouchableOpacity
+              style={styles.bubbleBtn}
+              onPress={() => {
+                setModeSelected('friends');
+                setStep(0);
+              }}
+            >
+              <Text style={styles.bubbleText}>Friends</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.bubbleBtn}
+              onPress={() => {
+                setModeSelected('public');
+                setStep(0);
+              }}
+            >
+              <Text style={styles.bubbleText}>Public</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -91,12 +135,25 @@ export default function CreateMotiveScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         {/* Step 1: Photo */}
         {step === 0 && (
-          <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-            {image
-              ? <Image source={{ uri: image }} style={styles.image} />
-              : <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
-            }
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+              {image
+                ? <Image source={{ uri: image }} style={styles.image} />
+                : <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
+              }
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setModeSelected(null);
+                setStep(0);
+                setImage(null);
+              }}
+              style={{ marginBottom: 20 }}
+            >
+              <Text style={{ color: '#e91e63', textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
+            </TouchableOpacity>
+          </>
         )}
 
         {/* Step 2: Details */}
@@ -153,11 +210,17 @@ export default function CreateMotiveScreen() {
               ))}
             </ScrollView>
 
-            <View style={styles.switchRow}>
-              <Text style={styles.label}>Friends Only</Text>
-              <Switch value={isPublic} onValueChange={setIsPublic} />
-              <Text style={styles.label}>Public</Text>
-            </View>
+            {/* Privacy Switch */}
+            {modeSelected === 'public' && (
+              <View style={styles.switchRow}>
+                <Text style={styles.label}>Allow anyone to join</Text>
+                  <Switch
+                    value={!requiresApproval}
+                    onValueChange={() => setRequiresApproval((prev) => !prev)}
+                  />
+                <Text style={styles.label}>Require approval</Text>
+              </View>
+            )}
           </>
         )}
 
@@ -172,7 +235,7 @@ export default function CreateMotiveScreen() {
               <Text style={styles.bold}>Price:</Text> ${price}
             </Text>
             <Text style={styles.previewText}>
-              <Text style={styles.bold}>Privacy:</Text> {isPublic ? 'Public' : 'Friends Only'}
+              <Text style={styles.bold}>Privacy:</Text> {modeSelected === 'public' ? 'Public' : 'Friends Only'}
             </Text>
             <Text style={styles.previewText}>
               <Text style={styles.bold}>Vibe:</Text> {selectedCategory}
@@ -316,4 +379,19 @@ const styles = StyleSheet.create({
   nextText: { color: '#fff' },
   submitBtn: { backgroundColor: '#4CAF50' },
   submitText: { color: '#fff', fontWeight: 'bold' },
+
+  bubbleBtn: {
+  backgroundColor: '#e91e63',
+  paddingHorizontal: 28,
+  paddingVertical: 12,
+  borderRadius: 50,
+  alignItems: 'center',
+  justifyContent: 'center',
+  },
+  bubbleText: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#fff',
+  },
+
 });
