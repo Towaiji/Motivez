@@ -41,6 +41,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 export default function CarouselRow({title, data,}: {title: string; data: Activity[]}) {
   const scrollX = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   const router = useRouter();
 
   const carouselData: (Activity | { id: string})[] = [
@@ -48,6 +49,24 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
     ...data,
     { id: "right-spacer" },
   ];
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
 
   return (
      <View style={{ marginBottom: 35 }}>
@@ -69,7 +88,7 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
         { useNativeDriver: true }
       )}
       scrollEventThrottle={16}
-        renderItem={({ item, index }) => {
+      renderItem={({ item, index }) => {
         if (!("title" in item && "image" in item)) {
             return <View style={{ width: SPACER_WIDTH }} />;
         }
@@ -96,11 +115,12 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
 
         return (
             <TouchableOpacity
-              activeOpacity={0.9}
+              activeOpacity={1}
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
               onPress={() => {
-                // Use React Navigation instead of expo-router
                 router.push({
-                  pathname: "/details/DetailScreen",
+                  pathname: "/motive-detail",
                   params: {
                     id: activityItem.id,
                     title: activityItem.title,
@@ -110,39 +130,49 @@ export default function CarouselRow({title, data,}: {title: string; data: Activi
                 });
               }}
             >
-              <Animated.View style={[styles.shadowContainer, { transform: [{ scale }], opacity }]}>
-                <View style={styles.card}>
-                  <SharedElement id={`item.${activityItem.id}.photo`}>
-                    <Image source={{ uri: activityItem.image }} style={styles.image} />
-                  </SharedElement>
-                  <View style={styles.overlay}>
-                        <LinearGradient
-                            colors={[
-                            "rgba(0,0,0,0.8)",
-                            "rgba(0,0,0,0.4)",
-                            "rgba(0,0,0,0)",
-                            ]}
-                            style={[StyleSheet.absoluteFill, { transform: [{ rotate: "180deg" }] }]}
-                        />
-
-            <View style={{ position: "relative", zIndex: 2 }}>
-                <Text style={styles.eventTitle}>{activityItem.title}</Text>
-                {activityItem.description && (
-                <Text style={styles.description}>{activityItem.description}</Text>
-                )}
-            </View>
-            </View>
-            </View>
-            </Animated.View>
+              <Animated.View style={[
+                styles.card,
+                {
+                  transform: [
+                    { scale: Animated.multiply(scale, scaleAnim) }
+                  ],
+                  opacity
+                }
+              ]}>
+                <SharedElement 
+                  id={`item.${activityItem.id}.photo`} 
+                  style={StyleSheet.absoluteFill}
+                >
+                  <Image 
+                    source={{ uri: activityItem.image }} 
+                    style={styles.image}
+                  />
+                </SharedElement>
+                <View style={styles.overlay}>
+                  <LinearGradient
+                    colors={[
+                      "rgba(0,0,0,0.8)",
+                      "rgba(0,0,0,0.4)",
+                      "rgba(0,0,0,0)",
+                    ]}
+                    style={[StyleSheet.absoluteFill, { transform: [{ rotate: "180deg" }] }]}
+                  />
+                  <View style={{ position: "relative", zIndex: 2 }}>
+                    <Text style={styles.eventTitle}>{activityItem.title}</Text>
+                    {activityItem.description && (
+                      <Text style={styles.description}>{activityItem.description}</Text>
+                    )}
+                  </View>
+                </View>
+              </Animated.View>
             </TouchableOpacity>
         );
-        }}
+      }}
     />
     </View>
   );
 }
 
-// ... styles remain the same
 const styles = StyleSheet.create({
   card: {
     width: ITEM_WIDTH,
