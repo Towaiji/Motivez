@@ -1,3 +1,4 @@
+import React from 'react';
 import { Stack } from "expo-router";
 import { LogBox, StatusBar } from "react-native";
 
@@ -10,19 +11,19 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
+          animation: 'none',
+          presentation: 'transparentModal',
         }}
       >
-        {/* Main tabs */}
-        <Stack.Screen name="(tabs)" />
-        {/* Detail screen */}
-        <Stack.Screen
-          name="details/DetailScreen"
-          options={{
-            presentation: "modal", // optional: 'modal' or 'card'
-            // You can add sharedElement options here if supported
-          }}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="motive-detail" 
+          options={{ 
+            headerShown: false,
+            animation: 'none',
+            presentation: 'transparentModal',
+          }} 
         />
-        {/* Not found fallback */}
         <Stack.Screen name="+not-found" options={{ headerTitle: "Not Found" }} />
       </Stack>
     </>

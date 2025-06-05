@@ -99,73 +99,73 @@ export default function Motives() {
   }
 
 return (
-<SafeAreaView style={styles.container}>
-  <View style={styles.headerCard}>
-    {/* Header Row: Title + Map Button */}
-    <View style={styles.headerRow}>
-      <Text style={styles.pageTitle}>Search</Text>
-      <TouchableOpacity
-        onPress={() => router.push("../maps/_index")}
-        style={styles.mapButton}
-      >
-        <Ionicons name="map-outline" size={24} color="#e91e63" />
-      </TouchableOpacity>
-    </View>
-
-    {/* Search Bar */}
-    <View style={styles.searchBar}>
-      <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
-      <TextInput
-        placeholder="Search motives..."
-        placeholderTextColor="#999"
-        style={styles.input}
-        value={search}
-        onChangeText={setSearch}
-      />
-    </View>
-
-    {/* Tabs */}
-      <View style={styles.toggleContainer}>
-        {["close-friends", "featured", "public"].map((type) => {
-          const isActive = selected === type;
-          return (
-            <TouchableOpacity
-              key={type}
-              onPress={() => setSelected(type as typeof selected)}
-              style={styles.toggleButton}
-              activeOpacity={0.7}
-            >
-              <View style={{ alignItems: "center" }}>
-                <Text style={[styles.toggleText, isActive && styles.activeText]}>
-                  {type === "close-friends"
-                    ? "Close Friends"
-                    : type === "featured"
-                    ? "Featured"
-                    : "Public"}
-                </Text>
-                {isActive && <View style={styles.activeIndicator} />}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+  <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <View style={styles.headerCard}>
+      {/* Header Row: Title + Map Button */}
+      <View style={styles.headerRow}>
+        <Text style={styles.pageTitle}>Search</Text>
+        <TouchableOpacity
+          onPress={() => router.push("../maps/_index")}
+          style={styles.mapButton}
+        >
+          <Ionicons name="map-outline" size={24} color="#e91e63" />
+        </TouchableOpacity>
       </View>
-  </View>
-    
 
-    {/* Scrollable content: exclude tabs item */}
-    <FlatList
-      data={data.filter(item => !isTabItem(item))}
-      keyExtractor={(item) => item.id}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingTop: 250, paddingBottom: 60 }}
-      renderItem={({ item }) => {
-        if (isCarouselItem(item)) {
-          return <CarouselRow title={item.title} data={item.data} />;
-        }
-        return null;
-      }}
-    />
-  </SafeAreaView>
+      {/* Search Bar */}
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+        <TextInput
+          placeholder="Search motives..."
+          placeholderTextColor="#999"
+          style={styles.input}
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+
+      {/* Tabs */}
+        <View style={styles.toggleContainer}>
+          {["close-friends", "featured", "public"].map((type) => {
+            const isActive = selected === type;
+            return (
+              <TouchableOpacity
+                key={type}
+                onPress={() => setSelected(type as typeof selected)}
+                style={styles.toggleButton}
+                activeOpacity={0.7}
+              >
+                <View style={{ alignItems: "center" }}>
+                  <Text style={[styles.toggleText, isActive && styles.activeText]}>
+                    {type === "close-friends"
+                      ? "Close Friends"
+                      : type === "featured"
+                      ? "Featured"
+                      : "Public"}
+                  </Text>
+                  {isActive && <View style={styles.activeIndicator} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+    </View>
+      
+
+      {/* Scrollable content: exclude tabs item */}
+      <FlatList
+        data={data.filter(item => !isTabItem(item))}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 250, paddingBottom: 60 }}
+        renderItem={({ item }) => {
+          if (isCarouselItem(item)) {
+            return <CarouselRow title={item.title} data={item.data} />;
+          }
+          return null;
+        }}
+      />
+    </SafeAreaView>
 );
 }
 
@@ -174,7 +174,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f6f8",
-    paddingTop: -70,
   },
   headerRow: {
   flexDirection: "row", // 🟢 makes it horizontal
@@ -280,22 +279,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#e91e63",
   },
   headerCard: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  height: height * 0.28, // make it reach half the screen
-  backgroundColor: "#fff",
-  borderBottomLeftRadius: 40,
-  borderBottomRightRadius: 40,
-  paddingVertical: 110,
-  paddingHorizontal: 24,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.1,
-  shadowRadius: 8,
-  elevation: 5,
-  zIndex: 10,
-  paddingBottom: 40,
-},
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: height * 0.28,
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    paddingVertical: 110,
+    paddingHorizontal: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    zIndex: 10,
+    paddingBottom: 40,
+  },
 });
