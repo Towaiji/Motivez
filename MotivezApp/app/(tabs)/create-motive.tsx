@@ -13,6 +13,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../../components/ProgressBar';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -23,11 +24,20 @@ export default function CreateMotiveScreen() {
   const [description, setDescription] = useState('');
   const [modeSelected, setModeSelected] = useState<'friends' | 'public' | null>(null);
   const [requiresApproval, setRequiresApproval] = useState(false);
-
+  const [title, setTitle] = useState('');
+  const [timeOfDay, setTimeOfDay] = useState<string | null>(null);
+  const [duration, setDuration] = useState<string | null>(null);
+  const [experienceLevel, setExperienceLevel] = useState<string | null>(null);
+  const [goals, setGoals] = useState('');
+  const [notes, setNotes] = useState('');
 
   // categories/chips state
   const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const timeSlots = ["🌅 Morning", "☀️ Afternoon", "🌆 Evening", "🌙 Night"];
+  const durations = ["⏱️ 1-2 hours", "⏱️ 2-4 hours", "⏱️ 4-6 hours", "⏱️ All day"];
+  const levels = ["🌱 Beginner", "🌿 Intermediate", "🌳 Expert"];
 
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -143,24 +153,112 @@ export default function CreateMotiveScreen() {
         {step === 1 && (
           <>
             <TextInput
+              placeholder="Title"
+              style={[styles.input, { color: '#000' }]}
+              value={title}
+              onChangeText={setTitle}
+              placeholderTextColor="#666"
+            />
+
+            <TextInput
               placeholder="Location"
-              style={styles.input}
+              style={[styles.input, { color: '#000' }]}
               value={location}
               onChangeText={setLocation}
+              placeholderTextColor="#666"
             />
+
+            <Text style={styles.subheading}>When?</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.chipRow}
+            >
+              {timeSlots.map((t) => (
+                <TouchableOpacity
+                  key={t}
+                  style={[styles.chip, timeOfDay === t && styles.chipSelected]}
+                  onPress={() => setTimeOfDay(timeOfDay === t ? null : t)}
+                >
+                  <Text style={[styles.chipText, timeOfDay === t && styles.chipTextSelected]}>
+                    {t}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <Text style={styles.subheading}>Duration</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.chipRow}
+            >
+              {durations.map((d) => (
+                <TouchableOpacity
+                  key={d}
+                  style={[styles.chip, duration === d && styles.chipSelected]}
+                  onPress={() => setDuration(duration === d ? null : d)}
+                >
+                  <Text style={[styles.chipText, duration === d && styles.chipTextSelected]}>
+                    {d}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
             <TextInput
-              placeholder="Price (CAD)"
-              style={styles.input}
+              placeholder="Budget (CAD)"
+              style={[styles.input, { color: '#000' }]}
               keyboardType="numeric"
               value={price}
               onChangeText={setPrice}
+              placeholderTextColor="#666"
             />
+
+            <Text style={styles.subheading}>Experience Level</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.chipRow}
+            >
+              {levels.map((l) => (
+                <TouchableOpacity
+                  key={l}
+                  style={[styles.chip, experienceLevel === l && styles.chipSelected]}
+                  onPress={() => setExperienceLevel(experienceLevel === l ? null : l)}
+                >
+                  <Text style={[styles.chipText, experienceLevel === l && styles.chipTextSelected]}>
+                    {l}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
             <TextInput
-              placeholder="Description (optional)"
-              style={[styles.input, { height: 80 }]}
+              placeholder="Goals (e.g., 'Learn a new skill', 'Relax and unwind')"
+              style={[styles.input, { color: '#000', height: 60 }]}
+              multiline
+              value={goals}
+              onChangeText={setGoals}
+              placeholderTextColor="#666"
+            />
+
+            <TextInput
+              placeholder="Description"
+              style={[styles.input, { color: '#000', height: 80 }]}
               multiline
               value={description}
               onChangeText={setDescription}
+              placeholderTextColor="#666"
+            />
+
+            <TextInput
+              placeholder="Additional Notes"
+              style={[styles.input, { color: '#000', height: 60 }]}
+              multiline
+              value={notes}
+              onChangeText={setNotes}
+              placeholderTextColor="#666"
             />
 
             {/* Category Chips */}
@@ -173,20 +271,10 @@ export default function CreateMotiveScreen() {
               {categories.map((cat) => (
                 <TouchableOpacity
                   key={cat}
-                  style={[
-                    styles.chip,
-                    selectedCategory === cat && styles.chipSelected,
-                  ]}
-                  onPress={() =>
-                    setSelectedCategory(selectedCategory === cat ? null : cat)
-                  }
+                  style={[styles.chip, selectedCategory === cat && styles.chipSelected]}
+                  onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selectedCategory === cat && styles.chipTextSelected,
-                    ]}
-                  >
+                  <Text style={[styles.chipText, selectedCategory === cat && styles.chipTextSelected]}>
                     {cat}
                   </Text>
                 </TouchableOpacity>
@@ -197,10 +285,10 @@ export default function CreateMotiveScreen() {
             {modeSelected === 'public' && (
               <View style={styles.switchRow}>
                 <Text style={styles.label}>Allow anyone to join</Text>
-                  <Switch
-                    value={!requiresApproval}
-                    onValueChange={() => setRequiresApproval((prev) => !prev)}
-                  />
+                <Switch
+                  value={!requiresApproval}
+                  onValueChange={() => setRequiresApproval((prev) => !prev)}
+                />
                 <Text style={styles.label}>Require approval</Text>
               </View>
             )}
@@ -302,8 +390,12 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: '100%' },
 
   input: {
-    width: '100%', backgroundColor: '#fff',
-    padding: 12, borderRadius: 8, marginBottom: 15, fontSize: 16,
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    fontSize: 16,
   },
   subheading: {
     alignSelf: 'flex-start',
@@ -315,7 +407,7 @@ const styles = StyleSheet.create({
   chipRow: {
     width: '100%',
     marginBottom: 20,
-    paddingVertical: 50,
+    paddingVertical: 10,
   },
   chip: {
     backgroundColor: '#fff',

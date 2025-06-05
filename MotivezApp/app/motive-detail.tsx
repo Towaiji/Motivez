@@ -15,8 +15,14 @@ export default function MotiveDetail() {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const translateY = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [isLiked, setIsLiked] = useState(false);
 
+  // Calculate dynamic values based on scroll
+  const IMAGE_HEIGHT = height * 0.7;
+  const HEADER_HEIGHT = 100; // Safe area + some padding
+  const INITIAL_CONTENT_TOP = IMAGE_HEIGHT * 0.6; // Where content starts initially
+  
   // Sample location (New York City)
   const initialRegion = {
     latitude: 40.7128,
@@ -66,7 +72,7 @@ export default function MotiveDetail() {
       }),
       Animated.timing(opacityAnim, {
         toValue: 0,
-        duration: 100,
+        duration: 150,
         useNativeDriver: true,
       })
     ]).start(() => {
@@ -79,9 +85,33 @@ export default function MotiveDetail() {
   };
 
   const handlePickMotive = () => {
-    // Handle picking the motive
     console.log('Motive picked!');
   };
+
+  // Animated values for smooth scrolling effects
+  const contentTranslateY = scrollY.interpolate({
+    inputRange: [0, INITIAL_CONTENT_TOP - HEADER_HEIGHT],
+    outputRange: [0, -(INITIAL_CONTENT_TOP - HEADER_HEIGHT)],
+    extrapolate: 'clamp',
+  });
+
+  const imageOpacity = scrollY.interpolate({
+    inputRange: [0, INITIAL_CONTENT_TOP - HEADER_HEIGHT],
+    outputRange: [1, 0.3],
+    extrapolate: 'clamp',
+  });
+
+  const imageScale = scrollY.interpolate({
+    inputRange: [0, INITIAL_CONTENT_TOP - HEADER_HEIGHT],
+    outputRange: [1, 1.1],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, INITIAL_CONTENT_TOP - HEADER_HEIGHT - 50, INITIAL_CONTENT_TOP - HEADER_HEIGHT],
+    outputRange: [0, 0, 1],
+    extrapolate: 'clamp',
+  });
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -97,7 +127,16 @@ export default function MotiveDetail() {
           }
         ]}
       >
-        <View style={styles.imageContainer}>
+        {/* Fixed Image Background */}
+        <Animated.View 
+          style={[
+            styles.imageContainer,
+            {
+              opacity: imageOpacity,
+              transform: [{ scale: imageScale }]
+            }
+          ]}
+        >
           <SharedElement 
             id={`item.${id}.photo`} 
             style={StyleSheet.absoluteFill}
@@ -107,7 +146,16 @@ export default function MotiveDetail() {
               style={styles.image}
             />
           </SharedElement>
+          
+          {/* Gradient overlay for better text contrast */}
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.3)']}
+            style={styles.gradientOverlay}
+          />
+        </Animated.View>
 
+        {/* Fixed Header Buttons */}
+        <View style={styles.headerButtons}>
           <TouchableOpacity 
             style={styles.backButton}
             onPress={handleBack}
@@ -127,13 +175,42 @@ export default function MotiveDetail() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView 
+        {/* Animated Header Title (appears when scrolled) */}
+        <Animated.View 
+          style={[
+            styles.scrolledHeader,
+            { opacity: headerOpacity }
+          ]}
+        >
+          <Text style={styles.scrolledHeaderTitle} numberOfLines={1}>
+            {title}
+          </Text>
+        </Animated.View>
+
+        {/* Scrollable Content */}
+        <Animated.ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          contentInsetAdjustmentBehavior="automatic"
         >
-          <View style={styles.contentContainer}>
+          {/* Spacer to position content initially */}
+          <View style={{ height: INITIAL_CONTENT_TOP }} />
+          
+          <Animated.View 
+            style={[
+              styles.contentContainer,
+              {
+                transform: [{ translateY: contentTranslateY }]
+              }
+            ]}
+          >
             <Text style={styles.title}>{title}</Text>
             {description && (
               <Text style={styles.description}>{description}</Text>
@@ -205,8 +282,11 @@ export default function MotiveDetail() {
             >
               <Text style={styles.pickButtonText}>Pick this motive</Text>
             </TouchableOpacity>
-          </View>
-        </ScrollView>
+
+            {/* Extended bottom padding to prevent over-scroll */}
+            <View style={styles.bottomSpacer} />
+          </Animated.View>
+        </Animated.ScrollView>
       </Animated.View>
     </SafeAreaView>
   );
@@ -222,7 +302,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   imageContainer: {
-    height: height * 0.6,
+    height: height * 0.7,
     width: width,
     position: 'absolute',
     top: 0,
@@ -235,14 +315,47 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  gradientOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+  },
+  headerButtons: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    zIndex: 3,
+  },
+  scrolledHeader: {
+    position: 'absolute',
+    top: 50,
+    left: 70,
+    right: 70,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 25,
+    backdropFilter: 'blur(10px)',
+  },
+  scrolledHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+  },
   scrollView: {
     flex: 1,
-    marginTop: height * 0.4,
     zIndex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 30,
   },
   contentContainer: {
     backgroundColor: '#fff',
@@ -250,40 +363,34 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     padding: 20,
     paddingTop: 30,
-    minHeight: height * 0.6,
+    minHeight: height * 0.9,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: -5,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 5,
-    overflow: 'visible',
+    marginBottom: -400,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
   },
   backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    zIndex: 2,
     width: 50,
     height: 50,
     borderRadius: 25,
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+    backdropFilter: 'blur(10px)',
   },
   heartButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 2,
     width: 50,
     height: 50,
     borderRadius: 25,
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+    backdropFilter: 'blur(10px)',
   },
   title: {
     fontSize: 28,
@@ -365,7 +472,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   pickButton: {
-    marginTop: 20,
+    marginTop: 30,
     backgroundColor: '#007AFF',
     padding: 15,
     borderRadius: 12,
@@ -376,4 +483,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-}); 
+  bottomSpacer: {
+    height: 200,
+    backgroundColor: '#fff',
+  },
+});
