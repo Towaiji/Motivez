@@ -74,10 +74,16 @@ type CarouselItem = {
   data: { id: string; title: string; description: string; image: string }[];
 };
 
-type Item = TabItem | CarouselItem;
+type TitleItem = {
+  id: string;
+  type: "title";
+  title: string;
+};
+
+type Item = TabItem | CarouselItem | TitleItem;
 
 export default function Motives() {
-  const [selected, setSelected] = useState<"close-friends" | "featured" | "public">("public");
+  const [selected, setSelected] = useState<"public" | "featured" | "close-friends">("featured");
   const [search, setSearch] = useState("");
   const router = useRouter();
   const { scrollY } = useScroll();
@@ -113,13 +119,14 @@ export default function Motives() {
     (motive) => motive.type === selected
   );
 
-  // Data for FlatList
-  const data: Item[] = [
-    { id: "tabs", type: "tabs" },
-    { id: "popular", title: "What's Popular in the Area", data: popularActivities },
-    { id: "festival", title: "Festival Themed", data: festivalActivities },
-    { id: "sport", title: "Sport Themed", data: sportActivities },
-  ];
+  // Get data based on selected tab
+  const getTabData = (): Item[] => {
+    return [
+      { id: "popular", title: "What's Popular in the Area", data: popularActivities },
+      { id: "festival", title: "Festival Themed", data: festivalActivities },
+      { id: "sport", title: "Sport Themed", data: sportActivities },
+    ];
+  };
 
   // Type guard to detect TabItem
   function isTabItem(item: Item): item is TabItem {
@@ -128,6 +135,10 @@ export default function Motives() {
 
   function isCarouselItem(item: Item): item is CarouselItem {
     return (item as CarouselItem).data !== undefined && (item as CarouselItem).title !== undefined;
+  }
+
+  function isTitleItem(item: Item): item is TitleItem {
+    return (item as TitleItem).type === "title";
   }
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -171,9 +182,9 @@ export default function Motives() {
             />
           </View>
 
-          {/* Tabs */}
+          {/* Tabs - Updated order: public, featured, close-friends */}
           <View style={styles.toggleContainer}>
-            {["close-friends", "featured", "public"].map((type) => {
+            {["public", "featured", "close-friends"].map((type) => {
               const isActive = selected === type;
               return (
                 <TouchableOpacity
@@ -201,7 +212,7 @@ export default function Motives() {
 
       {/* Scrollable content */}
       <Animated.FlatList
-        data={data.filter(item => !isTabItem(item))}
+        data={getTabData()}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: height * 0.3, paddingBottom: 120 }}
@@ -216,6 +227,12 @@ export default function Motives() {
         renderItem={({ item }) => {
           if (isCarouselItem(item)) {
             return <CarouselRow title={item.title} data={item.data} />;
+          } else if (isTitleItem(item)) {
+            return (
+              <View style={styles.sectionTitleContainer}>
+                <Text style={styles.sectionTitle}>{item.title}</Text>
+              </View>
+            );
           }
           return null;
         }}
@@ -350,5 +367,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     zIndex: 10,
+  },
+  sectionTitleContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
 });
