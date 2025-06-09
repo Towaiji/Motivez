@@ -203,13 +203,17 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     color: "#fff",
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: 28,
+    fontWeight: "700",
+    lineHeight: 28,
+    marginBottom: 6,
   },
   description: {
-    color: "#ddd",
-    fontSize: 14,
-    marginTop: 2,
+    color: "#ccc",
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 20,
+    marginBottom: 5,
   },
   shadowContainer: {
     width: ITEM_WIDTH,

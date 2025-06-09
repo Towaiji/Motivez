@@ -46,18 +46,18 @@ const dummyMotives = [
 
 // 🔹 Mock data for carousels
 const popularActivities = [
-  { id: "1", title: "Go Karting", description: "4.8 ⭐️ · 2.1km", image: "https://i.imgur.com/UYiroysl.jpg" },
-  { id: "2", title: "Karaoke Night", description: "4.5 ⭐️ · 3.7km", image: "https://i.imgur.com/UPrs1EWl.jpg" },
+  { id: "1", title: "Go Karting", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/UYiroysl.jpg" },
+  { id: "2", title: "Karaoke Night", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/UPrs1EWl.jpg" },
 ];
 
 const festivalActivities = [
-  { id: "3", title: "Lantern Fest", description: "5.0 ⭐️ · 1.2km", image: "https://i.imgur.com/MABUbpDl.jpg" },
-  { id: "4", title: "Food Street", description: "4.6 ⭐️ · 3.2km", image: "https://i.imgur.com/KZsmUi2l.jpg" },
+  { id: "3", title: "Lantern Fest", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/MABUbpDl.jpg" },
+  { id: "4", title: "Food Street", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/KZsmUi2l.jpg" },
 ];
 
 const sportActivities = [
-  { id: "5", title: "Pickup Soccer", description: "4.2 ⭐️ · 1.8km", image: "https://i.imgur.com/2nCt3Sbl.jpg" },
-  { id: "6", title: "Basketball Run", description: "4.9 ⭐️ · 2.5km", image: "https://i.imgur.com/lceHsT6l.jpg" },
+  { id: "5", title: "Pickup Soccer", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/2nCt3Sbl.jpg" },
+  { id: "6", title: "Basketball Run", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/lceHsT6l.jpg" },
 ];
 
 const { height, width } = Dimensions.get("window");
@@ -121,11 +121,28 @@ export default function Motives() {
 
   // Get data based on selected tab
   const getTabData = (): Item[] => {
-    return [
+    const carouselData = [
       { id: "popular", title: "What's Popular in the Area", data: popularActivities },
       { id: "festival", title: "Festival Themed", data: festivalActivities },
       { id: "sport", title: "Sport Themed", data: sportActivities },
     ];
+
+    switch(selected) {
+      case "featured":
+        return carouselData;
+      case "public":
+        return [
+          
+          ...carouselData
+        ];
+      case "close-friends":
+        return [
+          
+          ...carouselData
+        ];
+      default:
+        return carouselData;
+    }
   };
 
   // Type guard to detect TabItem
