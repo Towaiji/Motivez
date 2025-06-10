@@ -12,8 +12,8 @@ export default function Home() {
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: TOP_SPACE }]}>
-      <Text style={styles.header}>Welcome to Motivez!</Text>
-      <Text style={styles.subtext}>What do you feel like doing today?</Text>
+      <Text style={styles.header}>Discover</Text>
+      <Text style={styles.subtext}>Find your next adventure</Text>
 
       <View style={styles.swiperContainer}>
         <DeckSwiper />
@@ -33,20 +33,26 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   header: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    color: "#000",
+    alignSelf: "flex-start",
+    marginLeft: 60,
+    marginTop: -15,
   },
   subtext: {
     fontSize: 16,
     color: "#666",
     marginBottom: 20,
+    alignSelf: "flex-start",
+    marginLeft: 60,
+    marginTop: 5,
   },
   swiperContainer: {
     flex: 0.5,
     width: "100%",
     paddingBottom: 10,
     paddingHorizontal: 10,
+    paddingTop: 40,
   },
 });

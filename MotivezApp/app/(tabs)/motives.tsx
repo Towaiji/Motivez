@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   View,
@@ -8,12 +8,16 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Dimensions
+  Dimensions,
+  Animated,
+  NativeScrollEvent,
+  NativeSyntheticEvent
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CarouselRow from "../../components/CarouselRow";
 import { useRouter } from "expo-router";
+import { useScroll } from "../context/ScrollContext";
 
 // 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
@@ -42,21 +46,21 @@ const dummyMotives = [
 
 // 🔹 Mock data for carousels
 const popularActivities = [
-  { id: "1", title: "Go Karting", description: "4.8 ⭐️ · 2.1km", image: "https://i.imgur.com/UYiroysl.jpg" },
-  { id: "2", title: "Karaoke Night", description: "4.5 ⭐️ · 3.7km", image: "https://i.imgur.com/UPrs1EWl.jpg" },
+  { id: "1", title: "Go Karting", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/UYiroysl.jpg" },
+  { id: "2", title: "Karaoke Night", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/UPrs1EWl.jpg" },
 ];
 
 const festivalActivities = [
-  { id: "3", title: "Lantern Fest", description: "5.0 ⭐️ · 1.2km", image: "https://i.imgur.com/MABUbpDl.jpg" },
-  { id: "4", title: "Food Street", description: "4.6 ⭐️ · 3.2km", image: "https://i.imgur.com/KZsmUi2l.jpg" },
+  { id: "3", title: "Lantern Fest", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/MABUbpDl.jpg" },
+  { id: "4", title: "Food Street", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/KZsmUi2l.jpg" },
 ];
 
 const sportActivities = [
-  { id: "5", title: "Pickup Soccer", description: "4.2 ⭐️ · 1.8km", image: "https://i.imgur.com/2nCt3Sbl.jpg" },
-  { id: "6", title: "Basketball Run", description: "4.9 ⭐️ · 2.5km", image: "https://i.imgur.com/lceHsT6l.jpg" },
+  { id: "5", title: "Pickup Soccer", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/2nCt3Sbl.jpg" },
+  { id: "6", title: "Basketball Run", description: "1 mile · San Francisco, CA", image: "https://i.imgur.com/lceHsT6l.jpg" },
 ];
 
-const { height } = Dimensions.get("window");
+const { height, width } = Dimensions.get("window");
 
 //Define the Motives component
 type TabItem = {
@@ -70,24 +74,76 @@ type CarouselItem = {
   data: { id: string; title: string; description: string; image: string }[];
 };
 
-type Item = TabItem | CarouselItem;
+type TitleItem = {
+  id: string;
+  type: "title";
+  title: string;
+};
+
+type Item = TabItem | CarouselItem | TitleItem;
 
 export default function Motives() {
-  const [selected, setSelected] = useState<"close-friends" | "featured" | "public">("public");
+  const [selected, setSelected] = useState<"public" | "featured" | "close-friends">("featured");
   const [search, setSearch] = useState("");
   const router = useRouter();
+  const { scrollY } = useScroll();
+  const lastScrollY = useRef(0);
+  const scrollDirection = useRef<'up' | 'down'>('up');
+
+  // Header animation values with slower timing
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [height * 0.28, height * 0.14],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 75, 150],
+    outputRange: [1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+
+  const titleOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 1], // Keep title visible
+    extrapolate: 'clamp',
+  });
+
+  const mapButtonOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 1], // Keep map button visible
+    extrapolate: 'clamp',
+  });
 
   const filteredMotives = dummyMotives.filter(
     (motive) => motive.type === selected
   );
 
-   // Data for FlatList
-  const data: Item[] = [
-    { id: "tabs", type: "tabs" },
-    { id: "popular", title: "What's Popular in the Area", data: popularActivities },
-    { id: "festival", title: "Festival Themed", data: festivalActivities },
-    { id: "sport", title: "Sport Themed", data: sportActivities },
-  ];
+  // Get data based on selected tab
+  const getTabData = (): Item[] => {
+    const carouselData = [
+      { id: "popular", title: "What's Popular in the Area", data: popularActivities },
+      { id: "festival", title: "Festival Themed", data: festivalActivities },
+      { id: "sport", title: "Sport Themed", data: sportActivities },
+    ];
+
+    switch(selected) {
+      case "featured":
+        return carouselData;
+      case "public":
+        return [
+          
+          ...carouselData
+        ];
+      case "close-friends":
+        return [
+          
+          ...carouselData
+        ];
+      default:
+        return carouselData;
+    }
+  };
 
   // Type guard to detect TabItem
   function isTabItem(item: Item): item is TabItem {
@@ -98,11 +154,26 @@ export default function Motives() {
     return (item as CarouselItem).data !== undefined && (item as CarouselItem).title !== undefined;
   }
 
-return (
-  <SafeAreaView style={styles.container} edges={['left', 'right']}>
-    <View style={styles.headerCard}>
-      {/* Header Row: Title + Map Button */}
-      <View style={styles.headerRow}>
+  function isTitleItem(item: Item): item is TitleItem {
+    return (item as TitleItem).type === "title";
+  }
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    
+    if (currentScrollY > lastScrollY.current) {
+      scrollDirection.current = 'down';
+    } else {
+      scrollDirection.current = 'up';
+    }
+    
+    lastScrollY.current = currentScrollY;
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      {/* Fixed Header Elements */}
+      <View style={styles.fixedHeader}>
         <Text style={styles.pageTitle}>Search</Text>
         <TouchableOpacity
           onPress={() => router.push("../maps/_index")}
@@ -112,81 +183,102 @@ return (
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
-        <TextInput
-          placeholder="Search motives..."
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
+      {/* Animated Header */}
+      <Animated.View style={[styles.headerCard, { height: headerHeight }]}>
+        {/* Animated Content - Fades out when scrolling */}
+        <Animated.View style={{ opacity: headerOpacity }}>
+          {/* Search Bar */}
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+            <TextInput
+              placeholder="Search motives..."
+              placeholderTextColor="#999"
+              style={styles.input}
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
 
-      {/* Tabs */}
-        <View style={styles.toggleContainer}>
-          {["close-friends", "featured", "public"].map((type) => {
-            const isActive = selected === type;
-            return (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setSelected(type as typeof selected)}
-                style={styles.toggleButton}
-                activeOpacity={0.7}
-              >
-                <View style={{ alignItems: "center" }}>
-                  <Text style={[styles.toggleText, isActive && styles.activeText]}>
-                    {type === "close-friends"
-                      ? "Close Friends"
-                      : type === "featured"
-                      ? "Featured"
-                      : "Public"}
-                  </Text>
-                  {isActive && <View style={styles.activeIndicator} />}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-    </View>
-      
+          {/* Tabs - Updated order: public, featured, close-friends */}
+          <View style={styles.toggleContainer}>
+            {["public", "featured", "close-friends"].map((type) => {
+              const isActive = selected === type;
+              return (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setSelected(type as typeof selected)}
+                  style={styles.toggleButton}
+                  activeOpacity={0.7}
+                >
+                  <View style={{ alignItems: "center" }}>
+                    <Text style={[styles.toggleText, isActive && styles.activeText]}>
+                      {type === "close-friends"
+                        ? "Close Friends"
+                        : type === "featured"
+                        ? "Featured"
+                        : "Public"}
+                    </Text>
+                    {isActive && <View style={styles.activeIndicator} />}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </Animated.View>
+      </Animated.View>
 
-      {/* Scrollable content: exclude tabs item */}
-      <FlatList
-        data={data.filter(item => !isTabItem(item))}
+      {/* Scrollable content */}
+      <Animated.FlatList
+        data={getTabData()}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 250, paddingBottom: 60 }}
+        contentContainerStyle={{ paddingTop: height * 0.3, paddingBottom: 120 }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { 
+            useNativeDriver: false,
+            listener: handleScroll
+          }
+        )}
+        scrollEventThrottle={16}
         renderItem={({ item }) => {
           if (isCarouselItem(item)) {
             return <CarouselRow title={item.title} data={item.data} />;
+          } else if (isTitleItem(item)) {
+            return (
+              <View style={styles.sectionTitleContainer}>
+                <Text style={styles.sectionTitle}>{item.title}</Text>
+              </View>
+            );
           }
           return null;
         }}
       />
     </SafeAreaView>
-);
+  );
 }
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f6f8",
   },
-  headerRow: {
-  flexDirection: "row", // 🟢 makes it horizontal
-  alignItems: "center",
-  justifyContent: "space-between",
-  paddingHorizontal: 30,
-  marginBottom: -20,
+  fixedHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 50,
+    paddingTop: 60,
+    zIndex: 20,
   },
   pageTitle: {
     fontSize: 30,
     fontWeight: "bold",
     color: "#000",
-    marginTop: -80,
     paddingHorizontal: 10,
   },
   searchBar: {
@@ -199,7 +291,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginBottom: 16,
-    marginTop: 8,
+    marginTop: 20,
   },
   input: {
     flex: 1,
@@ -209,6 +301,7 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
+    paddingHorizontal: 20,
   },
   toggleButton: {
     paddingVertical: 8,
@@ -253,16 +346,13 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   mapButton: {
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  borderRadius: 20,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 2,
-  marginTop: -45,
-  marginRight: 0,
-  marginBottom: 30,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   stickyTabsContainer: {
     backgroundColor: "#efe7ee",
@@ -283,11 +373,10 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: height * 0.28,
     backgroundColor: "#fff",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
-    paddingVertical: 110,
+    paddingTop: 100,
     paddingHorizontal: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -295,6 +384,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     zIndex: 10,
-    paddingBottom: 40,
+  },
+  sectionTitleContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
 });
