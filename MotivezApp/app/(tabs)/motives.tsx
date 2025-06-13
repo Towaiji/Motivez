@@ -91,15 +91,21 @@ export default function Motives() {
   const scrollDirection = useRef<'up' | 'down'>('up');
 
   // Header animation values with slower timing
-  const headerHeight = scrollY.interpolate({
+  const headerScale = scrollY.interpolate({
     inputRange: [0, 150],
-    outputRange: [height * 0.28, height * 0.14],
+    outputRange: [1, 0.5],
     extrapolate: 'clamp',
   });
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 75, 150],
     outputRange: [1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+
+  const headerCardTop = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -height * 0.07],
     extrapolate: 'clamp',
   });
 
@@ -184,9 +190,17 @@ export default function Motives() {
       </View>
 
       {/* Animated Header */}
-      <Animated.View style={[styles.headerCard, { height: headerHeight }]}>
+      <Animated.View style={[
+        styles.headerCard,
+        {
+          transform: [
+            { translateY: headerCardTop },
+            { scaleY: headerScale }
+          ]
+        }
+      ]}>
         {/* Animated Content - Fades out when scrolling */}
-        <Animated.View style={{ opacity: headerOpacity }}>
+        <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
           {/* Search Bar */}
           <View style={styles.searchBar}>
             <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
@@ -228,32 +242,31 @@ export default function Motives() {
       </Animated.View>
 
       {/* Scrollable content */}
-      <Animated.FlatList
-        data={getTabData()}
-        keyExtractor={(item) => item.id}
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: height * 0.3, paddingBottom: 120 }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { 
-            useNativeDriver: false,
+            useNativeDriver: true,
             listener: handleScroll
           }
         )}
         scrollEventThrottle={16}
-        renderItem={({ item }) => {
+      >
+        {getTabData().map((item) => {
           if (isCarouselItem(item)) {
-            return <CarouselRow title={item.title} data={item.data} />;
+            return <CarouselRow key={item.id} title={item.title} data={item.data} />;
           } else if (isTitleItem(item)) {
             return (
-              <View style={styles.sectionTitleContainer}>
+              <View key={item.id} style={styles.sectionTitleContainer}>
                 <Text style={styles.sectionTitle}>{item.title}</Text>
               </View>
             );
           }
           return null;
-        }}
-      />
+        })}
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 }
@@ -274,6 +287,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingTop: 60,
     zIndex: 20,
+    backgroundColor: 'transparent',
   },
   pageTitle: {
     fontSize: 30,
@@ -319,7 +333,7 @@ const styles = StyleSheet.create({
   activeText: {
     color: "#000",
     fontWeight: "600",
-  }, 
+  },
   card: {
     marginBottom: 20,
     backgroundColor: "#fff",
@@ -373,6 +387,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
+    height: height * 0.28,
     backgroundColor: "#fff",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
@@ -384,6 +399,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     zIndex: 10,
+  },
+  headerContent: {
+    flex: 1,
   },
   sectionTitleContainer: {
     paddingHorizontal: 20,
