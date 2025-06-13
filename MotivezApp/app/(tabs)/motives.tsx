@@ -90,7 +90,7 @@ export default function Motives() {
   const lastScrollY = useRef(0);
   const scrollDirection = useRef<'up' | 'down'>('up');
 
-  // Header animation values with slower timing
+  // Header animation values
   const headerScale = scrollY.interpolate({
     inputRange: [0, 150],
     outputRange: [1, 0.5],

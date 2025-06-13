@@ -28,8 +28,10 @@ export default function RootLayout() {
             name="motive-detail" 
             options={{ 
               headerShown: false,
-              animation: 'none',
-              presentation: 'card'
+              presentation: 'modal', // Enable modal presentation
+              animation: 'slide_from_bottom', // Bottom-to-top animation
+              gestureEnabled: true, // Allow swipe down to dismiss
+              gestureDirection: 'vertical',
             }} 
           />
           <Stack.Screen 
