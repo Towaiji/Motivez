@@ -56,7 +56,7 @@ export default function CalendarScreen() {
         {/* Calendar */}
         <Calendar
           markedDates={markedDates}
-          onDayPress={day => setSelected(day.dateString)}
+          onDayPress={(day: { dateString: string }) => setSelected(day.dateString)}
           theme={{
             backgroundColor: '#f4f6f8',
             calendarBackground: '#fff',
