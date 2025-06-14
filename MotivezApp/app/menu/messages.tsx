@@ -11,7 +11,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import dayjs from 'dayjs';
+import { formatTime } from '../lib/formatTime';
 import { supabase } from '../lib/supabase';
 
 interface Chat {
@@ -53,7 +53,7 @@ export default function MessagesScreen() {
       <View style={styles.chatInfo}>
         <View style={styles.chatTitleRow}>
           <Text style={styles.chatName}>{item.name}</Text>
-          <Text style={styles.chatTime}>{dayjs(item.updated_at).format('HH:mm')}</Text>
+          <Text style={styles.chatTime}>{formatTime(item.updated_at)}</Text>
         </View>
         <Text style={styles.lastMessage} numberOfLines={1}>
           {item.last_message}
