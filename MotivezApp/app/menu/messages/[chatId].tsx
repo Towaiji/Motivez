@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, GestureResponderEvent } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  GestureResponderEvent,
+} from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatTime } from '../../lib/formatTime';
 import { supabase } from '../../lib/supabase';
 
@@ -17,12 +26,15 @@ interface Message {
 const CURRENT_USER_ID = 'demo-user'; // replace with your auth user id
 
 export default function ChatDetail() {
+  const router = useRouter();
   const { chatId } = useLocalSearchParams<{ chatId: string }>();
+  const [chatName, setChatName] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
   useEffect(() => {
     fetchMessages();
+    fetchChat();
     const channel = supabase
       .channel('messages')
       .on(
@@ -45,6 +57,15 @@ export default function ChatDetail() {
       .eq('chat_id', chatId as string)
       .order('created_at', { ascending: true });
     if (data) setMessages(data as Message[]);
+  }
+
+  async function fetchChat() {
+    const { data } = await supabase
+      .from('chats')
+      .select('name')
+      .eq('id', chatId as string)
+      .single();
+    if (data?.name) setChatName(data.name);
   }
 
   async function sendMessage() {
@@ -83,14 +104,24 @@ export default function ChatDetail() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Chat' }} />
-      <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={styles.safeArea}>
+        {/* Top Bar */}
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={28} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.topTitle}>{chatName || 'Chat'}</Text>
+          <View style={{ width: 32 }} />
+        </View>
+
         <FlatList
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
         />
+
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
@@ -102,14 +133,38 @@ export default function ChatDetail() {
             <Ionicons name="send" size={24} color="#007AFF" />
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
-  list: { padding: 12 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f4f6f8',
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 10,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dddddd',
+  },
+  backButton: {
+    width: 32,
+    alignItems: 'flex-start',
+  },
+  topTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+  },
+  list: { padding: 12, paddingBottom: 80 },
   message: {
     marginBottom: 12,
     padding: 10,
@@ -128,6 +183,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderTopWidth: 1,
     borderColor: '#eee',
+    backgroundColor: '#fff',
   },
   input: {
     flex: 1,
