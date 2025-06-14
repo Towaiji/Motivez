@@ -138,8 +138,9 @@ export default function CarouselRow({
                 <View style={styles.overlay}>
                   <LinearGradient
                     colors={[
-                      "rgba(0,0,0,0.8)",
-                      "rgba(0,0,0,0.4)",
+                      "rgba(0,0,0,0.9)",
+                      "rgba(0,0,0,0.6)",
+                      "rgba(0,0,0,0.3)",
                       "rgba(0,0,0,0)",
                     ]}
                     style={[StyleSheet.absoluteFill, { transform: [{ rotate: "180deg" }] }]}
@@ -169,10 +170,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#000",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
   image: {
     width: "100%",
@@ -184,22 +185,28 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     overflow: "hidden",
   },
   eventTitle: {
     color: "#fff",
     fontSize: 28,
     fontWeight: "700",
-    lineHeight: 28,
-    marginBottom: 6,
+    lineHeight: 32,
+    marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   description: {
-    color: "#ccc",
-    fontSize: 13,
+    color: "#fff",
+    fontSize: 14,
     fontWeight: "500",
     lineHeight: 20,
     marginBottom: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
