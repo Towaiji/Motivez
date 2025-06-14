@@ -10,6 +10,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 const categories = [
   { id: 'fun', label: '🎉 Fun' },
@@ -36,7 +37,7 @@ export default function CategoriesScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Categories</Text>
           <View style={{ width: 32 }} /> {/* placeholder to center title */}
@@ -115,7 +116,7 @@ export default function CategoriesScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -123,9 +124,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: colors.border,
   },
   backButton: {
     width: 32,
@@ -135,25 +136,25 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
   },
   container: {
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 40,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
     minHeight: '100%',
   },
   heading: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#333',
+    color: colors.text,
     marginBottom: 8,
   },
   subtext: {
     fontSize: 16,
-    color: '#555',
+    color: colors.textSecondary,
     marginBottom: 20,
     lineHeight: 22,
   },
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     marginRight: 12,
     borderWidth: 1,
     borderColor: '#cccccc',
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 16,
-    color: '#333333',
+    color: colors.text,
   },
   chipTextSelected: {
     color: '#ffffff',
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   selectedSection: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -194,12 +195,12 @@ const styles = StyleSheet.create({
   },
   selectedText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.text,
     marginBottom: 8,
   },
   selectedCategoryLabel: {
     fontWeight: '700',
-    color: '#007AFF',
+    color: colors.primary,
   },
   placeholderContent: {
     fontSize: 14,

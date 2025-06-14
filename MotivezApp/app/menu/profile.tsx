@@ -54,7 +54,7 @@ export default function Profile() {
       <SafeAreaView style={styles.safeArea}>
         {/* Back Button */}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="#333" />
+          <Ionicons name="arrow-back" size={28} color={colors.text} />
         </TouchableOpacity>
 
         {/* Profile Header */}
@@ -138,7 +138,7 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#efe7ee' },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   backButton: {
     position: 'absolute',
     top: 50,
@@ -163,11 +163,11 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
   },
   bio: {
     fontSize: 14,
-    color: '#555',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   stats: {
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     marginHorizontal: 16,
   },
   statBlock: {
@@ -185,11 +185,11 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   tabBar: {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
   },
   grid: {
     padding: gridSpacing,

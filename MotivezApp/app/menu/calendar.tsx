@@ -11,6 +11,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 import { Calendar } from 'react-native-calendars';
 
 // Dummy motives/events by date
@@ -47,7 +48,7 @@ export default function CalendarScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Calendar</Text>
           <View style={{ width: 32 }} /> {/* Spacer */}
@@ -58,7 +59,7 @@ export default function CalendarScreen() {
           markedDates={markedDates}
           onDayPress={day => setSelected(day.dateString)}
           theme={{
-            backgroundColor: '#f4f6f8',
+            backgroundColor: colors.background,
             calendarBackground: '#fff',
             textSectionTitleColor: '#222',
             selectedDayBackgroundColor: '#e91e63',
@@ -88,7 +89,7 @@ export default function CalendarScreen() {
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <View style={styles.motiveItem}>
-                <Ionicons name="calendar-outline" size={22} color="#007AFF" style={{ marginRight: 10 }} />
+                <Ionicons name="calendar-outline" size={22} color={colors.primary} style={{ marginRight: 10 }} />
                 <Text style={styles.motiveTitle}>{item.title}</Text>
                 <Text style={styles.motiveTime}>@ {item.time}</Text>
               </View>
@@ -106,7 +107,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -114,9 +115,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: colors.border,
   },
   backButton: {
     width: 32,
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
   },
   calendar: {
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   subheading: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007AFF',
+    color: colors.primary,
     marginBottom: 10,
     marginLeft: 4,
   },

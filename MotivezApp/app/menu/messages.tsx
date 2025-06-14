@@ -11,6 +11,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 const dummyChats = [
   {
@@ -102,7 +103,7 @@ export default function MessagesScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Messages</Text>
           <View style={{ width: 32 }} /> {/* Spacer to center title */}
@@ -110,7 +111,7 @@ export default function MessagesScreen() {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>Loading Messages...</Text>
           </View>
         ) : chats.length === 0 ? (
@@ -135,7 +136,7 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -143,9 +144,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: colors.border,
   },
   backButton: {
     width: 32,
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
   },
   loaderContainer: {
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#555555',
+    color: colors.textSecondary,
   },
   listContent: {
     paddingTop: 12,
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   chatName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     flex: 1,
     marginRight: 6,
   },
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
   },
   lastMessage: {
     fontSize: 15,
-    color: '#666',
+    color: colors.textSecondary,
     maxWidth: '97%',
   },
   unreadBadge: {

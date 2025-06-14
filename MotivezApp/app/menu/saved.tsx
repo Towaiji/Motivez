@@ -11,6 +11,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 // Dummy saved motives
 const dummySaved = [
@@ -78,7 +79,7 @@ export default function SavedScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Saved</Text>
           <View style={{ width: 32 }} /> {/* Spacer to center title */}
@@ -86,7 +87,7 @@ export default function SavedScreen() {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>Loading saved Motivez...</Text>
           </View>
         ) : saved.length === 0 ? (
@@ -111,7 +112,7 @@ export default function SavedScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -119,9 +120,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: colors.border,
   },
   backButton: {
     width: 32,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
   },
   loaderContainer: {
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#555555',
+    color: colors.textSecondary,
   },
   listContent: {
     padding: 12,
@@ -174,12 +175,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: colors.text,
     marginBottom: 4,
   },
   meta: {
     fontSize: 13,
-    color: '#555',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   emptyContainer: {

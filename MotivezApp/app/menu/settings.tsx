@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function SettingsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>Settings</Text>
         </View>
@@ -136,18 +137,18 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#efe7ee' },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     backgroundColor: '#fff',
   },
   backButton: { marginRight: 12 },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#333' },
+  title: { fontSize: 20, fontWeight: 'bold', color: colors.text },
 
   container: {
     paddingVertical: 16,
@@ -168,15 +169,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderColor: '#ececec',
+    borderColor: colors.border,
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  rowLabel: { marginLeft: 12, fontSize: 16, color: '#333' },
-  rowValue: { color: '#666', fontSize: 14 },
+  rowLabel: { marginLeft: 12, fontSize: 16, color: colors.text },
+  rowValue: { color: colors.textSecondary, fontSize: 14 },
 
   logoutRow: {
     marginTop: 32,
     borderTopWidth: 1,
-    borderColor: '#ececec',
+    borderColor: colors.border,
   },
 });

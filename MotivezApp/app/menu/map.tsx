@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 export default function Saved() {
     const router = useRouter();
@@ -10,7 +11,7 @@ export default function Saved() {
   return (
     <>
     <Stack.Screen options={{ headerShown: false }} />
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#efe7ee' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
     <View style={styles.container}>
         {/* Back button to return to previous screen */}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#efe7ee',
+    backgroundColor: colors.background,
   },
   text: {
     fontSize: 24,

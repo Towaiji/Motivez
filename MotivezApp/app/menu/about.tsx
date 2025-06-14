@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView } from 'r
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 export default function About() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function About() {
         {/* Top Bar with Back Button */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>About Motivez</Text>
         </View>
@@ -120,7 +121,7 @@ export default function About() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f4f6f8",
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: "row",
@@ -128,9 +129,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#dddddd",
+    borderBottomColor: colors.border,
   },
   backButton: {
     padding: 4,
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: "600",
-    color: "#333333",
+    color: colors.text,
     textAlign: "center",
     marginRight: 32, // to offset back arrow width
   },
@@ -155,12 +156,12 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: colors.primary,
     marginTop: 8,
   },
   tagline: {
     fontSize: 16,
-    color: "#666666",
+    color: colors.textSecondary,
     marginTop: 4,
   },
   section: {
@@ -169,12 +170,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333333",
+    color: colors.text,
     marginBottom: 8,
   },
   sectionText: {
     fontSize: 16,
-    color: "#555555",
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   bulletItem: {
@@ -185,12 +186,12 @@ const styles = StyleSheet.create({
   bulletText: {
     flex: 1,
     fontSize: 16,
-    color: "#555555",
+    color: colors.textSecondary,
     marginLeft: 8,
     lineHeight: 22,
   },
   linkText: {
-    color: "#007AFF",
+    color: colors.primary,
     textDecorationLine: "underline",
   },
   footerSection: {
@@ -199,14 +200,14 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: "#888888",
+    color: colors.textSecondary,
     marginVertical: 2,
   },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f4f6f8",
+    backgroundColor: colors.background,
   },
   text: {
     fontSize: 24,

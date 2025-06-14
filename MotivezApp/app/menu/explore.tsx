@@ -12,6 +12,7 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '../../constants/Colors';
 
 // Dummy data for trending/public motives
 const dummyTrending = [
@@ -97,7 +98,7 @@ export default function Explore() {
         {/* Top Bar with Back Button and Title */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Explore & Trending</Text>
           <View style={{ width: 32 }} /> {/* spacer to center title */}
@@ -106,7 +107,7 @@ export default function Explore() {
         {/* Content */}
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>Loading Trending Motives...</Text>
           </View>
         ) : (
@@ -126,7 +127,7 @@ export default function Explore() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -134,9 +135,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: colors.border,
   },
   backButton: {
     width: 32,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
   },
   loaderContainer: {
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#555555',
+    color: colors.textSecondary,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   cardContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     marginBottom: 16,
     shadowColor: '#000',
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333333',
+    color: colors.text,
     marginBottom: 6,
   },
   cardFooter: {
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   },
   cardUser: {
     fontSize: 14,
-    color: '#777777',
+    color: colors.textSecondary,
   },
   likesRow: {
     flexDirection: 'row',
@@ -204,14 +205,14 @@ const styles = StyleSheet.create({
   },
   likesText: {
     fontSize: 14,
-    color: '#777777',
+    color: colors.textSecondary,
     marginLeft: 4,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f4f6f8',
+    backgroundColor: colors.background,
   },
   text: {
     fontSize: 24,
