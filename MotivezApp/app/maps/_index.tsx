@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, TextInput, Dimensions } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "../../components/CustomMapView";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";

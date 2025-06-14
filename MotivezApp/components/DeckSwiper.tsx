@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from './CustomMapView';
 
 const { width, height } = Dimensions.get('window');
 
