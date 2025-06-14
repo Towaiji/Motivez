@@ -11,83 +11,55 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import dayjs from 'dayjs';
+import { supabase } from '../lib/supabase';
 
-const dummyChats = [
-  {
-    id: '1',
-    name: 'Sara Ahmed',
-    avatar: 'https://i.pravatar.cc/150?u=sara.ahmed',
-    lastMessage: 'See you at 8!',
-    time: '10:24 AM',
-    unread: 2,
-  },
-  {
-    id: '2',
-    name: 'Jay Patel',
-    avatar: 'https://i.pravatar.cc/150?u=jay.patel',
-    lastMessage: 'On my way 🚗',
-    time: '9:11 AM',
-    unread: 0,
-  },
-  {
-    id: '3',
-    name: 'Go Kart Crew',
-    avatar: 'https://i.pravatar.cc/150?u=gokart.group',
-    lastMessage: 'Let’s book for Friday?',
-    time: 'Yesterday',
-    unread: 1,
-  },
-  {
-    id: '4',
-    name: 'Maria Garcia',
-    avatar: 'https://i.pravatar.cc/150?u=maria.garcia',
-    lastMessage: 'Had so much fun last night!',
-    time: 'Mon',
-    unread: 0,
-  },
-  {
-    id: '5',
-    name: 'Trivia Night',
-    avatar: 'https://i.pravatar.cc/150?u=trivia.group',
-    lastMessage: 'Scoreboard updated! 🏆',
-    time: 'Sun',
-    unread: 5,
-  },
-];
+interface Chat {
+  id: string;
+  name: string;
+  avatar_url?: string | null;
+  last_message?: string | null;
+  updated_at: string;
+  unread?: number;
+}
+
+const CURRENT_USER_ID = 'demo-user';
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const [chats, setChats] = useState<typeof dummyChats>([]);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call delay
-    setTimeout(() => {
-      setChats(dummyChats);
-      setLoading(false);
-    }, 600);
+    fetchChats();
   }, []);
 
-  const renderChat = ({ item }: { item: typeof dummyChats[0] }) => (
+  async function fetchChats() {
+    const { data } = await supabase
+      .from('chats')
+      .select('*')
+      .eq('user_id', CURRENT_USER_ID)
+      .order('updated_at', { ascending: false });
+    if (data) setChats(data as Chat[]);
+    setLoading(false);
+  }
+
+  const renderChat = ({ item }: { item: Chat }) => (
     <TouchableOpacity
       style={styles.chatRow}
-      onPress={() => {
-        // router.push(`/menu/messages/${item.id}`);
-        // For now, just alert (replace with your navigation)
-        alert(`Go to chat with ${item.name}`);
-      }}
+      onPress={() => router.push(`/menu/messages/${item.id}`)}
     >
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image source={{ uri: item.avatar_url || undefined }} style={styles.avatar} />
       <View style={styles.chatInfo}>
         <View style={styles.chatTitleRow}>
           <Text style={styles.chatName}>{item.name}</Text>
-          <Text style={styles.chatTime}>{item.time}</Text>
+          <Text style={styles.chatTime}>{dayjs(item.updated_at).format('HH:mm')}</Text>
         </View>
         <Text style={styles.lastMessage} numberOfLines={1}>
-          {item.lastMessage}
+          {item.last_message}
         </Text>
       </View>
-      {item.unread > 0 && (
+      {item.unread && item.unread > 0 && (
         <View style={styles.unreadBadge}>
           <Text style={styles.unreadText}>{item.unread}</Text>
         </View>
