@@ -39,6 +39,25 @@ Many people struggle with **finding something to do** when they're bored. Motive
 - **APIs Used:** Google Maps API, OpenWeather API (optional for weather-based recommendations)
 - **Authentication:** Firebase Auth (for user login, business owner login, & friend invites)
 
+### Messaging with Supabase
+The new messaging feature stores chats and messages using [Supabase](https://supabase.com/).
+Add your Supabase credentials to a `.env` file in `MotivezApp/`:
+
+```bash
+EXPO_PUBLIC_SUPABASE_URL=<your-supabase-url>
+EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+After setting the keys, install dependencies and run the app:
+
+```bash
+cd MotivezApp
+npm install
+npx expo start
+```
+
+See `MotivezApp/README.md` for a detailed setup.
+
 ---
 
 ## **🚀 Future Plans**
