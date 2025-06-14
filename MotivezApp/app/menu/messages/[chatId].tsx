@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, GestureResponderEvent } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import dayjs from 'dayjs';
+import { formatTime } from '../../lib/formatTime';
 import { supabase } from '../../lib/supabase';
 
 interface Message {
@@ -76,7 +76,7 @@ export default function ChatDetail() {
       <Text style={styles.text}>{item.content}</Text>
       <View style={styles.metaRow}>
         {item.reaction && <Text style={styles.reaction}>{item.reaction}</Text>}
-        <Text style={styles.time}>{dayjs(item.created_at).format('HH:mm')}</Text>
+        <Text style={styles.time}>{formatTime(item.created_at)}</Text>
       </View>
     </TouchableOpacity>
   );
