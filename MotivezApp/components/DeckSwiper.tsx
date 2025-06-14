@@ -1,5 +1,5 @@
 import { transform } from '@babel/core';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, JSX } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
@@ -7,8 +7,30 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 const { width, height } = Dimensions.get('window');
 
+// Type definitions
+interface Friend {
+  username: string;
+  avatar: { uri: string };
+}
+
+interface Card {
+  id: string;
+  title: string;
+  location: string;
+  distance: string;
+  vibes: string[];
+  description: string;
+  price: string;
+  duration: string;
+  rating: number;
+  reviews: number;
+  openHours: string;
+  features: string[];
+  friends: Friend[];
+}
+
 // Enhanced mock data with more details
-const cards = [
+const cards: Card[] = [
   {
     id: '1',
     title: 'Axe Throwing',
@@ -101,43 +123,43 @@ const cards = [
   },
 ];
 
-const DeckSwiper = () => {
-  const swiperRef = useRef(null);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
+const DeckSwiper: React.FC = () => {
+  const swiperRef = useRef<Swiper<Card>>(null);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
 
-  const handleSwipeRight = (index: number) => {
+  const handleSwipeRight = (index: number): void => {
     console.log('Liked:', cards[index]?.title);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'like')
   };
 
-  const handleSwipeLeft = (index: number) => {
+  const handleSwipeLeft = (index: number): void => {
     console.log('Skipped:', cards[index]?.title);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'skip')
   };
 
-  const [allSwiped, setAllSwiped] = useState(false);
-  const [swiperKey, setSwiperKey] = useState(0);
+  const [allSwiped, setAllSwiped] = useState<boolean>(false);
+  const [swiperKey, setSwiperKey] = useState<number>(0);
 
-  const resetDeck = () => {
+  const resetDeck = (): void => {
     setAllSwiped(false);
     setSwiperKey(prev => prev + 1); // Force re-render of swiper
   };
 
-  const openCardDetails = (card) => {
+  const openCardDetails = (card: Card): void => {
     setSelectedCard(card);
     setDetailModalVisible(true);
   };
 
-  const closeCardDetails = () => {
+  const closeCardDetails = (): void => {
     setDetailModalVisible(false);
     setSelectedCard(null);
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
+  const renderStars = (rating: number): JSX.Element[] => {
+    const stars: JSX.Element[] = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     
@@ -165,7 +187,7 @@ const DeckSwiper = () => {
           key={swiperKey} // Force re-render when reset
           ref={swiperRef}
           cards={cards}
-          renderCard={(card) => (
+          renderCard={(card: Card) => (
             <TouchableOpacity 
               style={styles.card} 
               onPress={() => openCardDetails(card)}
@@ -185,7 +207,7 @@ const DeckSwiper = () => {
 
               {/* Vibe Pills replacing the type line */}
               <View style={styles.vibePillsContainer}>
-                {card.vibes.map((vibe) => (
+                {card.vibes.map((vibe: string) => (
                   <View key={vibe} style={styles.vibePill}>
                     <Text style={styles.vibePillText}>{vibe}</Text>
                   </View>
@@ -195,7 +217,7 @@ const DeckSwiper = () => {
               {card.friends && card.friends.length > 0 && (
                 <View style={styles.friendRow}>
                   <View style={styles.avatarGroup}>
-                    {card.friends.slice(0, 5).map((friend, index) => (
+                    {card.friends.slice(0, 5).map((friend: Friend, index: number) => (
                       <View key={friend.username} style={[styles.avatarContainer, { marginLeft: index === 0 ? 0 : -12 }]}>
                         <Image source={friend.avatar} style={styles.avatarImage} />
                       </View>
@@ -230,7 +252,7 @@ const DeckSwiper = () => {
             </TouchableOpacity>
           )}
       
-          onSwiped={(index) => console.log('Swiped index:', index)}
+          onSwiped={(index: number) => console.log('Swiped index:', index)}
           onSwipedAll={() => {
             console.log('All cards swiped');
             setAllSwiped(true);
@@ -358,7 +380,7 @@ const DeckSwiper = () => {
                 <View style={styles.vibesSection}>
                   <Text style={styles.sectionTitle}>Vibes</Text>
                   <View style={styles.modalVibePillsContainer}>
-                    {selectedCard.vibes.map((vibe) => (
+                    {selectedCard.vibes.map((vibe: string) => (
                       <View key={vibe} style={styles.modalVibePill}>
                         <Text style={styles.modalVibePillText}>{vibe}</Text>
                       </View>
@@ -369,7 +391,7 @@ const DeckSwiper = () => {
                 {/* Features */}
                 <View style={styles.featuresSection}>
                   <Text style={styles.sectionTitle}>Features</Text>
-                  {selectedCard.features.map((feature, index) => (
+                  {selectedCard.features.map((feature: string, index: number) => (
                     <View key={index} style={styles.featureItem}>
                       <Feather name="check" size={16} color="#4CAF50" />
                       <Text style={styles.featureText}>{feature}</Text>
@@ -382,7 +404,7 @@ const DeckSwiper = () => {
                   <View style={styles.friendsSection}>
                     <Text style={styles.sectionTitle}>Friends who visited</Text>
                     <View style={styles.modalFriendsContainer}>
-                      {selectedCard.friends.map((friend) => (
+                      {selectedCard.friends.map((friend: Friend) => (
                         <View key={friend.username} style={styles.modalFriendItem}>
                           <Image source={friend.avatar} style={styles.modalFriendAvatar} />
                           <Text style={styles.modalFriendName}>{friend.username}</Text>
