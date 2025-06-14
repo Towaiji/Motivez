@@ -41,6 +41,10 @@ export default function MotiveDetail() {
     console.log('Motive picked!');
   };
 
+  const handleShare = () => {
+    console.log('Share motive!');
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -157,6 +161,14 @@ export default function MotiveDetail() {
             onPress={handlePickMotive}
           >
             <Text style={styles.pickButtonText}>Pick this motive</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.shareButton}
+            onPress={handleShare}
+          >
+            <Ionicons name="share-outline" size={20} color="#007AFF" style={styles.shareIcon} />
+            <Text style={styles.shareButtonText}>Share this motive</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -304,7 +316,7 @@ const styles = StyleSheet.create({
   },
   pickButton: {
     marginTop: 30,
-    marginBottom: 20,
+    marginBottom: 10,
     backgroundColor: '#007AFF',
     padding: 15,
     borderRadius: 12,
@@ -314,5 +326,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  shareButton: {
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  shareButtonText: {
+    color: '#007AFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  shareIcon: {
+    marginRight: 8,
   },
 });
