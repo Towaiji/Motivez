@@ -1,47 +1,181 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, TextInput, Dimensions } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, TextInput, Dimensions, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { supabase } from '../../lib/supabaseClient'
 
 export default function MapScreen() {
-const [region, setRegion] = useState<{
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-} | null>(null);
+  const [region, setRegion] = useState<{
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  } | null>(null);
 
-const [errorMsg, setErrorMsg] = useState<string | null>(null);
-const router = useRouter();
-const mapRef = React.useRef<MapView>(null);
-
-const goToCurrentLocation = () => {
-  if (mapRef.current && region) {
-    mapRef.current.animateToRegion(region, 300);
-  }
-};
-
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const router = useRouter();
+  const mapRef = React.useRef<MapView>(null);
+  const [places, setPlaces] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    })();
+    // Debug log for API key
+    console.log("Google Maps API Key:", process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY);
+    console.log("Supabase URL:", process.env.EXPO_PUBLIC_SUPABASE_URL);
   }, []);
+
+  const goToCurrentLocation = () => {
+    if (mapRef.current && region) {
+      mapRef.current.animateToRegion(region, 300);
+    }
+  };
+
+  const geocodeLocation = async (query: string) => {
+    try {
+      const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+      console.log("Using API Key for geocoding:", apiKey); // Debug log
+      
+      if (!apiKey) {
+        console.error("Google Maps API key is not set");
+        return null;
+      }
+  
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`
+      );
+      
+      const data = await response.json();
+      console.log("Geocoding response status:", data.status); // Debug log
+  
+      if (data.status === "OK") {
+        const { lat, lng } = data.results[0].geometry.location;
+        return { latitude: lat, longitude: lng };
+      } else {
+        console.warn("Geocoding failed:", data.status);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error during geocoding:", error);
+      return null;
+    }
+  };
+  
+
+  const handleSearch = async () => {
+    const lowerQuery = searchQuery.toLowerCase();
+  
+    const match = places.find((place) => {
+      const name = place.name?.toLowerCase() || "";
+      const category = place.category?.toLowerCase() || "";
+      return name.includes(lowerQuery) || category.includes(lowerQuery);
+    });
+  
+    if (match && mapRef.current) {
+      const lat = Number(match.latitude);
+      const lng = Number(match.longitude);
+  
+      if (!isNaN(lat) && !isNaN(lng)) {
+        mapRef.current.animateToRegion({
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 300);
+      }
+    } else {
+      console.log("No Supabase match found. Trying geocoding...");
+  
+      const location = await geocodeLocation(searchQuery);
+      if (location && mapRef.current) {
+        mapRef.current.animateToRegion({
+          ...location,
+          latitudeDelta: 0.03,
+          longitudeDelta: 0.03,
+        }, 300);
+      } else {
+        console.warn("Could not find location:", searchQuery);
+      }
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      try {
+        console.log("Fetching places...");
+        const { data, error } = await supabase
+          .from('places')
+          .select('*');
+      
+        if (error) {
+          console.error("Error fetching places:", error);
+        } else {
+          console.log("Places fetched successfully:", data?.length, "places");
+          setPlaces(data || []);
+        }
+      } catch (error) {
+        console.error("Error in fetchPlaces:", error);
+      }
+    };
+
+    const getLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+        console.log("Location set:", location.coords);
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.03,
+          longitudeDelta: 0.03,
+        });
+      } catch (error) {
+        setErrorMsg("Error getting location");
+      }
+    };
+
+    fetchPlaces();
+    getLocation();
+  }, []);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const handleMarkerPress = (place: any) => {
+    console.log("Marker tapped:", place.name);
+  };
+
+  const handleSearchArea = () => {
+    console.log("Searching area:", region);
+    // Here you can add the logic to search for places in the current map view
+  };
 
   if (errorMsg) {
     return (
@@ -66,53 +200,94 @@ const goToCurrentLocation = () => {
     );
   }
 
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <View style={{ flex: 1 }}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          provider={PROVIDER_GOOGLE}
-          initialRegion={region}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-        />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={{ flex: 1 }}>
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            provider={PROVIDER_GOOGLE}
+            initialRegion={region}
+            showsUserLocation={true}
+            showsMyLocationButton={false}
+            mapPadding={{ bottom: 0, top: 0, left: 0, right: 0 }}
+          >
+            {places.map((place) => {
+              const lat = parseFloat(place.latitude);
+              const lng = parseFloat(place.longitude);
 
+              if (isNaN(lat) || isNaN(lng)) {
+                console.log("Invalid coordinates for place:", place);
+                return null;
+              }
 
-        {/* Top Back Button Only */}
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
-          <View style={styles.topBar}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
+              return (
+                <Marker
+                  key={place.id}
+                  coordinate={{ latitude: lat, longitude: lng }}
+                  title={place.name}
+                  description={place.description}
+                  onPress={() => handleMarkerPress(place)}
+                />
+              );
+            })}
+          </MapView>
 
-        {/* Return back to original position button */}
-        <TouchableOpacity
-          style={styles.currentLocationButton}
-          onPress={goToCurrentLocation}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="navigate" size={24} color="#000" />
-        </TouchableOpacity>
-
-        {/* Bottom Floating Search Bar */}
-        <SafeAreaView style={styles.bottomPanelSafe} edges={["bottom"]}>
-          <View style={styles.bottomPanel}>
-            <View style={styles.searchRow}>
-              <Ionicons name="search" size={20} color="#999" style={{ marginRight: 10 }} />
-              <TextInput
-                placeholder="Search for something fun..."
-                placeholderTextColor="#999"
-                style={styles.bottomSearchInput}
-              />
+          <SafeAreaView style={styles.safeArea} edges={["top"]}>
+            <View style={styles.topBar}>
+              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color="black" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.searchAreaButton} 
+                onPress={handleSearchArea}
+              >
+                <Ionicons name="search" size={20} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.searchAreaText}>Search this area</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        </SafeAreaView>
-      </View>
+          </SafeAreaView>
+
+          <TouchableOpacity
+            style={[
+              styles.currentLocationButton,
+              keyboardVisible && { bottom: 200 }
+            ]}
+            onPress={goToCurrentLocation}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="navigate" size={24} color="#000" />
+          </TouchableOpacity>
+
+          <SafeAreaView 
+            style={[
+              styles.bottomPanelSafe,
+              keyboardVisible && { bottom: 0 }
+            ]} 
+            edges={["bottom"]}
+          >
+            <View style={styles.bottomPanel}>
+              <View style={styles.searchRow}>
+                <Ionicons name="search" size={20} color="#999" style={{ marginRight: 10 }} />
+                <TextInput
+                  placeholder="Search for something fun..."
+                  placeholderTextColor="#999"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={() => handleSearch()}
+                  style={styles.bottomSearchInput}
+                />
+              </View>
+            </View>
+          </SafeAreaView>
+        </View>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -141,6 +316,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     zIndex: 2,
+    justifyContent: "space-between",
   },
   backButton: {
     width: 42,
@@ -156,70 +332,73 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  bottomSearchSafe: {
+  bottomPanelSafe: {
     position: "absolute",
-    bottom: 30,
+    bottom: -35,
     left: 0,
     right: 0,
-    alignItems: "center",
     zIndex: 10,
+    alignItems: "center",
   },
-  bottomPanelSafe: {
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: 10,
-  alignItems: "center",
-  paddingBottom: -60,
-},
-
-bottomPanel: {
-  backgroundColor: "#fff",
-  width: "100%",
-  paddingHorizontal: 20,
-  paddingTop: 10,
-  paddingBottom: 40,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: -2 },
-  shadowOpacity: 0.08,
-  shadowRadius: 10,
-  elevation: 12,
-},
-searchRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  //backgroundColor: "#f3f4f6",
-  borderRadius: 20,
-  paddingHorizontal: 16,
-  paddingVertical: 20,
-  marginTop: 10,
-},
-bottomSearchInput: {
-  flex: 1,
-  fontSize: 20,
-  color: "#333",
-},
+  bottomPanel: {
+    backgroundColor: "#fff",
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    marginTop: 10,
+  },
+  bottomSearchInput: {
+    flex: 1,
+    fontSize: 20,
+    color: "#333",
+  },
   currentLocationButton: {
     position: "absolute",
-    bottom: 135, // adjust vertical position
-    right: 20,   // adjust horizontal position
+    bottom: 135,
+    right: 20,
     width: 50,
     height: 50,
     borderRadius: 25,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 4 },
-
-    // Elevation for Android
     elevation: 8,
+  },
+  searchAreaButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FF4D6D",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  searchAreaText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
