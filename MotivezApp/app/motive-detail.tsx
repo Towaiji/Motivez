@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
+import {
+  View,
+  Text,
+  StyleSheet,
   Dimensions, 
   Image, 
   ScrollView, 
@@ -13,6 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from './context/ThemeContext';
+import { lightColors } from '../constants/colors';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,6 +22,8 @@ export default function MotiveDetail() {
   const { id, title, description, image } = useLocalSearchParams();
   const router = useRouter();
   const [isLiked, setIsLiked] = useState(false);
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   // Sample location (New York City)
   const initialRegion = {
@@ -53,7 +57,7 @@ export default function MotiveDetail() {
           style={styles.backButton}
           onPress={handleBack}
         >
-          <Ionicons name="chevron-back" size={28} color="#333" />
+          <Ionicons name="chevron-back" size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         
         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -67,7 +71,7 @@ export default function MotiveDetail() {
           <Ionicons 
             name={isLiked ? "heart" : "heart-outline"} 
             size={24} 
-            color={isLiked ? "#ff3b30" : "#333"} 
+            color={isLiked ? colors.danger : colors.textPrimary}
           />
         </TouchableOpacity>
       </View>
@@ -120,15 +124,15 @@ export default function MotiveDetail() {
               </Text>
               <View style={styles.highlightsContainer}>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="time-outline" size={24} color="#007AFF" />
+                  <Ionicons name="time-outline" size={24} color={colors.secondary} />
                   <Text style={styles.highlightText}>Duration: 2-3 hours</Text>
                 </View>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="people-outline" size={24} color="#007AFF" />
+                  <Ionicons name="people-outline" size={24} color={colors.secondary} />
                   <Text style={styles.highlightText}>Group Size: 4-8 people</Text>
                 </View>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="cash-outline" size={24} color="#007AFF" />
+                  <Ionicons name="cash-outline" size={24} color={colors.secondary} />
                   <Text style={styles.highlightText}>Estimated Cost: $25-40 per person</Text>
                 </View>
               </View>
@@ -167,7 +171,7 @@ export default function MotiveDetail() {
             style={styles.shareButton}
             onPress={handleShare}
           >
-            <Ionicons name="share-outline" size={20} color="#007AFF" style={styles.shareIcon} />
+            <Ionicons name="share-outline" size={20} color={colors.secondary} style={styles.shareIcon} />
             <Text style={styles.shareButtonText}>Share this motive</Text>
           </TouchableOpacity>
         </View>
@@ -176,10 +180,10 @@ export default function MotiveDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: c.cardBackground,
   },
   header: {
     flexDirection: 'row',
@@ -188,20 +192,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: c.border,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: c.lightGrey,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 20,
@@ -210,7 +214,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: c.lightGrey,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -234,52 +238,52 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: c.cardBackground,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#000',
+    color: c.textPrimary,
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: c.textSecondary,
     lineHeight: 24,
     marginBottom: 20,
   },
   detailsContainer: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: c.offWhite,
     borderRadius: 12,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#000',
+    color: c.textPrimary,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: c.borderLight,
   },
   detailLabel: {
     fontSize: 16,
-    color: '#666',
+    color: c.textSecondary,
   },
   detailValue: {
     fontSize: 16,
-    color: '#000',
+    color: c.textPrimary,
     fontWeight: '500',
   },
   aboutContainer: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: c.offWhite,
     borderRadius: 12,
   },
   aboutContent: {
@@ -287,7 +291,7 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     fontSize: 16,
-    color: '#333',
+    color: c.textPrimary,
     lineHeight: 24,
     marginBottom: 15,
   },
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
   },
   highlightText: {
     fontSize: 15,
-    color: '#333',
+    color: c.textPrimary,
     marginLeft: 10,
   },
   mapContainer: {
@@ -317,29 +321,29 @@ const styles = StyleSheet.create({
   pickButton: {
     marginTop: 30,
     marginBottom: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: c.secondary,
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
   },
   pickButtonText: {
-    color: '#fff',
+    color: c.white,
     fontSize: 18,
     fontWeight: '600',
   },
   shareButton: {
     marginBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: c.cardBackground,
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: c.secondary,
   },
   shareButtonText: {
-    color: '#007AFF',
+    color: c.secondary,
     fontSize: 18,
     fontWeight: '600',
   },
