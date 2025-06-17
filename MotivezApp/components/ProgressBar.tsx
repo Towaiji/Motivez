@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../app/context/ThemeContext';
+import { lightColors } from '../constants/colors';
 
 const { width } = Dimensions.get('window');
-const pink = '#e91e63';
-const grey = '#ccc';
 
 const ProgressBar = ({ steps, currentStep }: { steps: string[]; currentStep: number }) => {
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     const stepFraction = currentStep / (steps.length - 1);
@@ -28,7 +30,7 @@ const ProgressBar = ({ steps, currentStep }: { steps: string[]; currentStep: num
         pointerEvents="none"
       >
         <LinearGradient
-          colors={["#ff8a65", pink]}
+          colors={["#ff8a65", colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
@@ -70,7 +72,7 @@ const ProgressBar = ({ steps, currentStep }: { steps: string[]; currentStep: num
 const CIRCLE_SIZE = 36; // Change this to make circles bigger/smaller
 const LINE_THICKNESS = 3;
 
-const styles = StyleSheet.create({
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
   wrapper: {
     position: 'relative',
     height: CIRCLE_SIZE + 10,
@@ -84,12 +86,12 @@ const styles = StyleSheet.create({
     left: 24,
     right: 24,
     height: LINE_THICKNESS,
-    backgroundColor: grey,
+    backgroundColor: c.grey,
     borderRadius: LINE_THICKNESS / 2,
     zIndex: 0,
   },
   filledLine: {
-    backgroundColor: pink,
+    backgroundColor: c.primary,
     overflow: 'hidden',
     zIndex: 1,
   },
@@ -106,29 +108,29 @@ const styles = StyleSheet.create({
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
     borderRadius: CIRCLE_SIZE / 2,
-    backgroundColor: grey,
+    backgroundColor: c.grey,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: -7
   },
   number: {
-    color: '#fff',
+    color: c.white,
     fontSize: 12,
     fontWeight: '600',
   },
   completed: {
-    backgroundColor: pink,
+    backgroundColor: c.primary,
   },
   completedText: {
-    color: '#fff',
+    color: c.white,
   },
   active: {
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     borderWidth: 2,
-    borderColor: pink,
+    borderColor: c.primary,
   },
   activeText: {
-    color: pink,
+    color: c.primary,
   },
 });
 

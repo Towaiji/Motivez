@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
+import { lightColors } from '../../constants/colors';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { theme, toggleTheme, colors } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
@@ -31,7 +34,7 @@ export default function SettingsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.title}>Settings</Text>
         </View>
@@ -44,10 +47,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('../settings/edit-profile')}
           >
             <View style={styles.rowLeft}>
-              <Ionicons name="person-outline" size={22} color="#666" />
+              <Ionicons name="person-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Edit Profile</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </TouchableOpacity>
 
           {/* Preferences Section */}
@@ -55,7 +58,7 @@ export default function SettingsScreen() {
 
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="notifications-outline" size={22} color="#666" />
+              <Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Notifications</Text>
             </View>
             <Switch
@@ -66,7 +69,7 @@ export default function SettingsScreen() {
 
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="location-outline" size={22} color="#666" />
+              <Ionicons name="location-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Location Access</Text>
             </View>
             <Switch
@@ -77,12 +80,12 @@ export default function SettingsScreen() {
 
           <View style={styles.row}>
             <View style={styles.rowLeft}>
-              <Ionicons name="moon-outline" size={22} color="#666" />
+              <Ionicons name="moon-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Dark Mode</Text>
             </View>
             <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
+              value={theme === 'dark'}
+              onValueChange={toggleTheme}
             />
           </View>
 
@@ -93,10 +96,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('../settings/privacy')}
           >
             <View style={styles.rowLeft}>
-              <Ionicons name="lock-closed-outline" size={22} color="#666" />
+              <Ionicons name="lock-closed-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Privacy & Security</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </TouchableOpacity>
 
           {/* Support Section */}
@@ -106,17 +109,17 @@ export default function SettingsScreen() {
             onPress={() => router.push('../settings/help')}
           >
             <View style={styles.rowLeft}>
-              <Ionicons name="help-circle-outline" size={22} color="#666" />
+              <Ionicons name="help-circle-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>Help & Feedback</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color={colors.grey} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.row}
             onPress={() => Alert.alert('App Version', 'Motivez v1.0.0')}
           >
             <View style={styles.rowLeft}>
-              <Ionicons name="information-circle-outline" size={22} color="#666" />
+              <Ionicons name="information-circle-outline" size={22} color={colors.textSecondary} />
               <Text style={styles.rowLabel}>About Motivez</Text>
             </View>
             <Text style={styles.rowValue}>v1.0.0</Text>
@@ -135,26 +138,26 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#efe7ee' },
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: c.background },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
+    borderColor: c.grey,
+    backgroundColor: c.white,
   },
   backButton: { marginRight: 12 },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#333' },
+  title: { fontSize: 20, fontWeight: 'bold', color: c.textPrimary },
 
   container: {
     paddingVertical: 16,
   },
   sectionHeader: {
     fontSize: 14,
-    color: '#888',
+    color: c.textSecondary,
     marginTop: 24,
     marginBottom: 8,
     paddingHorizontal: 16,
@@ -166,17 +169,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     borderBottomWidth: 1,
-    borderColor: '#ececec',
+    borderColor: c.grey,
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  rowLabel: { marginLeft: 12, fontSize: 16, color: '#333' },
-  rowValue: { color: '#666', fontSize: 14 },
+  rowLabel: { marginLeft: 12, fontSize: 16, color: c.textPrimary },
+  rowValue: { color: c.textSecondary, fontSize: 14 },
 
   logoutRow: {
     marginTop: 32,
     borderTopWidth: 1,
-    borderColor: '#ececec',
+    borderColor: c.grey,
   },
 });

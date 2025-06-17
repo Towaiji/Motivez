@@ -3,17 +3,19 @@ import { Stack } from "expo-router";
 import { LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollProvider } from "./context/ScrollContext";
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
-      <ScrollProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
+      <ThemeProvider>
+        <ThemeStatusBar />
+        <ScrollProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
             animation: 'none',
             presentation: 'card',
             contentStyle: {
@@ -42,7 +44,14 @@ export default function RootLayout() {
             }} 
           />
         </Stack>
-      </ScrollProvider>
+        </ScrollProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
+
+// Separate component to access theme inside provider
+const ThemeStatusBar = () => {
+  const { theme } = useTheme();
+  return <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />;
+};

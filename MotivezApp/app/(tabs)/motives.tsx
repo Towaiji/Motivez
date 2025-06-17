@@ -20,6 +20,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CarouselRow from "../../components/CarouselRow";
 import { useRouter } from "expo-router";
 import { useScroll } from "../context/ScrollContext";
+import { useTheme } from "../context/ThemeContext";
+import { lightColors } from "../../constants/colors";
 import Slider from '@react-native-community/slider';
 
 // 🔹 Dummy motives for FlatList (bottom)
@@ -121,6 +123,8 @@ export default function Motives() {
   });
   const router = useRouter();
   const { scrollY } = useScroll();
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
   const lastScrollY = useRef(0);
   const scrollDirection = useRef<'up' | 'down'>('up');
   const [distance, setDistance] = useState(8); // Changed from 5 miles to 8 km
@@ -248,13 +252,13 @@ export default function Motives() {
                 style={[styles.friendButton, styles.acceptButton]}
                 onPress={() => handleAcceptFriend(friend.id)}
               >
-                <Ionicons name="checkmark" size={24} color="#fff" />
+                <Ionicons name="checkmark" size={24} color={colors.white} />
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.friendButton, styles.rejectButton]}
                 onPress={() => handleRejectFriend(friend.id)}
               >
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={colors.white} />
               </TouchableOpacity>
             </View>
           </View>
@@ -279,7 +283,7 @@ export default function Motives() {
                 onPress={() => setIsFilterModalVisible(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
 
@@ -296,9 +300,9 @@ export default function Motives() {
                 step={1}
                 value={filters.distance}
                 onValueChange={(value) => handleFilterChange('distance', value)}
-                minimumTrackTintColor="#e91e63"
-                maximumTrackTintColor="#ddd"
-                thumbTintColor="#e91e63"
+                minimumTrackTintColor={colors.primary}
+                maximumTrackTintColor={colors.grey}
+                thumbTintColor={colors.primary}
               />
               <View style={styles.distanceMarkers}>
                 <Text style={styles.markerText}>1 km</Text>
@@ -375,7 +379,7 @@ export default function Motives() {
           onPress={() => router.push("../maps/_index")}
           style={styles.mapButton}
         >
-          <Ionicons name="map-outline" size={24} color="#e91e63" />
+          <Ionicons name="map-outline" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -393,10 +397,10 @@ export default function Motives() {
         <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
           {/* Search Bar */}
           <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+            <Ionicons name="search" size={20} color={colors.grey} style={{ marginRight: 8 }} />
             <TextInput
               placeholder="Search motives..."
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.grey}
               style={styles.input}
               value={search}
               onChangeText={setSearch}
@@ -405,7 +409,7 @@ export default function Motives() {
               style={styles.filterButton}
               onPress={() => setIsFilterModalVisible(true)}
             >
-              <Ionicons name="options-outline" size={20} color="#666" />
+              <Ionicons name="options-outline" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -469,10 +473,10 @@ export default function Motives() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f6f8",
+    backgroundColor: c.background,
   },
   fixedHeader: {
     position: 'absolute',
@@ -490,7 +494,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#000",
+    color: c.black,
     paddingHorizontal: 10,
   },
   searchBar: {
@@ -498,7 +502,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f1f1f1",
+    backgroundColor: c.grey,
     borderRadius: 25,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -508,7 +512,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: c.textPrimary,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -521,23 +525,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activeButton: {
-    backgroundColor: "#e91e63",
+    backgroundColor: c.primary,
   },
   toggleText: {
-    color: "rgba(0,0,0,0.5)",
+    color: c.textSecondary,
     fontWeight: "500",
     fontSize: 14,
   },
   activeText: {
-    color: "#000",
+    color: c.black,
     fontWeight: "600",
   },
   card: {
     marginBottom: 20,
-    backgroundColor: "#fff",
+    backgroundColor: c.white,
     borderRadius: 12,
     padding: 12,
-    shadowColor: "#000",
+    shadowColor: c.black,
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
@@ -555,22 +559,22 @@ const styles = StyleSheet.create({
   },
   user: {
     fontSize: 14,
-    color: "#666",
+    color: c.textSecondary,
   },
   mapButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
-    shadowColor: "#000",
+    shadowColor: c.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   stickyTabsContainer: {
-    backgroundColor: "#efe7ee",
+    backgroundColor: c.background,
     paddingVertical: 10,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
+    borderBottomColor: c.grey,
     zIndex: 10,
   },
   activeIndicator: {
@@ -578,7 +582,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#e91e63",
+    backgroundColor: c.primary,
   },
   headerCard: {
     position: "absolute",
@@ -586,12 +590,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: height * 0.28,
-    backgroundColor: "#fff",
+    backgroundColor: c.white,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingTop: 100,
     paddingHorizontal: 24,
-    shadowColor: "#000",
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -609,7 +613,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#333",
+    color: c.textPrimary,
     textAlign: "center",
   },
   suggestedFriendsContainer: {
@@ -620,16 +624,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
+    color: c.textPrimary,
   },
   suggestedFriendCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -641,8 +645,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     marginRight: 16,
     borderWidth: 2,
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: c.white,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -654,17 +658,17 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 2,
   },
   friendUsername: {
     fontSize: 14,
-    color: '#666',
+    color: c.textSecondary,
     marginBottom: 4,
   },
   mutualFriends: {
     fontSize: 13,
-    color: '#888',
+    color: c.textSecondary,
     fontWeight: '500',
   },
   friendActions: {
@@ -677,7 +681,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -693,10 +697,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -713,12 +717,12 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     maxHeight: '80%',
-    shadowColor: '#000',
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -733,7 +737,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: c.textPrimary,
   },
   closeButton: {
     padding: 5,
@@ -744,7 +748,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 10,
   },
   filterOptions: {
@@ -756,30 +760,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: c.grey,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: c.grey,
   },
   filterOptionSelected: {
-    backgroundColor: '#e91e63',
-    borderColor: '#e91e63',
+    backgroundColor: c.primary,
+    borderColor: c.primary,
   },
   filterOptionText: {
-    color: '#666',
-    fontSize: 14,
+    color: c.textSecondary,
+  fontSize: 14,
   },
   filterOptionTextSelected: {
-    color: '#fff',
+    color: c.white,
   },
   applyButton: {
-    backgroundColor: '#e91e63',
+    backgroundColor: c.primary,
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
   },
   applyButtonText: {
-    color: '#fff',
+    color: c.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -792,7 +796,7 @@ const styles = StyleSheet.create({
   distanceValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#e91e63',
+    color: c.primary,
   },
   slider: {
     width: '100%',
@@ -806,6 +810,6 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 12,
-    color: '#666',
+    color: c.textSecondary,
   },
 });

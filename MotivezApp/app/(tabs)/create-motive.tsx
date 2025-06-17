@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../../components/ProgressBar';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
+import { lightColors } from '../../constants/colors';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -30,6 +32,9 @@ export default function CreateMotiveScreen() {
   const [experienceLevel, setExperienceLevel] = useState<string | null>(null);
   const [goals, setGoals] = useState('');
   const [notes, setNotes] = useState('');
+
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // categories/chips state
   const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
@@ -81,7 +86,7 @@ export default function CreateMotiveScreen() {
             Create a Motive
           </Text>
 
-          <Text style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' }}>
+          <Text style={{ fontSize: 16, color: colors.textSecondary, marginBottom: 40, textAlign: 'center' }}>
             Is this just for the crew, or for the world?
           </Text>
 
@@ -144,7 +149,7 @@ export default function CreateMotiveScreen() {
               }}
               style={{ marginBottom: 20 }}
             >
-              <Text style={{ color: '#e91e63', textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
+              <Text style={{ color: colors.primary, textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
             </TouchableOpacity>
           </>
         )}
@@ -154,18 +159,18 @@ export default function CreateMotiveScreen() {
           <>
             <TextInput
               placeholder="Title"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: colors.textPrimary }]}
               value={title}
               onChangeText={setTitle}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             <TextInput
               placeholder="Location"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: colors.textPrimary }]}
               value={location}
               onChangeText={setLocation}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             <Text style={styles.subheading}>When?</Text>
@@ -208,11 +213,11 @@ export default function CreateMotiveScreen() {
 
             <TextInput
               placeholder="Budget (CAD)"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: colors.textPrimary }]}
               keyboardType="numeric"
               value={price}
               onChangeText={setPrice}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             <Text style={styles.subheading}>Experience Level</Text>
@@ -236,29 +241,29 @@ export default function CreateMotiveScreen() {
 
             <TextInput
               placeholder="Goals (e.g., 'Learn a new skill', 'Relax and unwind')"
-              style={[styles.input, { color: '#000', height: 60 }]}
+              style={[styles.input, { color: colors.textPrimary, height: 60 }]}
               multiline
               value={goals}
               onChangeText={setGoals}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             <TextInput
               placeholder="Description"
-              style={[styles.input, { color: '#000', height: 80 }]}
+              style={[styles.input, { color: colors.textPrimary, height: 80 }]}
               multiline
               value={description}
               onChangeText={setDescription}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             <TextInput
               placeholder="Additional Notes"
-              style={[styles.input, { color: '#000', height: 60 }]}
+              style={[styles.input, { color: colors.textPrimary, height: 60 }]}
               multiline
               value={notes}
               onChangeText={setNotes}
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textSecondary}
             />
 
             {/* Category Chips */}
@@ -350,31 +355,31 @@ export default function CreateMotiveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#f4f6f8', paddingTop: 50 },
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
+  safeContainer: { flex: 1, backgroundColor: c.background, paddingTop: 50 },
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
   },
   stepWrapper: { alignItems: 'center' },
   stepCircle: {
     width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#ddd', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: c.grey, justifyContent: 'center', alignItems: 'center',
   },
-  stepCircleActive: { backgroundColor: '#e91e63' },
-  stepNumber: { color: '#444', fontSize: 12 },
-  stepNumberActive: { color: '#fff', fontWeight: 'bold' },
-  stepLabel: { fontSize: 10, color: '#666', marginTop: 2 },
-  stepLabelActive: { color: '#e91e63', fontWeight: '600' },
+  stepCircleActive: { backgroundColor: c.primary },
+  stepNumber: { color: c.textPrimary, fontSize: 12 },
+  stepNumberActive: { color: c.white, fontWeight: 'bold' },
+  stepLabel: { fontSize: 10, color: c.textSecondary, marginTop: 2 },
+  stepLabelActive: { color: c.primary, fontWeight: '600' },
 
   headerRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingBottom: 4,
   },
   headerTitle: {
-    fontSize: 24, fontWeight: 'bold', color: '#333',
+    fontSize: 24, fontWeight: 'bold', color: c.textPrimary,
     marginLeft: 10,
   },
 
@@ -382,16 +387,16 @@ const styles = StyleSheet.create({
     padding: 20, flexGrow: 1, alignItems: 'center',
   },
   imagePicker: {
-    width: '100%', height: 200, backgroundColor: '#ddd',
+    width: '100%', height: 200, backgroundColor: c.grey,
     borderRadius: 12, justifyContent: 'center',
     alignItems: 'center', overflow: 'hidden', marginBottom: 20,
   },
-  imagePlaceholder: { color: '#666' },
+  imagePlaceholder: { color: c.textSecondary },
   image: { width: '100%', height: '100%' },
 
   input: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
@@ -402,7 +407,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
   },
   chipRow: {
     width: '100%',
@@ -410,21 +415,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   chip: {
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 10,
   },
   chipSelected: {
-    backgroundColor: '#e91e63',
+    backgroundColor: c.primary,
   },
   chipText: {
-    color: '#444',
+    color: c.textPrimary,
     fontSize: 14,
   },
   chipTextSelected: {
-    color: '#fff',
+    color: c.white,
     fontWeight: '600',
   },
 
@@ -432,13 +437,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     marginBottom: 20,
   },
-  label: { marginHorizontal: 8, color: '#444' },
+  label: { marginHorizontal: 8, color: c.textPrimary },
 
   preview: { alignItems: 'flex-start', width: '100%' },
   previewImage: {
     width: '100%', height: 200, borderRadius: 12, marginBottom: 15,
   },
-  previewText: { fontSize: 16, color: '#333', marginBottom: 6 },
+  previewText: { fontSize: 16, color: c.textPrimary, marginBottom: 6 },
   bold: { fontWeight: '600' },
 
   navRow: {
@@ -447,16 +452,16 @@ const styles = StyleSheet.create({
   },
   navBtn: {
     paddingVertical: 10, paddingHorizontal: 20,
-    borderRadius: 8, backgroundColor: '#ddd',
+    borderRadius: 8, backgroundColor: c.grey,
   },
-  navText: { fontSize: 16, color: '#444' },
-  nextBtn: { backgroundColor: '#e91e63' },
-  nextText: { color: '#fff' },
+  navText: { fontSize: 16, color: c.textPrimary },
+  nextBtn: { backgroundColor: c.primary },
+  nextText: { color: c.white },
   submitBtn: { backgroundColor: '#4CAF50' },
-  submitText: { color: '#fff', fontWeight: 'bold' },
+  submitText: { color: c.white, fontWeight: 'bold' },
 
   bubbleBtn: {
-  backgroundColor: '#e91e63',
+  backgroundColor: c.primary,
   paddingHorizontal: 28,
   paddingVertical: 12,
   borderRadius: 50,
@@ -466,7 +471,7 @@ const styles = StyleSheet.create({
   bubbleText: {
   fontSize: 16,
   fontWeight: '600',
-  color: '#fff',
+  color: c.white,
   },
 
 });
