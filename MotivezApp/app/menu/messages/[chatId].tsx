@@ -6,13 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  GestureResponderEvent,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatTime } from '../../lib/formatTime';
 import { supabase } from '../../lib/supabase';
+import DoubleTap from 'react-native-double-tap';
 
 interface Message {
   id: string;
@@ -78,28 +78,40 @@ export default function ChatDetail() {
     setInput('');
   }
 
-  async function addReaction(messageId: string, reaction: string) {
+  async function addReaction(messageId: string, reaction: string | null) {
     await supabase
       .from('messages')
       .update({ reaction })
       .eq('id', messageId);
   }
 
-  const handleLongPress = (id: string) => (e: GestureResponderEvent) => {
-    addReaction(id, '❤️');
+  const toggleReaction = async (messageId: string, currentReaction: string | null) => {
+    const newReaction = currentReaction === '❤️' ? null : '❤️';
+    await addReaction(messageId, newReaction);
+
+    // Optimistically update the local state
+    setMessages(prevMessages =>
+      prevMessages.map(msg =>
+        msg.id === messageId ? { ...msg, reaction: newReaction } : msg
+      )
+    );
   };
 
   const renderItem = ({ item }: { item: Message }) => (
-    <TouchableOpacity
-      onLongPress={handleLongPress(item.id)}
-      style={[styles.message, item.sender_id === CURRENT_USER_ID ? styles.me : styles.them]}
+    <DoubleTap
+      key={item.id}
+      doubleTap={() => toggleReaction(item.id, item.reaction)}
     >
-      <Text style={styles.text}>{item.content}</Text>
-      <View style={styles.metaRow}>
-        {item.reaction && <Text style={styles.reaction}>{item.reaction}</Text>}
-        <Text style={styles.time}>{formatTime(item.created_at)}</Text>
+      <View
+        style={[styles.message, item.sender_id === CURRENT_USER_ID ? styles.me : styles.them]}
+      >
+        <Text style={styles.text}>{item.content}</Text>
+        <View style={styles.metaRow}>
+          {item.reaction && <Text style={styles.reaction}>{item.reaction}</Text>}
+          <Text style={styles.time}>{formatTime(item.created_at)}</Text>
+        </View>
       </View>
-    </TouchableOpacity>
+    </DoubleTap>
   );
 
   return (
@@ -194,5 +206,5 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 8,
   },
-  sendButton: { padding: 4 },
+  sendButton: { padding: 4 }
 });

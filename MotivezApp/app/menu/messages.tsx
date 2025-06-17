@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,6 +30,13 @@ export default function MessagesScreen() {
   const router = useRouter();
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [friends, setFriends] = useState([
+    { id: 'friend1', name: 'Alice' },
+    { id: 'friend2', name: 'Bob' },
+    // Add more friends as needed
+  ]);
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
   useEffect(() => {
     fetchChats();
@@ -43,6 +51,38 @@ export default function MessagesScreen() {
     if (data) setChats(data as Chat[]);
     setLoading(false);
   }
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const handleFriendSelection = (friendId: string) => {
+    setSelectedFriends((prev) => {
+      if (prev.includes(friendId)) {
+        return prev.filter((id) => id !== friendId);
+      } else {
+        return [...prev, friendId];
+      }
+    });
+  };
+
+  const createNewChat = async () => {
+    // Replace this with your actual logic to create a new chat
+    console.log('Creating new chat with friends:', selectedFriends);
+    setIsModalVisible(false);
+    // You might want to navigate to the new chat after creating it
+  };
+
+  useEffect(() => {
+    // Fetch friends here (replace with your actual logic)
+    // Example:
+    // async function fetchFriends() {
+    //   const { data, error } = await supabase.from('friends').select('*').eq('user_id', CURRENT_USER_ID);
+    //   if (data) setFriends(data);
+    //   if (error) console.error('Error fetching friends:', error);
+    // }
+    // fetchFriends();
+  }, []);
 
   const renderChat = ({ item }: { item: Chat }) => (
     <TouchableOpacity
@@ -77,7 +117,9 @@ export default function MessagesScreen() {
             <Ionicons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Messages</Text>
-          <View style={{ width: 32 }} /> {/* Spacer to center title */}
+          <TouchableOpacity onPress={toggleModal}>
+            <Ionicons name="add" size={28} color="#333" />
+          </TouchableOpacity>
         </View>
 
         {loading ? (
@@ -99,6 +141,39 @@ export default function MessagesScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
+
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={toggleModal}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Select Friends</Text>
+              {friends.map((friend) => (
+                <TouchableOpacity
+                  key={friend.id}
+                  style={[
+                    styles.friendItem,
+                    selectedFriends.includes(friend.id) && styles.selectedFriendItem,
+                  ]}
+                  onPress={() => handleFriendSelection(friend.id)}
+                >
+                  <Text>{friend.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.modalButton} onPress={createNewChat}>
+                  <Text>Create Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalButton} onPress={toggleModal}>
+                  <Text>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </>
   );
@@ -118,6 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#dddddd',
+    justifyContent: 'space-between', // Added to push the add button to the right
   },
   backButton: {
     width: 32,
@@ -212,5 +288,44 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     fontWeight: '500',
+  },
+
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  friendItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  selectedFriendItem: {
+    backgroundColor: '#e0e0e0',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  modalButton: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
   },
 });
