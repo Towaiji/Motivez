@@ -688,10 +688,10 @@ const createStyles = (c: typeof lightColors) => StyleSheet.create({
     elevation: 3,
   },
   acceptButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: c.success,
   },
   rejectButton: {
-    backgroundColor: '#FF5252',
+    backgroundColor: c.error,
   },
   filterButton: {
     width: 32,

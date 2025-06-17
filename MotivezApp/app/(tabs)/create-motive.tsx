@@ -457,7 +457,7 @@ const createStyles = (c: typeof lightColors) => StyleSheet.create({
   navText: { fontSize: 16, color: c.textPrimary },
   nextBtn: { backgroundColor: c.primary },
   nextText: { color: c.white },
-  submitBtn: { backgroundColor: '#4CAF50' },
+  submitBtn: { backgroundColor: c.success },
   submitText: { color: c.white, fontWeight: 'bold' },
 
   bubbleBtn: {

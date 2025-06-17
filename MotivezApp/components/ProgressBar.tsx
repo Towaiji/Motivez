@@ -30,7 +30,7 @@ const ProgressBar = ({ steps, currentStep }: { steps: string[]; currentStep: num
         pointerEvents="none"
       >
         <LinearGradient
-          colors={["#ff8a65", colors.primary]}
+          colors={[colors.accent, colors.primary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}

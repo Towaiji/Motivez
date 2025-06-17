@@ -1,8 +1,12 @@
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { useTheme } from "./context/ThemeContext";
+import { lightColors } from "../constants/colors";
 import { Link, Stack } from "expo-router";
 
 export default function NotFoundScreen() {
+    const { colors } = useTheme();
+    const styles = React.useMemo(() => createStyles(colors), [colors]);
     return (
         <>
             <Stack.Screen options={{ title: "404 - Not Found" }} />
@@ -15,25 +19,25 @@ export default function NotFoundScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#efe7ee",
+        backgroundColor: c.offWhite,
     },
     text: {
         fontSize: 30,
-        color: "black",
+        color: c.textPrimary,
     },
     button: {
-        backgroundColor: "#4CAF50",
+        backgroundColor: c.success,
         padding: 10,
         borderRadius: 5,
         marginTop: 20,
     },
     buttonText: {
-        color: "black",
+        color: c.textPrimary,
         fontWeight: "bold",
     },
 });

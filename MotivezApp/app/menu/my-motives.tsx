@@ -12,6 +12,8 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
+import { lightColors } from '../../constants/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -55,6 +57,8 @@ export default function MyMotivesScreen() {
   const router = useRouter();
   const [motives, setMotives] = useState<typeof dummyMotives>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     // Simulate API fetch delay
@@ -74,12 +78,12 @@ export default function MyMotivesScreen() {
           <Ionicons
             name={item.privacy === 'Public' ? 'earth' : 'lock-closed'}
             size={15}
-            color={item.privacy === 'Public' ? '#4CAF50' : '#e91e63'}
+            color={item.privacy === 'Public' ? colors.success : colors.primary}
           />{' '}
           {item.privacy}
         </Text>
         <Text style={styles.motiveAttendees}>
-          <Ionicons name="people-outline" size={15} color="#007AFF" /> {item.attendees} Attending
+          <Ionicons name="people-outline" size={15} color={colors.secondary} /> {item.attendees} Attending
         </Text>
       </View>
     </View>
@@ -92,7 +96,7 @@ export default function MyMotivesScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>My Motivez</Text>
           <View style={{ width: 32 }} /> {/* Spacer to center title */}
@@ -100,12 +104,12 @@ export default function MyMotivesScreen() {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.secondary} />
             <Text style={styles.loadingText}>Loading your Motivez...</Text>
           </View>
         ) : motives.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="create-outline" size={60} color="#cccccc" />
+            <Ionicons name="create-outline" size={60} color={colors.grey} />
             <Text style={styles.emptyText}>You haven't created any Motivez yet.</Text>
           </View>
         ) : (
@@ -122,10 +126,10 @@ export default function MyMotivesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: typeof lightColors) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
+    backgroundColor: c.background,
   },
   topBar: {
     flexDirection: 'row',
@@ -133,9 +137,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
+    borderBottomColor: c.border,
   },
   backButton: {
     width: 32,
@@ -145,7 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: '600',
-    color: '#333333',
+    color: c.textPrimary,
     textAlign: 'center',
   },
   loaderContainer: {
@@ -156,18 +160,18 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#555555',
+    color: c.textSecondary,
   },
   listContent: {
     padding: 12,
     paddingBottom: 40,
   },
   motiveCard: {
-    backgroundColor: '#fff',
+    backgroundColor: c.cardBackground,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: c.black,
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
@@ -188,22 +192,22 @@ const styles = StyleSheet.create({
   motiveTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 4,
   },
   motiveDate: {
     fontSize: 14,
-    color: '#555',
+    color: c.textSecondary,
   },
   motivePrivacy: {
     fontSize: 13,
     marginTop: 3,
-    color: '#666',
+    color: c.textSecondary,
   },
   motiveAttendees: {
     fontSize: 13,
     marginTop: 3,
-    color: '#666',
+    color: c.textSecondary,
   },
   emptyContainer: {
     flex: 1,
@@ -213,7 +217,7 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 12,
     fontSize: 17,
-    color: '#888',
+    color: c.grey,
     textAlign: 'center',
     fontWeight: '500',
   },

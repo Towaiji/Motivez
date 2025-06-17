@@ -128,8 +128,8 @@ export default function SettingsScreen() {
           {/* Logout */}
           <TouchableOpacity style={[styles.row, styles.logoutRow]} onPress={handleLogout}>
             <View style={styles.rowLeft}>
-              <Ionicons name="log-out-outline" size={22} color="#e53935" />
-              <Text style={[styles.rowLabel, { color: '#e53935' }]}>Log Out</Text>
+              <Ionicons name="log-out-outline" size={22} color={colors.danger} />
+              <Text style={[styles.rowLabel, { color: colors.danger }]}>Log Out</Text>
             </View>
           </TouchableOpacity>
         </ScrollView>
