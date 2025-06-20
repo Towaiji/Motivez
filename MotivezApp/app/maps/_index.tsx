@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from '../../lib/supabaseClient'
 import { fetchNearbyPlaces } from "@/lib/fetchNearbyPlaces";
+import { fetchPlacesByTextSearch } from "@/lib/fetchNearbyPlaces";
 
 export default function MapScreen() {
   const [region, setRegion] = useState<{
@@ -25,8 +26,12 @@ export default function MapScreen() {
   const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
   const [mapRegion, setMapRegion] = useState(region);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categoryPlaces, setCategoryPlaces] = useState<{[key: string]: any[]}>({});
   const searchPanelAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
+  const [activeSearchLabel, setActiveSearchLabel] = useState<string | null>(null);
+
 
   const panelTranslateY = searchPanelAnim.interpolate({
     inputRange: [0, 1],
@@ -96,42 +101,88 @@ export default function MapScreen() {
   
 
   const handleSearch = async () => {
+    if (searchQuery.trim() === "") return;
+    setActiveSearchLabel(searchQuery);
     const lowerQuery = searchQuery.toLowerCase();
-  
     const match = places.find((place) => {
       const name = place.name?.toLowerCase() || "";
       const category = place.category?.toLowerCase() || "";
       return name.includes(lowerQuery) || category.includes(lowerQuery);
     });
-  
     if (match && mapRef.current) {
       const lat = Number(match.latitude);
       const lng = Number(match.longitude);
-  
       if (!isNaN(lat) && !isNaN(lng)) {
         mapRef.current.animateToRegion({
           latitude: lat,
           longitude: lng,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }, 300);
-      }
-    } else {
-      console.log("No Supabase match found. Trying geocoding...");
-  
-      const location = await geocodeLocation(searchQuery);
-      if (location && mapRef.current) {
-        mapRef.current.animateToRegion({
-          ...location,
           latitudeDelta: 0.03,
           longitudeDelta: 0.03,
         }, 300);
-      } else {
-        console.warn("Could not find location:", searchQuery);
+      }
+    } else if (mapRegion) {
+      const results = await fetchPlacesByTextSearch(searchQuery, mapRegion.latitude, mapRegion.longitude);
+      if (results.length > 0) {
+        setGooglePlaces(results);
+        const first = results[0];
+        const lat = first.geometry?.location?.lat;
+        const lng = first.geometry?.location?.lng;
+        if (mapRef.current && lat && lng) {
+          mapRef.current.animateToRegion({
+            latitude: lat,
+            longitude: lng,
+            latitudeDelta: 0.03,
+            longitudeDelta: 0.03,
+          }, 300);
+        }
       }
     }
   };
   
+
+  const handleCategoryToggle = async (categoryType: string) => {
+    if (!mapRegion) return;
+
+    if (selectedCategories.includes(categoryType)) {
+      // Remove category
+      setSelectedCategories(prev => prev.filter(cat => cat !== categoryType));
+      setCategoryPlaces(prev => {
+        const newPlaces = { ...prev };
+        delete newPlaces[categoryType];
+        return newPlaces;
+      });
+    } else {
+      // Add category
+      setSelectedCategories(prev => [...prev, categoryType]);
+      
+      // Fetch places for this category
+      const results = await fetchNearbyPlaces(
+        mapRegion.latitude,
+        mapRegion.longitude,
+        categoryType
+      );
+      
+      setCategoryPlaces(prev => ({
+        ...prev,
+        [categoryType]: results
+      }));
+    }
+  };
+
+  // Get all places to display based on selected categories
+  const getDisplayPlaces = () => {
+    if (selectedCategories.length === 0) {
+      return googlePlaces; // Show default places when no categories selected
+    }
+    
+    const allCategoryPlaces = [];
+    for (const category of selectedCategories) {
+      if (categoryPlaces[category]) {
+        allCategoryPlaces.push(...categoryPlaces[category]);
+      }
+    }
+    return allCategoryPlaces;
+  };
   
 
   useEffect(() => {
@@ -213,13 +264,22 @@ export default function MapScreen() {
       console.warn("No visible region available.");
       return;
     }
-  
     const { latitude, longitude } = mapRegion;
-  
     console.log("Searching this area:", latitude, longitude);
-  
-    const results = await fetchNearbyPlaces(latitude, longitude);
-    setGooglePlaces(results);
+    if (activeSearchLabel) {
+      const results = await fetchPlacesByTextSearch(activeSearchLabel, latitude, longitude);
+      setGooglePlaces(results);
+    } else if (selectedCategories.length > 0) {
+      const newCategoryPlaces = { ...categoryPlaces };
+      for (const categoryType of selectedCategories) {
+        const results = await fetchNearbyPlaces(latitude, longitude, categoryType);
+        newCategoryPlaces[categoryType] = results;
+      }
+      setCategoryPlaces(newCategoryPlaces);
+    } else {
+      const results = await fetchNearbyPlaces(latitude, longitude);
+      setGooglePlaces(results);
+    }
   };
   
 
@@ -245,6 +305,8 @@ export default function MapScreen() {
       </>
     );
   }
+
+  const displayPlaces = getDisplayPlaces();
 
   return (
     <>
@@ -287,8 +349,8 @@ export default function MapScreen() {
             );
           })}
 
-          {/* Google Places */}
-          {googlePlaces.map((place, index) => (
+          {/* Google Places - now filtered by selected categories */}
+          {displayPlaces.map((place, index) => (
             <Marker
               key={`google-${index}`}
               coordinate={{
@@ -318,6 +380,46 @@ export default function MapScreen() {
               </TouchableOpacity>
             </View>
           </SafeAreaView>
+
+          {/* Show active categories and search label indicator */}
+          {(selectedCategories.length > 0 || activeSearchLabel) && (
+            <View style={styles.activeCategoriesContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.activeCategoriesScroll}>
+                {activeSearchLabel && (
+                  <View style={styles.searchPill}>
+                    <Text style={styles.searchPillText}>{activeSearchLabel}</Text>
+                    <TouchableOpacity onPress={() => setActiveSearchLabel(null)}>
+                      <Ionicons name="close" size={16} color="#666" style={styles.activeCategoryClose} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {selectedCategories.map((category) => {
+                  const categoryData = [
+                    { emoji: "🍕", label: "Food", type: "restaurant" },
+                    { emoji: "🎳", label: "Fun", type: "amusement_park" },
+                    { emoji: "🎶", label: "Music", type: "night_club" },
+                    { emoji: "🌿", label: "Nature", type: "park" },
+                    { emoji: "🧘", label: "Chill", type: "spa" },
+                    { emoji: "🧠", label: "Learn", type: "museum" },
+                    { emoji: "🛍️", label: "Shopping", type: "shopping_mall" },
+                    { emoji: "🎮", label: "Games", type: "arcade" },
+                  ].find(item => item.type === category);
+                  if (!categoryData) return null;
+                  return (
+                    <TouchableOpacity
+                      key={category}
+                      style={styles.activeCategoryChip}
+                      onPress={() => handleCategoryToggle(category)}
+                    >
+                      <Text style={styles.activeCategoryEmoji}>{categoryData.emoji}</Text>
+                      <Text style={styles.activeCategoryLabel}>{categoryData.label}</Text>
+                      <Ionicons name="close" size={16} color="#666" style={styles.activeCategoryClose} />
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
 
           <TouchableOpacity
             style={[
@@ -397,9 +499,17 @@ export default function MapScreen() {
                     style={styles.modalSearchInput}
                     returnKeyType="search"
                   />
+                  {searchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchQuery("")}
+                      style={styles.clearButton}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Ionicons name="close-circle" size={20} color="#999" />
+                    </TouchableOpacity>
+                  )}
                 </View>
 
-                <Text style={styles.categoryTitle}>Choose a Category</Text>
+                <Text style={styles.categoryTitle}>Choose Categories</Text>
 
                 <ScrollView style={styles.categoryScrollView} showsVerticalScrollIndicator={false}>
                   <View style={styles.categoryGrid}>
@@ -412,25 +522,32 @@ export default function MapScreen() {
                       { emoji: "🧠", label: "Learn", type: "museum" },
                       { emoji: "🛍️", label: "Shopping", type: "shopping_mall" },
                       { emoji: "🎮", label: "Games", type: "arcade" },
-                    ].map((item, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.categoryButton}
-                        onPress={async () => {
-                          if (!mapRegion) return;
-                          const results = await fetchNearbyPlaces(
-                            mapRegion.latitude,
-                            mapRegion.longitude,
-                            item.type
-                          );
-                          setGooglePlaces(results);
-                          closeModal();
-                        }}
-                      >
-                        <Text style={styles.categoryEmoji}>{item.emoji}</Text>
-                        <Text style={styles.categoryLabel}>{item.label}</Text>
-                      </TouchableOpacity>
-                    ))}
+                    ].map((item, index) => {
+                      const isSelected = selectedCategories.includes(item.type);
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={[
+                            styles.categoryButton,
+                            isSelected && styles.categoryButtonSelected
+                          ]}
+                          onPress={() => handleCategoryToggle(item.type)}
+                        >
+                          <Text style={styles.categoryEmoji}>{item.emoji}</Text>
+                          <Text style={[
+                            styles.categoryLabel,
+                            isSelected && styles.categoryLabelSelected
+                          ]}>
+                            {item.label}
+                          </Text>
+                          {isSelected && (
+                            <View style={styles.selectedIndicator}>
+                              <Ionicons name="checkmark" size={14} color="#fff" />
+                            </View>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 </ScrollView>
               </View>
@@ -669,6 +786,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     borderWidth: 1,
     borderColor: "#f0f0f0",
+    position: "relative",
+  },
+  categoryButtonSelected: {
+    backgroundColor: "#FF4D6D",
+    borderColor: "#FF4D6D",
   },
   categoryEmoji: {
     fontSize: 24,
@@ -680,7 +802,108 @@ const styles = StyleSheet.create({
     color: "#555",
     fontWeight: "500",
   },
+  categoryLabelSelected: {
+    color: "#fff",
+    fontWeight: "600",
+  },
   categoryScrollView: {
     flex: 1,
+  },
+  clearButton: {
+    marginLeft: 8,
+  },
+  selectedIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#28a745",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  activeCategoriesContainer: {
+    position: "absolute",
+    top: 120,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    paddingHorizontal: 20,
+  },
+  activeCategoriesScroll: {
+    flexDirection: "row",
+  },
+  activeCategoryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  activeCategoryEmoji: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  activeCategoryLabel: {
+    fontSize: 12,
+    color: "#333",
+    fontWeight: "500",
+    marginRight: 4,
+  },
+  activeCategoryClose: {
+    marginLeft: 2,
+  },
+  activeLabel: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    marginLeft: 10,
+    marginTop: 130,
+    alignItems: 'center',
+    elevation: 3, // Android shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  activeLabelText: {
+    fontSize: 14,
+    marginRight: 6,
+    color: '#333',
+  },
+  removeText: {
+    fontSize: 14,
+    color: '#999',
+  },
+  searchPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  searchPillText: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '600',
+    marginRight: 6,
   },
 });
