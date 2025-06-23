@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomAccountDrawer from "./BottomAccountDrawer";
+import { useTheme } from "../theme/ThemeContext";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -36,6 +37,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
+  const { colors } = useTheme();
 
   useLayoutEffect(() => {
     if (isVisible) {
@@ -67,19 +69,19 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
       <View style={styles.drawerWrapper}>
         {/* Backdrop: clicking it closes the drawer */}
         <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.backdrop} />
+          <View style={[styles.backdrop, { backgroundColor: colors.backdrop }]} />
         </TouchableWithoutFeedback>
 
         {/* Animated drawer sliding in/out from left */}
         <Animated.View
           style={[
             styles.drawer,
-            { transform: [{ translateX: slideAnim }] },
+            { transform: [{ translateX: slideAnim }], backgroundColor: colors.card },
           ]}
         >
           {/* Close “X” button */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={33} color="#333" />
+            <Ionicons name="close" size={33} color={colors.text} />
           </TouchableOpacity>
 
           {/* Wrap all menu items in a ScrollView */}
@@ -106,8 +108,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Profile</Text>
+              <Ionicons name="person-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Profile</Text>
             </TouchableOpacity>
 
             {/* “My Motives” */}
@@ -118,8 +120,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="list-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>My Motives</Text>
+              <Ionicons name="list-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>My Motives</Text>
             </TouchableOpacity>
 
             {/* “Add / Invite Friends” */}
@@ -130,8 +132,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-add-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Add / Invite Friends</Text>
+              <Ionicons name="person-add-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Add / Invite Friends</Text>
             </TouchableOpacity>
 
             <View style={styles.sectionDivider} />
@@ -144,8 +146,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="people-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Friends</Text>
+              <Ionicons name="people-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Friends</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -155,8 +157,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Messages</Text>
+              <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Messages</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -166,8 +168,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="bookmark-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Saved Motives</Text>
+              <Ionicons name="bookmark-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Saved Motives</Text>
             </TouchableOpacity>
 
             <View style={styles.sectionDivider} />
@@ -180,8 +182,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="compass-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Explore / Trending</Text>
+              <Ionicons name="compass-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Explore / Trending</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -191,8 +193,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="map-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Nearby Map</Text>
+              <Ionicons name="map-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Nearby Map</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -202,8 +204,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="pricetags-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Categories</Text>
+              <Ionicons name="pricetags-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Categories</Text>
             </TouchableOpacity>
 
             <View style={styles.sectionDivider} />
@@ -216,8 +218,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="calendar-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Upcoming Events</Text>
+              <Ionicons name="calendar-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Upcoming Events</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -227,8 +229,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="time-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Past Memories</Text>
+              <Ionicons name="time-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Past Memories</Text>
             </TouchableOpacity>
 
             <View style={styles.sectionDivider} />
@@ -241,8 +243,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="settings-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Settings</Text>
+              <Ionicons name="settings-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Settings</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -252,8 +254,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="notifications-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Notifications</Text>
+              <Ionicons name="notifications-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Notifications</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -263,8 +265,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="help-circle-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>Help & Feedback</Text>
+              <Ionicons name="help-circle-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>Help & Feedback</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -274,8 +276,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="information-circle-outline" size={22} color="#333" />
-              <Text style={styles.drawerItemText}>About Motivez</Text>
+              <Ionicons name="information-circle-outline" size={22} color={colors.text} />
+              <Text style={[styles.drawerItemText, { color: colors.text }]}>About Motivez</Text>
             </TouchableOpacity>
 
             <View style={styles.sectionDivider} />
@@ -288,8 +290,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 console.log("Logging out...");
               }}
             >
-              <Ionicons name="log-out-outline" size={22} color="#e53935" />
-              <Text style={[styles.drawerItemText, { color: "#e53935" }]}>Log Out</Text>
+              <Ionicons name="log-out-outline" size={22} color={colors.primary} />
+              <Text style={[styles.drawerItemText, { color: colors.primary }]}>Log Out</Text>
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>

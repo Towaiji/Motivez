@@ -4,10 +4,12 @@ import { LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollProvider } from "./context/ScrollContext";
 import { supabase } from '../lib/supabaseClient';
+import { ThemeProvider, useTheme } from '../theme/ThemeContext';
 
 LogBox.ignoreAllLogs(true);
 
-export default function RootLayout() {
+function InnerLayout() {
+  const { theme } = useTheme();
 
   useEffect(() => {
     const login = async () => {
@@ -24,7 +26,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />
       <ScrollProvider>
         <Stack
           screenOptions={{
@@ -59,5 +61,13 @@ export default function RootLayout() {
         </Stack>
       </ScrollProvider>
     </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <InnerLayout />
+    </ThemeProvider>
   );
 }

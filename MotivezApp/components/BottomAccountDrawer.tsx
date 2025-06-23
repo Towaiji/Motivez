@@ -26,6 +26,7 @@ export default function BottomAccountDrawer({
 }: BottomAccountDrawerProps) {
   const [mounted, setMounted] = useState(isVisible);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (isVisible) {
@@ -52,15 +53,15 @@ export default function BottomAccountDrawer({
     <View style={styles.wrapper}>
       {/* Backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop} />
+        <View style={[styles.backdrop, { backgroundColor: colors.backdrop }]} />
       </TouchableWithoutFeedback>
 
       {/* Bottom Drawer */}
-      <Animated.View style={[styles.drawer, { transform: [{ translateY }] }]}>
+      <Animated.View style={[styles.drawer, { transform: [{ translateY }], backgroundColor: colors.card }]}>
         <View style={styles.handle} />
 
         {/* Title */}
-        <Text style={styles.title}>Switch Profile</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Switch Profile</Text>
 
         {/* Account List */}
         {accounts.map((acct) => (
@@ -74,12 +75,12 @@ export default function BottomAccountDrawer({
             }}
           >
             <Image source={{ uri: acct.avatarUri }} style={styles.avatar} />
-            <Text style={styles.accountName}>{acct.name}</Text>
+            <Text style={[styles.accountName, { color: colors.text }]}>{acct.name}</Text>
           </TouchableOpacity>
         ))}
 
         {/* Divider */}
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         {/* Sign in with new account */}
         <TouchableOpacity
@@ -89,8 +90,8 @@ export default function BottomAccountDrawer({
             onClose();
           }}
         >
-          <Ionicons name="add-circle-outline" size={24} color="#333" />
-          <Text style={styles.newAccountText}>Sign in with another account</Text>
+          <Ionicons name="add-circle-outline" size={24} color={colors.text} />
+          <Text style={[styles.newAccountText, { color: colors.text }]}>Sign in with another account</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -98,6 +99,7 @@ export default function BottomAccountDrawer({
 }
 
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../theme/ThemeContext";
 
 const styles = StyleSheet.create({
   wrapper: {
