@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatTime } from '../../lib/formatTime';
 import { supabase } from '../../lib/supabase';
-import DoubleTap from 'react-native-double-tap';
 
 interface Message {
   id: string;
@@ -25,29 +25,80 @@ interface Message {
 
 const CURRENT_USER_ID = 'demo-user'; // replace with your auth user id
 
+interface DoubleTapProps {
+  children: React.ReactNode;
+  doubleTap: () => void;
+  delay?: number; // in ms, optional, default 300
+}
+
+// Local DoubleTap component, not exported
+const DoubleTap: React.FC<DoubleTapProps> = ({ children, doubleTap, delay = 300 }) => {
+  const lastTap = useRef<number>(0);
+
+  const handleTap = () => {
+    const now = Date.now();
+    if (lastTap.current && now - lastTap.current < delay) {
+      doubleTap();
+    }
+    lastTap.current = now;
+  };
+
+  return (
+    <TouchableWithoutFeedback onPress={handleTap}>
+      {children}
+    </TouchableWithoutFeedback>
+  );
+};
+
 export default function ChatDetail() {
   const router = useRouter();
   const { chatId } = useLocalSearchParams<{ chatId: string }>();
   const [chatName, setChatName] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [demoMessages, setDemoMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
+  const isDemoChat = chatId?.startsWith('example-chat');
+
   useEffect(() => {
-    fetchMessages();
-    fetchChat();
-    const channel = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
-        payload => {
-          setMessages(prev => [...prev, payload.new as Message]);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    if (isDemoChat) {
+      // Provide example messages for the demo chat
+      setChatName('Alice, Bob (Example)');
+      setDemoMessages([
+        {
+          id: 'demo-1',
+          chat_id: chatId!,
+          sender_id: 'friend1',
+          content: 'Hey, this is a demo chat!',
+          created_at: new Date().toISOString(),
+          reaction: null,
+        },
+        {
+          id: 'demo-2',
+          chat_id: chatId!,
+          sender_id: CURRENT_USER_ID,
+          content: 'Cool! Try sending a message 👇',
+          created_at: new Date().toISOString(),
+          reaction: null,
+        },
+      ]);
+    } else {
+      fetchMessages();
+      fetchChat();
+      const channel = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
+          payload => {
+            setMessages(prev => [...prev, payload.new as Message]);
+          }
+        )
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [chatId]);
 
   async function fetchMessages() {
@@ -70,6 +121,22 @@ export default function ChatDetail() {
 
   async function sendMessage() {
     if (!input.trim()) return;
+    if (isDemoChat) {
+      setDemoMessages(prev => [
+        ...prev,
+        {
+          id: 'demo-' + Math.random().toString(36).slice(2, 8),
+          chat_id: chatId!,
+          sender_id: CURRENT_USER_ID,
+          content: input.trim(),
+          created_at: new Date().toISOString(),
+          reaction: null,
+        },
+      ]);
+      setInput('');
+      return;
+    }
+    // Normal Supabase logic
     await supabase.from('messages').insert({
       chat_id: chatId,
       sender_id: CURRENT_USER_ID,
@@ -79,28 +146,38 @@ export default function ChatDetail() {
   }
 
   async function addReaction(messageId: string, reaction: string | null) {
-    await supabase
-      .from('messages')
-      .update({ reaction })
-      .eq('id', messageId);
+    if (isDemoChat) {
+      setDemoMessages(prev =>
+        prev.map(msg =>
+          msg.id === messageId ? { ...msg, reaction } : msg
+        )
+      );
+    } else {
+      await supabase
+        .from('messages')
+        .update({ reaction })
+        .eq('id', messageId);
+    }
   }
+
 
   const toggleReaction = async (messageId: string, currentReaction: string | null) => {
     const newReaction = currentReaction === '❤️' ? null : '❤️';
     await addReaction(messageId, newReaction);
-
-    // Optimistically update the local state
-    setMessages(prevMessages =>
-      prevMessages.map(msg =>
-        msg.id === messageId ? { ...msg, reaction: newReaction } : msg
-      )
-    );
+    if (!isDemoChat) {
+      setMessages(prevMessages =>
+        prevMessages.map(msg =>
+          msg.id === messageId ? { ...msg, reaction: newReaction } : msg
+        )
+      );
+    }
+    // For demo chats, already updated in addReaction
   };
 
   const renderItem = ({ item }: { item: Message }) => (
     <DoubleTap
       key={item.id}
-      doubleTap={() => toggleReaction(item.id, item.reaction)}
+      doubleTap={() => toggleReaction(item.id, item.reaction ?? null)}
     >
       <View
         style={[styles.message, item.sender_id === CURRENT_USER_ID ? styles.me : styles.them]}
@@ -128,7 +205,7 @@ export default function ChatDetail() {
         </View>
 
         <FlatList
-          data={messages}
+          data={isDemoChat ? demoMessages : messages}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}

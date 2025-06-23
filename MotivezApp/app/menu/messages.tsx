@@ -48,7 +48,22 @@ export default function MessagesScreen() {
       .select('*')
       .eq('user_id', CURRENT_USER_ID)
       .order('updated_at', { ascending: false });
-    if (data) setChats(data as Chat[]);
+
+    // If nothing is in Supabase, show a hardcoded example chat
+    if (!data || data.length === 0) {
+      setChats([
+        {
+          id: 'example-chat-1',
+          name: 'Alice, Bob (Example)',
+          avatar_url: 'https://ui-avatars.com/api/?name=Alice+Bob',
+          last_message: 'This is an example chat! 👋',
+          updated_at: new Date().toISOString(),
+          unread: 1,
+        },
+      ]);
+    } else {
+      setChats(data as Chat[]);
+    }
     setLoading(false);
   }
 
@@ -67,22 +82,57 @@ export default function MessagesScreen() {
   };
 
   const createNewChat = async () => {
-    // Replace this with your actual logic to create a new chat
-    console.log('Creating new chat with friends:', selectedFriends);
+    if (selectedFriends.length === 0) {
+      alert('Select at least one friend!');
+      return;
+    }
+
+    // Compose a chat name
+    const selectedNames = friends
+      .filter(f => selectedFriends.includes(f.id))
+      .map(f => f.name);
+    const chatName = [CURRENT_USER_ID, ...selectedNames].join(', ');
+
+    // Try Supabase insert (will fail if table not set up)
+    let chatId: string;
+    try {
+      const { data: chat, error } = await supabase
+        .from('chats')
+        .insert([
+          {
+            name: chatName,
+            user_id: CURRENT_USER_ID,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error || !chat) throw new Error(error?.message || 'No chat created');
+      chatId = chat.id;
+      fetchChats();
+    } catch (e) {
+      // Fallback: just add locally if no Supabase
+      chatId = 'local-chat-' + Math.random().toString(36).substring(2, 10);
+      setChats((prev) => [
+        ...prev,
+        {
+          id: chatId,
+          name: chatName + ' (Local)',
+          avatar_url: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chatName),
+          last_message: 'Welcome to your new chat!',
+          updated_at: new Date().toISOString(),
+          unread: 0,
+        },
+      ]);
+    }
+
     setIsModalVisible(false);
-    // You might want to navigate to the new chat after creating it
+    setSelectedFriends([]);
+    // Navigate to the new chat (works for both real and fake)
+    router.push(`/menu/messages/${chatId}`);
   };
 
-  useEffect(() => {
-    // Fetch friends here (replace with your actual logic)
-    // Example:
-    // async function fetchFriends() {
-    //   const { data, error } = await supabase.from('friends').select('*').eq('user_id', CURRENT_USER_ID);
-    //   if (data) setFriends(data);
-    //   if (error) console.error('Error fetching friends:', error);
-    // }
-    // fetchFriends();
-  }, []);
+
 
   const renderChat = ({ item }: { item: Chat }) => (
     <TouchableOpacity
