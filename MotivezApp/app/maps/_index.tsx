@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from '../../lib/supabaseClient'
 import { fetchNearbyPlaces } from "@/lib/fetchNearbyPlaces";
 import { fetchPlacesByTextSearch } from "@/lib/fetchNearbyPlaces";
+import { useTheme } from "../context/ThemeContext";
 
 export default function MapScreen() {
   const [region, setRegion] = useState<{
@@ -31,6 +32,9 @@ export default function MapScreen() {
   const searchPanelAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const [activeSearchLabel, setActiveSearchLabel] = useState<string | null>(null);
+
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
 
 
   const panelTranslateY = searchPanelAnim.interpolate({
@@ -559,7 +563,7 @@ export default function MapScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) => StyleSheet.create({
   map: {
     flex: 1,
   },
@@ -589,7 +593,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#ffffff",
+    backgroundColor: darkMode ? "#333" : "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -608,7 +612,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   bottomPanel: {
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? "#181818" : "#fff",
     width: "100%",
     paddingHorizontal: 20,
     paddingBottom: 5,
@@ -631,7 +635,7 @@ const styles = StyleSheet.create({
   bottomSearchInput: {
     flex: 1,
     fontSize: 20,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
   currentLocationButton: {
     position: "absolute",
@@ -640,7 +644,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? "#333" : "#fff",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -697,14 +701,14 @@ const styles = StyleSheet.create({
   fakeSearchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: darkMode ? "#333" : "#f0f0f0",
     borderRadius: 16,
     padding: 14,
     marginTop: 10,
   },
   fakeSearchText: {
     fontSize: 16,
-    color: "#888",
+    color: darkMode ? "#aaa" : "#888",
   },
   
   modalOverlay: {
@@ -721,7 +725,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? "#181818" : "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -743,13 +747,13 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: darkMode ? "#333" : "#f5f5f5",
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: darkMode ? "#555" : "#e0e0e0",
   },
   searchIcon: {
     marginRight: 10,
@@ -757,13 +761,13 @@ const styles = StyleSheet.create({
   modalSearchInput: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
   categoryTitle: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 16,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
   categoryGrid: {
     flexDirection: "row",
@@ -773,7 +777,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     width: "48%",
     aspectRatio: 2.5,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: darkMode ? "#333" : "#f8f8f8",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -785,7 +789,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     borderWidth: 1,
-    borderColor: "#f0f0f0",
+    borderColor: darkMode ? "#444" : "#f0f0f0",
     position: "relative",
   },
   categoryButtonSelected: {
@@ -799,7 +803,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     textAlign: "center",
-    color: "#555",
+    color: darkMode ? "#ccc" : "#555",
     fontWeight: "500",
   },
   categoryLabelSelected: {
@@ -837,7 +841,7 @@ const styles = StyleSheet.create({
   activeCategoryChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? "#333" : "#fff",
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -854,7 +858,7 @@ const styles = StyleSheet.create({
   },
   activeCategoryLabel: {
     fontSize: 12,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
     fontWeight: "500",
     marginRight: 4,
   },
@@ -863,7 +867,7 @@ const styles = StyleSheet.create({
   },
   activeLabel: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#333' : '#fff',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
@@ -880,7 +884,7 @@ const styles = StyleSheet.create({
   activeLabelText: {
     fontSize: 14,
     marginRight: 6,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
   },
   removeText: {
     fontSize: 14,
@@ -889,7 +893,7 @@ const styles = StyleSheet.create({
   searchPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#333' : '#fff',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -902,7 +906,7 @@ const styles = StyleSheet.create({
   },
   searchPillText: {
     fontSize: 14,
-    color: '#000',
+    color: darkMode ? '#fff' : '#000',
     fontWeight: '600',
     marginRight: 6,
   },
