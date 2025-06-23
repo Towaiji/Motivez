@@ -9,7 +9,7 @@ Motivez is a **mobile app** designed to help users find something to do when the
 - **Real-Time Event Listings** – Find limited-time events, pop-up activities, and trending spots.
 - **Social Planning** – Invite friends and plan group outings.
 - **Smart Filters** – Filter activities based on budget, category, and time availability.
-- **Dark Mode** – Toggle a comfortable dark theme from the settings screen.
+- **Dark Mode** – Toggle a comfortable dark theme from the settings screen, now applied to the menu drawer and account switcher.
 - **Motivez Moments (New Feature)** – Create group chats for planned activities, share memories, and relive fun experiences.
 
 ---
