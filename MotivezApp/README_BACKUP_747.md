@@ -35,26 +35,10 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Supabase Messaging Setup
+<<<<<<< HEAD
 
-1. Create a project at [Supabase](https://supabase.com/) and note the project URL and anon key.
-2. Create two tables in your Supabase database:
-   - **chats**: `id` UUID primary key, `user_id` text, `name` text, `avatar_url` text, `last_message` text, `updated_at` timestamp, `unread` integer.
-   - **messages**: `id` UUID primary key, `chat_id` UUID reference to `chats.id`, `sender_id` text, `content` text, `created_at` timestamp default `now()`, `reaction` text.
-3. Add your credentials to a `.env` file in this directory:
-
-```bash
-EXPO_PUBLIC_SUPABASE_URL=<your-supabase-url>
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-```
-
-4. Install dependencies and run the project:
-
-```bash
-npm install
-npx expo start
-```
-
+=======
+>>>>>>> parent of a944e08 (Add Supabase messaging)
 ## Learn more
 
 To learn more about developing your project with Expo, look at the following resources:

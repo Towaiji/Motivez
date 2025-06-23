@@ -46,7 +46,9 @@ export default {
       typedRoutes: true
     },
     extra: {
-      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     }
   }
 };
