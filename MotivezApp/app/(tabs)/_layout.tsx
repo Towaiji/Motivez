@@ -5,10 +5,14 @@ import CustomAnimatedTabBar from "../../components/CustomAnimatedTabBar";
 import { useState } from "react";
 import MenuDrawer from "../../components/MenuDrawer";
 import { useScroll } from "../context/ScrollContext";
+import { useDevAuth } from "../../hooks/useDevAuth";
 
 export default function TabsLayout() {
   const [menuVisible, setMenuVisible] = useState(false);
   const { scrollY } = useScroll();
+  
+  useDevAuth(); // This will log in the test user during dev
+
 
   // Tab bar animation with slower timing
   const tabBarTranslateY = scrollY.interpolate({
