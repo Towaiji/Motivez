@@ -21,6 +21,7 @@ import CarouselRow from "../../components/CarouselRow";
 import { useRouter } from "expo-router";
 import { useScroll } from "../context/ScrollContext";
 import Slider from '@react-native-community/slider';
+import { useTheme } from "../context/ThemeContext";
 
 // 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
@@ -121,6 +122,8 @@ export default function Motives() {
   });
   const router = useRouter();
   const { scrollY } = useScroll();
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
   const lastScrollY = useRef(0);
   const scrollDirection = useRef<'up' | 'down'>('up');
   const [distance, setDistance] = useState(8); // Changed from 5 miles to 8 km
@@ -469,10 +472,11 @@ export default function Motives() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) =>
+  StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f6f8",
+    backgroundColor: darkMode ? '#000' : '#f4f6f8',
   },
   fixedHeader: {
     position: 'absolute',
@@ -490,7 +494,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#000",
+    color: darkMode ? '#fff' : '#000',
     paddingHorizontal: 10,
   },
   searchBar: {
@@ -498,7 +502,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f1f1f1",
+    backgroundColor: darkMode ? '#181818' : '#f1f1f1',
     borderRadius: 25,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -508,7 +512,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: darkMode ? '#eee' : '#333',
   },
   toggleContainer: {
     flexDirection: "row",
@@ -524,17 +528,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#e91e63",
   },
   toggleText: {
-    color: "rgba(0,0,0,0.5)",
+    color: darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
     fontWeight: "500",
     fontSize: 14,
   },
   activeText: {
-    color: "#000",
+    color: darkMode ? '#fff' : '#000',
     fontWeight: "600",
   },
   card: {
     marginBottom: 20,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? '#181818' : '#fff',
     borderRadius: 12,
     padding: 12,
     shadowColor: "#000",
@@ -555,7 +559,7 @@ const styles = StyleSheet.create({
   },
   user: {
     fontSize: 14,
-    color: "#666",
+    color: darkMode ? '#aaa' : '#666',
   },
   mapButton: {
     paddingVertical: 8,
@@ -567,7 +571,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   stickyTabsContainer: {
-    backgroundColor: "#efe7ee",
+    backgroundColor: darkMode ? '#1a1a1a' : '#efe7ee',
     paddingVertical: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: "#ccc",
@@ -586,7 +590,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: height * 0.28,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? '#181818' : '#fff',
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingTop: 100,
@@ -609,7 +613,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#333",
+    color: darkMode ? '#eee' : '#333',
     textAlign: "center",
   },
   suggestedFriendsContainer: {
@@ -620,12 +624,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
   },
   suggestedFriendCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -654,17 +658,17 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     marginBottom: 2,
   },
   friendUsername: {
     fontSize: 14,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
     marginBottom: 4,
   },
   mutualFriends: {
     fontSize: 13,
-    color: '#888',
+    color: darkMode ? '#bbb' : '#888',
     fontWeight: '500',
   },
   friendActions: {
@@ -693,7 +697,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -713,7 +717,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#000' : '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -733,7 +737,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
   },
   closeButton: {
     padding: 5,
@@ -744,7 +748,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     marginBottom: 10,
   },
   filterOptions: {
@@ -756,16 +760,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: darkMode ? '#333' : '#f1f1f1',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: darkMode ? '#444' : '#ddd',
   },
   filterOptionSelected: {
     backgroundColor: '#e91e63',
     borderColor: '#e91e63',
   },
   filterOptionText: {
-    color: '#666',
+    color: darkMode ? '#ccc' : '#666',
     fontSize: 14,
   },
   filterOptionTextSelected: {
@@ -806,6 +810,6 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 12,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
   },
 });
