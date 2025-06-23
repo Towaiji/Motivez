@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, Scr
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useTheme } from '../app/context/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -124,6 +125,8 @@ const cards: Card[] = [
 ];
 
 const DeckSwiper: React.FC = () => {
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
   const swiperRef = useRef<Swiper<Card>>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
@@ -448,7 +451,7 @@ const DeckSwiper: React.FC = () => {
   );
 }; 
 
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -460,7 +463,7 @@ const styles = StyleSheet.create({
     width: width * 0.85,
     height: height * 0.6,
     borderRadius: 30,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: darkMode ? '#181818' : '#f2f2f2',
     padding: 20,
     marginTop: -55, //adjusts the heigh of the card
     justifyContent: 'flex-start',
@@ -478,11 +481,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: darkMode ? '#fff' : '#000',
   },
 
   details: {
     fontSize: 16,
-    color: '#555',
+    color: darkMode ? '#ccc' : '#555',
     marginBottom: 5,
   },
 
@@ -510,7 +514,9 @@ const styles = StyleSheet.create({
   },
 
   vibePill: {
-    backgroundColor: 'rgba(100, 150, 240, 0.2)', // light pastel blue
+    backgroundColor: darkMode
+      ? 'rgba(100, 150, 240, 0.3)'
+      : 'rgba(100, 150, 240, 0.2)', // light pastel blue
     borderRadius: 12,
     paddingVertical: 4,
     paddingHorizontal: 12,
@@ -520,7 +526,7 @@ const styles = StyleSheet.create({
 
   vibePillText: {
     fontSize: 12,
-    color: '#264653', // dark teal blue
+    color: darkMode ? '#90caf9' : '#264653', // dark teal blue
     fontWeight: '600',
   },
 
@@ -551,13 +557,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: darkMode ? '#eee' : '#1a1a1a',
     marginBottom: 10,
   },
 
   emptySubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -580,7 +586,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#fff',
-    backgroundColor: '#eee',
+    backgroundColor: darkMode ? '#333' : '#eee',
   },
 
   avatarImage: {
@@ -591,14 +597,14 @@ const styles = StyleSheet.create({
 
   friendText: {
     fontSize: 14,
-    color: '#555',
+    color: darkMode ? '#ccc' : '#555',
     fontWeight: '500',
   },
 
   // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#000' : '#fff',
   },
 
   modalHeader: {
@@ -607,7 +613,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 50,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: darkMode ? '#333' : '#eee',
   },
 
   closeButton: {
@@ -631,13 +637,13 @@ const styles = StyleSheet.create({
 
   modalLocationText: {
     fontSize: 16,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     fontWeight: '500',
   },
 
   modalDistanceText: {
     fontSize: 16,
-    color: '#666',
+    color: darkMode ? '#ccc' : '#666',
   },
 
   ratingSection: {
@@ -660,13 +666,13 @@ const styles = StyleSheet.create({
 
   reviewsText: {
     fontSize: 14,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
   },
 
   descriptionText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
+    color: darkMode ? '#ddd' : '#333',
     marginBottom: 20,
   },
 
@@ -680,14 +686,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: darkMode ? '#222' : '#f8f9fa',
     borderRadius: 12,
     marginHorizontal: 5,
   },
 
   infoLabel: {
     fontSize: 12,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
     marginTop: 5,
     marginBottom: 2,
   },
@@ -695,7 +701,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     textAlign: 'center',
   },
 
@@ -703,7 +709,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
   },
 
   hoursSection: {
@@ -712,7 +718,7 @@ const styles = StyleSheet.create({
 
   hoursText: {
     fontSize: 14,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
     lineHeight: 20,
   },
 
@@ -726,7 +732,9 @@ const styles = StyleSheet.create({
   },
 
   modalVibePill: {
-    backgroundColor: 'rgba(100, 150, 240, 0.2)',
+    backgroundColor: darkMode
+      ? 'rgba(100, 150, 240, 0.3)'
+      : 'rgba(100, 150, 240, 0.2)',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -736,7 +744,7 @@ const styles = StyleSheet.create({
 
   modalVibePillText: {
     fontSize: 14,
-    color: '#264653',
+    color: darkMode ? '#90caf9' : '#264653',
     fontWeight: '600',
   },
 
@@ -752,7 +760,7 @@ const styles = StyleSheet.create({
 
   featureText: {
     fontSize: 14,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     marginLeft: 8,
   },
 
@@ -780,7 +788,7 @@ const styles = StyleSheet.create({
 
   modalFriendName: {
     fontSize: 12,
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     fontWeight: '500',
   },
 
