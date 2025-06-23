@@ -11,18 +11,17 @@ export default {
     newArchEnabled: true,
     ios: {
       config: {
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
       },
       supportsTablet: true
     },
     android: {
       adaptiveIcon: {
-        //foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
       config: {
         googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY
+          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
         }
       }
     },
@@ -47,7 +46,7 @@ export default {
       typedRoutes: true
     },
     extra: {
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
     }
   }
 };

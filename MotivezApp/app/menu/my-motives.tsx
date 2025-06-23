@@ -12,6 +12,8 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from "../../lib/supabaseClient";
+
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -53,37 +55,86 @@ const dummyMotives = [
 
 export default function MyMotivesScreen() {
   const router = useRouter();
-  const [motives, setMotives] = useState<typeof dummyMotives>([]);
+  type Motive = {
+    id: string;
+    title: string;
+    description?: string;
+    created_at?: string;
+    category?: string;
+    image_url?: string;
+    privacy?: string;
+    attendees?: number;
+  };
+  
+  const [motives, setMotives] = useState<Motive[]>([]);
+  
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate API fetch delay
-    setTimeout(() => {
-      setMotives(dummyMotives);
-      setLoading(false);
-    }, 600);
-  }, []);
 
-  const renderMotive = ({ item }: { item: typeof dummyMotives[0] }) => (
+  useEffect(() => {
+    const fetchMyMotives = async () => {
+      setLoading(true);
+    
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error("User fetch error:", userError);
+        setLoading(false);
+        return;
+      }
+      
+    
+      const { data, error } = await supabase
+        .from("motives")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+    
+        if (error) {
+          console.error("Motives fetch error:", error);
+        } else {
+          console.log("Fetched motives:", data); // ✅ Add this
+          setMotives(data);
+        }
+    
+      setLoading(false);
+    };    
+  
+    fetchMyMotives();
+  }, []);
+  
+  
+
+  const renderMotive = ({ item }: { item: Motive }) => (
     <View style={styles.motiveCard}>
-      <Image source={{ uri: item.image }} style={styles.motiveImage} />
+      <Image
+        source={{ uri: item.image_url || "https://picsum.photos/400/240" }}
+        style={styles.motiveImage}
+      />
       <View style={styles.motiveInfo}>
         <Text style={styles.motiveTitle}>{item.title}</Text>
-        <Text style={styles.motiveDate}>Date: {item.date}</Text>
+        <Text style={styles.motiveDate}>
+          Date: {item.created_at ? item.created_at.split("T")[0] : "Unknown"}
+        </Text>
         <Text style={styles.motivePrivacy}>
           <Ionicons
-            name={item.privacy === 'Public' ? 'earth' : 'lock-closed'}
+            name={item.privacy === "Friends" ? "lock-closed" : "earth"}
             size={15}
-            color={item.privacy === 'Public' ? '#4CAF50' : '#e91e63'}
-          />{' '}
-          {item.privacy}
+            color={item.privacy === "Friends" ? "#e91e63" : "#4CAF50"}
+          />{" "}
+          {item.privacy || "Public"}
         </Text>
         <Text style={styles.motiveAttendees}>
-          <Ionicons name="people-outline" size={15} color="#007AFF" /> {item.attendees} Attending
+          <Ionicons name="people-outline" size={15} color="#007AFF" />{" "}
+          {item.attendees || 0} Attending
         </Text>
       </View>
     </View>
   );
+  
 
   return (
     <>

@@ -14,6 +14,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../../components/ProgressBar';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from "../../lib/supabaseClient";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+
 
 export default function CreateMotiveScreen() {
   // form state
@@ -54,22 +58,54 @@ export default function CreateMotiveScreen() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!image || !location || !price || !selectedCategory) {
-      return Alert.alert('Missing Info', 'Please fill out all required fields and choose a vibe.');
+  const router = useRouter();
+
+  const handleSubmit = async () => {
+    if (!title || !location || !price || !selectedCategory) {
+      return Alert.alert("Missing Info", "Please fill out all required fields.");
     }
-    // your submit logic here...
-    console.log({
-      image,
-      location,
-      price,
-      privacy: modeSelected === 'public' ? 'Public' : 'Friends Only',
-      description,
-      category: selectedCategory,
-      requiresApproval,
-    });
-    Alert.alert('Success', 'Motive posted!');
+  
+    // Ask for location permission
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      return Alert.alert("Permission Denied", "Enable location to post motive.");
+    }
+  
+    // Get current location
+    const loc = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = loc.coords;
+  
+    // Get logged-in user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return Alert.alert("Error", "Unable to identify user.");
+    }
+  
+    // Insert into Supabase
+    const { error } = await supabase.from("motives").insert([
+      {
+        user_id: user.id,
+        title,
+        description,
+        category: selectedCategory,
+        latitude,
+        longitude,
+        image_url: image || null,
+        privacy: modeSelected === 'public' ? 'Public' : 'Friends',
+      }
+    ]);
+    
+  
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return Alert.alert("Error", "Failed to post motive.");
+    }
+  
+    Alert.alert("Success", "Motive posted successfully!");
+    router.push("/(tabs)/motives"); 
+    //*You can redirect to homepage or "My Motivez"}
   };
+  
 
   const steps = ['Photo', 'Details', 'Preview'];
 
