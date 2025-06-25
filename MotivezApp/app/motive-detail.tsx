@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from './context/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,6 +21,8 @@ export default function MotiveDetail() {
   const { id, title, description, image } = useLocalSearchParams();
   const router = useRouter();
   const [isLiked, setIsLiked] = useState(false);
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
 
   // Sample location (New York City)
   const initialRegion = {
@@ -53,7 +56,11 @@ export default function MotiveDetail() {
           style={styles.backButton}
           onPress={handleBack}
         >
-          <Ionicons name="chevron-back" size={28} color="#333" />
+          <Ionicons
+            name="chevron-back"
+            size={28}
+            color={darkMode ? '#eee' : '#333'}
+          />
         </TouchableOpacity>
         
         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -64,10 +71,10 @@ export default function MotiveDetail() {
           style={styles.heartButton}
           onPress={handleLike}
         >
-          <Ionicons 
-            name={isLiked ? "heart" : "heart-outline"} 
-            size={24} 
-            color={isLiked ? "#ff3b30" : "#333"} 
+          <Ionicons
+            name={isLiked ? 'heart' : 'heart-outline'}
+            size={24}
+            color={isLiked ? '#ff3b30' : darkMode ? '#eee' : '#333'}
           />
         </TouchableOpacity>
       </View>
@@ -176,10 +183,10 @@ export default function MotiveDetail() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#000' : '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -188,20 +195,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: darkMode ? '#333' : '#f0f0f0',
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: darkMode ? '#333' : '#f8f9fa',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 20,
@@ -210,7 +217,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: darkMode ? '#333' : '#f8f9fa',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -234,52 +241,52 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#000' : '#fff',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#000',
+    color: darkMode ? '#fff' : '#000',
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
     lineHeight: 24,
     marginBottom: 20,
   },
   detailsContainer: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: darkMode ? '#181818' : '#f8f8f8',
     borderRadius: 12,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#000',
+    color: darkMode ? '#fff' : '#000',
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: darkMode ? '#333' : '#eee',
   },
   detailLabel: {
     fontSize: 16,
-    color: '#666',
+    color: darkMode ? '#aaa' : '#666',
   },
   detailValue: {
     fontSize: 16,
-    color: '#000',
+    color: darkMode ? '#fff' : '#000',
     fontWeight: '500',
   },
   aboutContainer: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: darkMode ? '#181818' : '#f8f8f8',
     borderRadius: 12,
   },
   aboutContent: {
@@ -287,7 +294,7 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     fontSize: 16,
-    color: '#333',
+    color: darkMode ? '#ddd' : '#333',
     lineHeight: 24,
     marginBottom: 15,
   },
@@ -301,7 +308,7 @@ const styles = StyleSheet.create({
   },
   highlightText: {
     fontSize: 15,
-    color: '#333',
+    color: darkMode ? '#ddd' : '#333',
     marginLeft: 10,
   },
   mapContainer: {
@@ -329,7 +336,7 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     marginBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',

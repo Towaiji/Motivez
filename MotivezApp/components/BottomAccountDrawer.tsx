@@ -10,6 +10,8 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../app/context/ThemeContext";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -24,6 +26,8 @@ export default function BottomAccountDrawer({
   onClose,
   accounts,
 }: BottomAccountDrawerProps) {
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
   const [mounted, setMounted] = useState(isVisible);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -89,7 +93,11 @@ export default function BottomAccountDrawer({
             onClose();
           }}
         >
-          <Ionicons name="add-circle-outline" size={24} color="#333" />
+          <Ionicons
+            name="add-circle-outline"
+            size={24}
+            color={darkMode ? "#eee" : "#333"}
+          />
           <Text style={styles.newAccountText}>Sign in with another account</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -97,9 +105,7 @@ export default function BottomAccountDrawer({
   );
 }
 
-import { Ionicons } from "@expo/vector-icons";
-
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) => StyleSheet.create({
   wrapper: {
     position: "absolute",
     top: 0,
@@ -116,7 +122,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? "#181818" : "#fff",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingHorizontal: 20,
@@ -133,7 +139,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: 40,
     height: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: darkMode ? "#555" : "#ccc",
     borderRadius: 2.5,
     marginBottom: 10,
   },
@@ -141,7 +147,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 16,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
   accountRow: {
     flexDirection: "row",
@@ -156,11 +162,11 @@ const styles = StyleSheet.create({
   },
   accountName: {
     fontSize: 16,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
   divider: {
     height: 1,
-    backgroundColor: "#ececec",
+    backgroundColor: darkMode ? "#333" : "#ececec",
     marginVertical: 16,
   },
   newAccountRow: {
@@ -170,6 +176,6 @@ const styles = StyleSheet.create({
   newAccountText: {
     marginLeft: 10,
     fontSize: 16,
-    color: "#333",
+    color: darkMode ? "#eee" : "#333",
   },
 });

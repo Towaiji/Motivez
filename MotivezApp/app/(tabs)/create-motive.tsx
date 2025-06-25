@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabaseClient";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
+import { useTheme } from "../context/ThemeContext";
 
 
 export default function CreateMotiveScreen() {
@@ -59,6 +60,8 @@ export default function CreateMotiveScreen() {
   };
 
   const router = useRouter();
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
 
   const handleSubmit = async () => {
     if (!title || !location || !price || !selectedCategory) {
@@ -386,23 +389,24 @@ export default function CreateMotiveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#f4f6f8', paddingTop: 50 },
+const getStyles = (darkMode: boolean) =>
+  StyleSheet.create({
+  safeContainer: { flex: 1, backgroundColor: darkMode ? '#000' : '#f4f6f8', paddingTop: 50 },
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
   },
   stepWrapper: { alignItems: 'center' },
   stepCircle: {
     width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#ddd', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: darkMode ? '#333' : '#ddd', justifyContent: 'center', alignItems: 'center',
   },
   stepCircleActive: { backgroundColor: '#e91e63' },
-  stepNumber: { color: '#444', fontSize: 12 },
+  stepNumber: { color: darkMode ? '#ccc' : '#444', fontSize: 12 },
   stepNumberActive: { color: '#fff', fontWeight: 'bold' },
-  stepLabel: { fontSize: 10, color: '#666', marginTop: 2 },
+  stepLabel: { fontSize: 10, color: darkMode ? '#aaa' : '#666', marginTop: 2 },
   stepLabelActive: { color: '#e91e63', fontWeight: '600' },
 
   headerRow: {
@@ -410,7 +414,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingBottom: 4,
   },
   headerTitle: {
-    fontSize: 24, fontWeight: 'bold', color: '#333',
+    fontSize: 24, fontWeight: 'bold', color: darkMode ? '#eee' : '#333',
     marginLeft: 10,
   },
 
@@ -418,16 +422,16 @@ const styles = StyleSheet.create({
     padding: 20, flexGrow: 1, alignItems: 'center',
   },
   imagePicker: {
-    width: '100%', height: 200, backgroundColor: '#ddd',
+    width: '100%', height: 200, backgroundColor: darkMode ? '#333' : '#ddd',
     borderRadius: 12, justifyContent: 'center',
     alignItems: 'center', overflow: 'hidden', marginBottom: 20,
   },
-  imagePlaceholder: { color: '#666' },
+  imagePlaceholder: { color: darkMode ? '#aaa' : '#666' },
   image: { width: '100%', height: '100%' },
 
   input: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
@@ -438,7 +442,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? '#eee' : '#333',
   },
   chipRow: {
     width: '100%',
@@ -446,7 +450,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   chip: {
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? '#181818' : '#fff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -456,7 +460,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e91e63',
   },
   chipText: {
-    color: '#444',
+    color: darkMode ? '#ccc' : '#444',
     fontSize: 14,
   },
   chipTextSelected: {
@@ -468,13 +472,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     marginBottom: 20,
   },
-  label: { marginHorizontal: 8, color: '#444' },
+  label: { marginHorizontal: 8, color: darkMode ? '#ccc' : '#444' },
 
   preview: { alignItems: 'flex-start', width: '100%' },
   previewImage: {
     width: '100%', height: 200, borderRadius: 12, marginBottom: 15,
   },
-  previewText: { fontSize: 16, color: '#333', marginBottom: 6 },
+  previewText: { fontSize: 16, color: darkMode ? '#eee' : '#333', marginBottom: 6 },
   bold: { fontWeight: '600' },
 
   navRow: {
@@ -483,9 +487,9 @@ const styles = StyleSheet.create({
   },
   navBtn: {
     paddingVertical: 10, paddingHorizontal: 20,
-    borderRadius: 8, backgroundColor: '#ddd',
+    borderRadius: 8, backgroundColor: darkMode ? '#333' : '#ddd',
   },
-  navText: { fontSize: 16, color: '#444' },
+  navText: { fontSize: 16, color: darkMode ? '#ccc' : '#444' },
   nextBtn: { backgroundColor: '#e91e63' },
   nextText: { color: '#fff' },
   submitBtn: { backgroundColor: '#4CAF50' },
