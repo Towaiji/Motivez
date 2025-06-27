@@ -1,9 +1,11 @@
 import { transform } from '@babel/core';
-import React, { useState, useRef, JSX } from 'react';
+import React, { useState, useRef, JSX, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,8 +31,8 @@ interface Card {
   friends: Friend[];
 }
 
-// Enhanced mock data with more details
-const cards: Card[] = [
+// fallback if API fails
+const defaultCards: Card[] = [
   {
     id: '1',
     title: 'Axe Throwing',
@@ -125,6 +127,7 @@ const cards: Card[] = [
 
 const DeckSwiper: React.FC = () => {
   const swiperRef = useRef<Swiper<Card>>(null);
+  const [cards, setCards] = useState<Card[]>(defaultCards);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
 
@@ -157,6 +160,48 @@ const DeckSwiper: React.FC = () => {
     setDetailModalVisible(false);
     setSelectedCard(null);
   };
+
+  useEffect(() => {
+    const loadPlaces = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.warn('Location permission not granted');
+          return;
+        }
+
+        const loc = await Location.getCurrentPositionAsync({});
+        const results = await fetchNearbyPlaces(
+          loc.coords.latitude,
+          loc.coords.longitude
+        );
+
+        if (results && results.length > 0) {
+          const mapped = results.map((place: any): Card => ({
+            id: place.place_id || place.id?.toString() || Math.random().toString(),
+            title: place.name,
+            location: place.vicinity || place.formatted_address || 'Unknown',
+            distance: '',
+            vibes: place.types || [],
+            description: place.types ? place.types.join(', ') : '',
+            price: 'N/A',
+            duration: 'N/A',
+            rating: place.rating || 0,
+            reviews: place.user_ratings_total || 0,
+            openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
+            features: [],
+            friends: [],
+          }));
+          setCards(mapped);
+        }
+      } catch (err) {
+        console.error('Error loading nearby places', err);
+      }
+    };
+
+    loadPlaces();
+  }, []);
+
 
   const renderStars = (rating: number): JSX.Element[] => {
     const stars: JSX.Element[] = [];
