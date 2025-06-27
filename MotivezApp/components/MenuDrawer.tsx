@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomAccountDrawer from "./BottomAccountDrawer";
+import { useAuth } from "../app/context/AuthContext";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -36,6 +37,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
+  const { signOut } = useAuth();
 
   useLayoutEffect(() => {
     if (isVisible) {
@@ -283,9 +285,9 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             {/* ==== Log Out ==== */}
             <TouchableOpacity
               style={[styles.drawerItemRow, styles.logoutRow]}
-              onPress={() => {
-                /* Perform logout logic here */
-                console.log("Logging out...");
+              onPress={async () => {
+                await signOut();
+                onClose();
               }}
             >
               <Ionicons name="log-out-outline" size={22} color="#e53935" />

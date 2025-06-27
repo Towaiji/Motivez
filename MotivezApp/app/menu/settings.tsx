@@ -11,17 +11,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { signOut } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = () => {
+    // Confirm before logging out
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: () => console.log('Logged out') },
+      { text: 'Log Out', style: 'destructive', onPress: async () => { await signOut(); } },
     ]);
   };
 
