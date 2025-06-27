@@ -287,6 +287,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
               style={[styles.drawerItemRow, styles.logoutRow]}
               onPress={async () => {
                 await signOut();
+                router.replace("/login"); // Navigate to login after logout
                 onClose();
               }}
             >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase } from '../../lib/supabaseClient';
 
 const createdMotives = [
   { id: '1', image: 'https://picsum.photos/300/300?random=11' },
@@ -48,21 +47,6 @@ const itemSize = (screenWidth - gridSpacing * (numCols + 1)) / numCols;
 export default function Profile() {
   const router = useRouter();
   const [tab, setTab] = useState<'created' | 'attending' | 'friends'>('created');
-  const [profile, setProfile] = useState<{ name?: string; username?: string; avatar_url?: string; bio?: string }>({});
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('name, username, avatar_url, bio')
-        .eq('id', user.id)
-        .single();
-      if (!error && data) setProfile(data);
-    };
-    fetchProfile();
-  }, []);
 
   return (
     <>
@@ -76,12 +60,12 @@ export default function Profile() {
         {/* Profile Header */}
         <View style={styles.header}>
           <Image
-            source={{ uri: profile.avatar_url || 'https://i.pravatar.cc/150?u=' + (profile.username || 'user') }}
+            source={{ uri: 'https://i.pravatar.cc/150?u=motive_user' }}
             style={styles.avatar}
           />
           <View style={styles.info}>
-            <Text style={styles.username}>{profile.username ? `@${profile.username}` : profile.name || "My Account"}</Text>
-            <Text style={styles.bio}>{profile.bio || "Exploring new places, one motive at a time 🌍"}</Text>
+            <Text style={styles.username}>@motive_user</Text>
+            <Text style={styles.bio}>Exploring new places, one motive at a time 🌍</Text>
           </View>
         </View>
 

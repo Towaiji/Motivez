@@ -50,7 +50,7 @@ export default function SignUpScreen() {
     }
     Alert.alert(
       "Sign Up Successful",
-      "Account created successfully!"
+      "Account created"
     );
     router.replace("/login");
   };

@@ -24,7 +24,10 @@ export default function SettingsScreen() {
     // Confirm before logging out
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: async () => { await signOut(); } },
+      { text: 'Log Out', style: 'destructive', onPress: async () => { 
+        await signOut();
+        router.replace("/login"); // Navigate to login after logout
+      } },
     ]);
   };
 
