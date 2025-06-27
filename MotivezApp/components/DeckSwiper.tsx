@@ -29,6 +29,8 @@ interface Card {
   openHours: string;
   features: string[];
   friends: Friend[];
+  latitude: number;
+  longitude: number;
 }
 
 // fallback if API fails
@@ -51,6 +53,8 @@ const defaultCards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 0,
+    longitude: 0
   },
   {
     id: '2',
@@ -69,6 +73,8 @@ const defaultCards: Card[] = [
       { username: 'sara', avatar: { uri: 'https://randomuser.me/api/portraits/women/68.jpg' } },
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
+    latitude: 0,
+    longitude: 0
   },
   {
     id: '3',
@@ -86,6 +92,8 @@ const defaultCards: Card[] = [
     friends: [
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 0,
+    longitude: 0
   },
   {
     id: '4',
@@ -105,6 +113,8 @@ const defaultCards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 0,
+    longitude: 0
   },
   {
     id: '5',
@@ -122,6 +132,8 @@ const defaultCards: Card[] = [
     friends: [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
+    latitude: 0,
+    longitude: 0
   },
 ];
 
@@ -191,6 +203,8 @@ const DeckSwiper: React.FC = () => {
             openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
             features: [],
             friends: [],
+            latitude: place.geometry?.location?.lat || 43.65107,
+            longitude: place.geometry?.location?.lng || -79.347015,
           }));
           setCards(mapped);
         }
@@ -276,8 +290,8 @@ const DeckSwiper: React.FC = () => {
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
                 initialRegion={{
-                  latitude: 43.65107,       
-                  longitude: -79.347015,
+                  latitude: card.latitude,
+                  longitude: card.longitude,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
@@ -288,8 +302,8 @@ const DeckSwiper: React.FC = () => {
               >
                 <Marker
                   coordinate={{
-                    latitude: 43.65107,
-                    longitude: -79.347015,
+                    latitude: card.latitude,
+                    longitude: card.longitude,
                   }}
                   title="Activity Location"
                 />
@@ -466,8 +480,8 @@ const DeckSwiper: React.FC = () => {
                     provider={PROVIDER_GOOGLE}
                     style={styles.modalMap}
                     initialRegion={{
-                      latitude: 43.65107,       
-                      longitude: -79.347015,
+                      latitude: selectedCard.latitude,
+                      longitude: selectedCard.longitude,
                       latitudeDelta: 0.01,
                       longitudeDelta: 0.01,
                     }}
@@ -476,8 +490,8 @@ const DeckSwiper: React.FC = () => {
                   >
                     <Marker
                       coordinate={{
-                        latitude: 43.65107,
-                        longitude: -79.347015,
+                        latitude: selectedCard.latitude,
+                        longitude: selectedCard.longitude,
                       }}
                       title={selectedCard.title}
                       description={selectedCard.location}
