@@ -9,6 +9,21 @@ import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
 
 const { width, height } = Dimensions.get('window');
 
+// Helper to calculate distance between two coordinates in km
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 // Type definitions
 interface Friend {
   username: string;
@@ -189,23 +204,34 @@ const DeckSwiper: React.FC = () => {
         );
 
         if (results && results.length > 0) {
-          const mapped = results.map((place: any): Card => ({
-            id: place.place_id || place.id?.toString() || Math.random().toString(),
-            title: place.name,
-            location: place.vicinity || place.formatted_address || 'Unknown',
-            distance: '',
-            vibes: place.types || [],
-            description: place.types ? place.types.join(', ') : '',
-            price: 'N/A',
-            duration: 'N/A',
-            rating: place.rating || 0,
-            reviews: place.user_ratings_total || 0,
-            openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
-            features: [],
-            friends: [],
-            latitude: place.geometry?.location?.lat || 43.65107,
-            longitude: place.geometry?.location?.lng || -79.347015,
-          }));
+          const mapped = results.map((place: any): Card => {
+            const lat = place.geometry?.location?.lat || 43.65107;
+            const lng = place.geometry?.location?.lng || -79.347015;
+            const dist = getDistanceKm(
+              loc.coords.latitude,
+              loc.coords.longitude,
+              lat,
+              lng
+            ).toFixed(1);
+
+            return {
+              id: place.place_id || place.id?.toString() || Math.random().toString(),
+              title: place.name,
+              location: place.vicinity || place.formatted_address || 'Unknown',
+              distance: `${dist} km`,
+              vibes: place.types || [],
+              description: place.types ? place.types.join(', ') : '',
+              price: 'N/A',
+              duration: 'N/A',
+              rating: place.rating || 0,
+              reviews: place.user_ratings_total || 0,
+              openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
+              features: [],
+              friends: [],
+              latitude: lat,
+              longitude: lng,
+            };
+          });
           setCards(mapped);
         }
       } catch (err) {
