@@ -10,9 +10,6 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useAuth } from "../app/context/AuthContext";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -29,8 +26,6 @@ export default function BottomAccountDrawer({
 }: BottomAccountDrawerProps) {
   const [mounted, setMounted] = useState(isVisible);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const router = useRouter();
-  const { signOut } = useAuth();
 
   useEffect(() => {
     if (isVisible) {
@@ -89,10 +84,9 @@ export default function BottomAccountDrawer({
         {/* Sign in with new account */}
         <TouchableOpacity
           style={styles.newAccountRow}
-          onPress={async () => {
-            await signOut();
+          onPress={() => {
+            console.log("Navigate to sign‐in screen");
             onClose();
-            router.replace("/login");
           }}
         >
           <Ionicons name="add-circle-outline" size={24} color="#333" />
@@ -102,6 +96,8 @@ export default function BottomAccountDrawer({
     </View>
   );
 }
+
+import { Ionicons } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
   wrapper: {

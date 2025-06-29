@@ -16,3 +16,5 @@ export const useDevAuth = () => {
     signInDev();
   }, []);
 };
+
+// No changes needed for user override; real login will take precedence.

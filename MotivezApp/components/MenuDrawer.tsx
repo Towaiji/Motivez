@@ -19,13 +19,6 @@ import { useAuth } from "../app/context/AuthContext";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-// Dummy accounts for demonstration (replace with real data)
-const DUMMY_ACCOUNTS = [
-  { id: "1", name: "@motive_user", avatarUri: "https://i.pravatar.cc/100?u=motive_user" },
-  { id: "2", name: "@john_doe",    avatarUri: "https://i.pravatar.cc/100?u=john_doe"    },
-  { id: "3", name: "@jane_smith",  avatarUri: "https://i.pravatar.cc/100?u=jane_smith"  },
-];
-
 interface MenuDrawerProps {
   isVisible: boolean;
   onClose: () => void;
@@ -37,7 +30,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
 
   useLayoutEffect(() => {
     if (isVisible) {
@@ -62,6 +55,13 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
 
   // If nothing is mounted, render nothing
   if (!drawerMounted) return null;
+
+  // Use fallback if profile is missing
+  const displayName =
+    profile?.name && profile.name.trim().length > 0
+      ? profile.name
+      : "User";
+  const displayAvatar = profile?.avatarUri || "https://i.pravatar.cc/100?u=default";
 
   return (
     <>
@@ -89,11 +89,11 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             {/* ==== 1) User Account Section ==== */}
             <View style={styles.profileSection}>
               <Image
-                source={{ uri: DUMMY_ACCOUNTS[0].avatarUri }}
+                source={{ uri: displayAvatar }}
                 style={styles.profileImage}
               />
               <View>
-                <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
+                <Text style={styles.profileName}>Hey, {displayName} 👋</Text>
                 <TouchableOpacity onPress={() => setBottomVisible(true)}>
                   <Text style={styles.profileSubtitle}>Switch Profile</Text>
                 </TouchableOpacity>
@@ -302,7 +302,11 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
       <BottomAccountDrawer
         isVisible={bottomVisible}
         onClose={() => setBottomVisible(false)}
-        accounts={DUMMY_ACCOUNTS}
+        accounts={
+          profile
+            ? [{ id: profile.id, name: profile.name, avatarUri: displayAvatar }]
+            : []
+        }
       />
     </>
   );
