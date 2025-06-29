@@ -578,7 +578,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   emptyTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: darkMode ? DARK_TEXT : DARKER_BG,
+    color: darkMode ? DARK_TEXT : DARK_BG,
     marginBottom: 10,
   },
 

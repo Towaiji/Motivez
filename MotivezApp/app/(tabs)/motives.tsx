@@ -38,6 +38,13 @@ import {
   DARKER_BG,
   RED_SOFT,
   GREEN,
+  DARK_TEXT,
+  GRAY_LIGHTER,
+  GRAY_MEDIUM_LIGHT,
+  GRAY_PLACEHOLDER,
+  GRAY_SOFT,
+  GRAY_ULTRA_LIGHT3,
+  LIGHT_TEXT,
 } from "../../constants/colors";
 
 // 🔹 Dummy motives for FlatList (bottom)

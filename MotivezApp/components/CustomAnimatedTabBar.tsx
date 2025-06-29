@@ -11,6 +11,8 @@ import {
   DARK_BG,
   LIGHT_CARD,
   BLACK,
+  LIGHT_TEXT,
+  PINK_LIGHT,
 } from "../constants/colors";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../app/context/ThemeContext";

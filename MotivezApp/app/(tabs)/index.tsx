@@ -6,7 +6,7 @@ import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
-import { BLACK, WHITE, LIGHT_BG, DARK_BG, GRAY, DARK_TEXT } from "../../constants/colors";
+import { BLACK, WHITE, LIGHT_BG, DARK_BG, GRAY, DARK_TEXT, GRAY_LIGHT } from "../../constants/colors";
 
 export default function Home() {
   const navigation = useNavigation();

@@ -22,7 +22,17 @@ import {
   WHITE as WHITE_CONST,
   TEAL,
   SECONDARY,
-} from "../constants/colors";
+  GREEN_SEA,
+  LIGHT_TEXT,
+  OFF_WHITE,
+  DARK_TEXT,
+  GRAY_BRIGHT,
+  GRAY_EXTRA_LIGHT,
+  GRAY_MEDIUM_DARK,
+  GRAY_MEDIUM_LIGHT,
+  GRAY_ULTRA_LIGHT2,
+  RED_PINK,
+} from "../../constants/colors";
 
 export default function MapScreen() {
   const [region, setRegion] = useState<{

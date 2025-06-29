@@ -31,6 +31,8 @@ import {
   RED,
   DARK_TEXT,
   LIGHT_TEXT,
+  GRAY_ULTRA_LIGHT,
+  BLUE_LIGHT,
 } from "../constants/colors";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
