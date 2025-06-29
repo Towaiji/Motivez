@@ -15,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../../components/ProgressBar';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabaseClient";
-import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 
 
@@ -34,6 +33,8 @@ export default function CreateMotiveScreen() {
   const [experienceLevel, setExperienceLevel] = useState<string | null>(null);
   const [goals, setGoals] = useState('');
   const [notes, setNotes] = useState('');
+
+  
 
   // categories/chips state
   const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
@@ -65,16 +66,6 @@ export default function CreateMotiveScreen() {
       return Alert.alert("Missing Info", "Please fill out all required fields.");
     }
   
-    // Ask for location permission
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      return Alert.alert("Permission Denied", "Enable location to post motive.");
-    }
-  
-    // Get current location
-    const loc = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = loc.coords;
-  
     // Get logged-in user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
@@ -88,11 +79,17 @@ export default function CreateMotiveScreen() {
         title,
         description,
         category: selectedCategory,
-        latitude,
-        longitude,
+        location,
         image_url: image || null,
         privacy: modeSelected === 'public' ? 'Public' : 'Friends',
+        time_of_day: timeOfDay,
+        duration,
+        experience_level: experienceLevel,
+        goals,
+        notes,
+        requires_approval: requiresApproval,
       }
+      
     ]);
     
   
@@ -101,8 +98,7 @@ export default function CreateMotiveScreen() {
       return Alert.alert("Error", "Failed to post motive.");
     }
   
-    Alert.alert("Success", "Motive posted successfully!");
-    router.push("/(tabs)/motives"); 
+    router.push("/motive-success");
     //*You can redirect to homepage or "My Motivez"}
   };
   

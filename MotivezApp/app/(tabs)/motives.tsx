@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Text,
   View,
@@ -13,7 +13,8 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Modal,
-  Pressable
+  Pressable,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +22,7 @@ import CarouselRow from "../../components/CarouselRow";
 import { useRouter } from "expo-router";
 import { useScroll } from "../context/ScrollContext";
 import Slider from '@react-native-community/slider';
+import { supabase } from "../../lib/supabaseClient";
 
 // 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
@@ -124,6 +126,89 @@ export default function Motives() {
   const lastScrollY = useRef(0);
   const scrollDirection = useRef<'up' | 'down'>('up');
   const [distance, setDistance] = useState(8); // Changed from 5 miles to 8 km
+  
+  
+  const [publicMotives, setPublicMotives] = useState<any[]>([]);
+  const [loadingPublicMotives, setLoadingPublicMotives] = useState(true);
+  const [friendsMotives, setFriendsMotives] = useState<any[]>([]);
+  const [loadingFriendsMotives, setLoadingFriendsMotives] = useState(true);
+
+
+  useEffect(() => {
+    const fetchPublicMotives = async () => {
+      setLoadingPublicMotives(true);
+      try {
+        const { data, error } = await supabase
+          .from('motives')
+          .select('*')
+          .eq('privacy', 'Public')
+          .order('created_at', { ascending: false });
+    
+        if (error) {
+          console.error('Error fetching public motives:', error);
+          setPublicMotives([]); // Set empty array on error
+        } else {
+          setPublicMotives(data || []); // Ensure data is always an array
+        }
+      } catch (err) {
+        console.error('Exception fetching public motives:', err);
+        setPublicMotives([]); // Set empty array on exception
+      }
+      setLoadingPublicMotives(false);
+    };
+  
+    const fetchFriendsMotives = async () => {
+      setLoadingFriendsMotives(true);
+      try {
+        const { data, error } = await supabase
+          .from('motives')
+          .select('*')
+          .eq('privacy', 'Friends')
+          .order('created_at', { ascending: false });
+    
+        if (error) {
+          console.error('Error fetching friends motives:', error);
+          setFriendsMotives([]); // Set empty array on error
+        } else {
+          setFriendsMotives(data || []); // Ensure data is always an array
+        }
+      } catch (err) {
+        console.error('Exception fetching friends motives:', err);
+        setFriendsMotives([]); // Set empty array on exception
+      }
+      setLoadingFriendsMotives(false);
+    };
+  
+    fetchPublicMotives();
+    fetchFriendsMotives();
+  }, []);
+
+  const formattedPublicMotives = (publicMotives || []).map((motive) => {
+    // Ensure motive is a valid object with required properties
+    if (!motive || typeof motive !== 'object') {
+      return null;
+    }
+    return {
+      id: motive.id || 'unknown',
+      title: motive.title || 'Untitled',
+      image: motive.image_url || 'https://via.placeholder.com/300x200',
+      description: motive.description || '',
+    };
+  }).filter((item): item is { id: string; title: string; image: string; description: string } => item !== null);
+  
+  const formattedFriendsMotives = (friendsMotives || []).map((motive) => {
+    // Ensure motive is a valid object with required properties
+    if (!motive || typeof motive !== 'object') {
+      return null;
+    }
+    return {
+      id: motive.id || 'unknown',
+      title: motive.title || 'Untitled',
+      image: motive.image_url || 'https://via.placeholder.com/300x200',
+      description: motive.description || '',
+    };
+  }).filter((item): item is { id: string; title: string; image: string; description: string } => item !== null);
+  
 
   // Header animation values
   const headerScale = scrollY.interpolate({
@@ -156,35 +241,37 @@ export default function Motives() {
     extrapolate: 'clamp',
   });
 
-  const filteredMotives = dummyMotives.filter(
-    (motive) => motive.type === selected
-  );
-
   // Get data based on selected tab
   const getTabData = (): Item[] => {
+    // Ensure we have valid arrays
+    const safePublicMotives = Array.isArray(formattedPublicMotives) ? formattedPublicMotives : [];
+    const safeFriendsMotives = Array.isArray(formattedFriendsMotives) ? formattedFriendsMotives : [];
+    
     const carouselData = [
-      { id: "popular", title: "What's Popular in the Area", data: popularActivities },
-      { id: "festival", title: "Festival Themed", data: festivalActivities },
-      { id: "sport", title: "Sport Themed", data: sportActivities },
+      {
+        id: "public",
+        title: "Public Motives",
+        data: safePublicMotives,
+      },
+      {
+        id: "friends",
+        title: "Close Friends Motives",
+        data: safeFriendsMotives,
+      },
     ];
-
-    switch(selected) {
-      case "featured":
-        return carouselData;
+  
+    switch (selected) {
       case "public":
-        return [
-          
-          ...carouselData
-        ];
+        return carouselData[0] ? [carouselData[0]] : []; // Only show public motives
       case "close-friends":
-        return [
-          
-          ...carouselData
-        ];
+        return carouselData[1] ? [carouselData[1]] : []; // Only show close friends motives
+      case "featured":
+        return carouselData; // Show both
       default:
         return carouselData;
     }
   };
+  
 
   // Type guard to detect TabItem
   function isTabItem(item: Item): item is TabItem {
@@ -232,10 +319,13 @@ export default function Motives() {
   };
 
   const renderSuggestedFriends = () => {
+    // Ensure suggestedFriends is always an array
+    const safeSuggestedFriends = Array.isArray(suggestedFriends) ? suggestedFriends : [];
+    
     return (
       <View style={styles.suggestedFriendsContainer}>
         <Text style={styles.suggestedFriendsTitle}>Suggested Friends</Text>
-        {suggestedFriends.map((friend) => (
+        {safeSuggestedFriends.map((friend) => (
           <View key={friend.id} style={styles.suggestedFriendCard}>
             <Image source={{ uri: friend.avatar }} style={styles.friendAvatar} />
             <View style={styles.friendInfo}>
@@ -262,6 +352,66 @@ export default function Motives() {
       </View>
     );
   };
+
+  const renderPublicMotives = () => {
+    if (loadingPublicMotives) {
+      return <ActivityIndicator size="large" color="#e91e63" style={{ marginTop: 30 }} />;
+    }
+  
+    const safePublicMotives = Array.isArray(publicMotives) ? publicMotives : [];
+    
+    if (safePublicMotives.length === 0) {
+      return <Text style={{ textAlign: 'center', marginTop: 30 }}>No public motives yet.</Text>;
+    }
+  
+    return (
+      <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
+        {safePublicMotives.map((motive) => (
+          <View key={motive.id} style={styles.card}>
+            {motive.image_url && (
+              <Image source={{ uri: motive.image_url }} style={styles.image} />
+            )}
+            <Text style={styles.title}>{motive.title}</Text>
+            <Text style={styles.user}>{motive.description}</Text>
+            <Text style={[styles.user, { color: "#e91e63", fontWeight: 'bold' }]}>
+              {motive.category}
+            </Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const renderFriendsMotives = () => {
+    if (loadingFriendsMotives) {
+      return <ActivityIndicator size="large" color="#e91e63" style={{ marginTop: 30 }} />;
+    }
+  
+    const safeFriendsMotives = Array.isArray(friendsMotives) ? friendsMotives : [];
+    
+    if (safeFriendsMotives.length === 0) {
+      return <Text style={{ textAlign: 'center', marginTop: 30 }}>No close friends motives yet.</Text>;
+    }
+  
+    return (
+      <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
+        {safeFriendsMotives.map((motive) => (
+          <View key={motive.id} style={styles.card}>
+            {motive.image_url && (
+              <Image source={{ uri: motive.image_url }} style={styles.image} />
+            )}
+            <Text style={styles.title}>{motive.title}</Text>
+            <Text style={styles.user}>{motive.description}</Text>
+            <Text style={[styles.user, { color: "#4CAF50", fontWeight: 'bold' }]}>
+              {motive.category}
+            </Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+  
+  
 
   const renderFilterModal = () => {
     return (
@@ -450,7 +600,7 @@ export default function Motives() {
         )}
         scrollEventThrottle={16}
       >
-        {getTabData().map((item) => {
+        {(getTabData() || []).map((item) => {
           if (isCarouselItem(item)) {
             return <CarouselRow key={item.id} title={item.title} data={item.data} />;
           } else if (isTitleItem(item)) {
@@ -462,6 +612,8 @@ export default function Motives() {
           }
           return null;
         })}
+        {selected === 'public' && renderPublicMotives()}
+        {selected === 'close-friends' && renderFriendsMotives()}
         {renderSuggestedFriends()}
       </Animated.ScrollView>
       {renderFilterModal()}
