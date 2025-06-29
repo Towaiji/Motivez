@@ -2,6 +2,16 @@ import React, { useEffect, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet, Dimensions, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  PRIMARY,
+  WHITE,
+  BLUE,
+  GRAY_MEDIUM,
+  GRAY_SOFT,
+  DARK_BG,
+  LIGHT_CARD,
+  BLACK,
+} from "../constants/colors";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../app/context/ThemeContext";
 
@@ -68,13 +78,13 @@ export default function CustomAnimatedTabBar({ state, descriptors, navigation }:
               <MaterialCommunityIcons
                 name="cards"
                 size={32}
-                color={isFocused ? "#e91e63" : darkMode ? "#777" : "#aaa"}
+                color={isFocused ? PRIMARY : darkMode ? GRAY_MEDIUM : GRAY_SOFT}
               />
             ) : (
               <Ionicons
                 name={ICONS[index] as any}
                 size={32}
-                color={isFocused ? "#e91e63" : darkMode ? "#777" : "#aaa"}
+                color={isFocused ? PRIMARY : darkMode ? GRAY_MEDIUM : GRAY_SOFT}
               />
             )}
           </TouchableOpacity>
@@ -90,10 +100,10 @@ const getStyles = (darkMode: boolean) =>
       flexDirection: "row",
       height: 70,
       alignSelf: "center",
-      backgroundColor: darkMode ? "#181818" : "#fff",
+      backgroundColor: darkMode ? DARK_BG : WHITE,
       borderRadius: 35,
       marginBottom: 20,
-      shadowColor: "#000",
+      shadowColor: BLACK,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 10,
@@ -114,7 +124,7 @@ const getStyles = (darkMode: boolean) =>
       position: "absolute",
       top: 10,
       height: 50,
-      backgroundColor: darkMode ? "#333" : "#ffe4ec",
+      backgroundColor: darkMode ? LIGHT_TEXT : PINK_LIGHT,
       borderRadius: 25,
       zIndex: 0,
       left: 0,

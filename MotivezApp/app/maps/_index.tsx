@@ -9,6 +9,20 @@ import { supabase } from '../../lib/supabaseClient'
 import { fetchNearbyPlaces } from "@/lib/fetchNearbyPlaces";
 import { fetchPlacesByTextSearch } from "@/lib/fetchNearbyPlaces";
 import { useTheme } from "../context/ThemeContext";
+import {
+  PRIMARY,
+  WHITE,
+  BLACK,
+  GRAY,
+  GRAY_SOFT,
+  GRAY_LIGHT,
+  GRAY_LIGHTER,
+  GRAY_PLACEHOLDER,
+  DARK_BG,
+  WHITE as WHITE_CONST,
+  TEAL,
+  SECONDARY,
+} from "../constants/colors";
 
 export default function MapScreen() {
   const [region, setRegion] = useState<{
@@ -363,7 +377,7 @@ export default function MapScreen() {
               }}
               title={place.name}
               description={place.vicinity}
-              pinColor="#2E8B57" // Optional: makes Google markers visually distinct
+              pinColor={GREEN_SEA} // Optional: makes Google markers visually distinct
             />
           ))}
         </MapView>
@@ -372,14 +386,14 @@ export default function MapScreen() {
           <SafeAreaView style={styles.safeArea} edges={["top"]}>
             <View style={styles.topBar}>
               <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
+                <Ionicons name="arrow-back" size={24} color={BLACK} />
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={styles.searchAreaButton} 
                 onPress={handleSearchArea}
               >
-                <Ionicons name="search" size={20} color="white" style={{ marginRight: 8 }} />
+                <Ionicons name="search" size={20} color={WHITE} style={{ marginRight: 8 }} />
                 <Text style={styles.searchAreaText}>Search this area</Text>
               </TouchableOpacity>
             </View>
@@ -393,7 +407,7 @@ export default function MapScreen() {
                   <View style={styles.searchPill}>
                     <Text style={styles.searchPillText}>{activeSearchLabel}</Text>
                     <TouchableOpacity onPress={() => setActiveSearchLabel(null)}>
-                      <Ionicons name="close" size={16} color="#666" style={styles.activeCategoryClose} />
+                      <Ionicons name="close" size={16} color={GRAY} style={styles.activeCategoryClose} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -417,7 +431,7 @@ export default function MapScreen() {
                     >
                       <Text style={styles.activeCategoryEmoji}>{categoryData.emoji}</Text>
                       <Text style={styles.activeCategoryLabel}>{categoryData.label}</Text>
-                      <Ionicons name="close" size={16} color="#666" style={styles.activeCategoryClose} />
+                      <Ionicons name="close" size={16} color={GRAY} style={styles.activeCategoryClose} />
                     </TouchableOpacity>
                   );
                 })}
@@ -433,7 +447,7 @@ export default function MapScreen() {
             onPress={goToCurrentLocation}
             activeOpacity={0.7}
           >
-            <Ionicons name="navigate" size={24} color="#000" />
+            <Ionicons name="navigate" size={24} color={BLACK} />
           </TouchableOpacity>
 
           {/* Only show bottom panel when modal is NOT visible */}
@@ -484,16 +498,16 @@ export default function MapScreen() {
                 {/* Close button at the top */}
                 <View style={styles.modalHeader}>
                   <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-                    <Ionicons name="close" size={24} color="#666" />
+                    <Ionicons name="close" size={24} color={GRAY} />
                   </TouchableOpacity>
                 </View>
 
                 {/* Search Input with proper styling */}
                 <View style={styles.searchInputContainer}>
-                  <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+                  <Ionicons name="search" size={20} color={GRAY_PLACEHOLDER} style={styles.searchIcon} />
                   <TextInput
                     placeholder="Search places or names..."
-                    placeholderTextColor="#999"
+                    placeholderTextColor={GRAY_PLACEHOLDER}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onSubmitEditing={async () => {
@@ -508,7 +522,7 @@ export default function MapScreen() {
                       style={styles.clearButton}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                      <Ionicons name="close-circle" size={20} color="#999" />
+                      <Ionicons name="close-circle" size={20} color={GRAY_PLACEHOLDER} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -546,7 +560,7 @@ export default function MapScreen() {
                           </Text>
                           {isSelected && (
                             <View style={styles.selectedIndicator}>
-                              <Ionicons name="checkmark" size={14} color="#fff" />
+                              <Ionicons name="checkmark" size={14} color={WHITE} />
                             </View>
                           )}
                         </TouchableOpacity>
@@ -593,11 +607,11 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: darkMode ? "#333" : "#ffffff",
+    backgroundColor: darkMode ? LIGHT_TEXT : OFF_WHITE,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -612,13 +626,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     alignItems: "center",
   },
   bottomPanel: {
-    backgroundColor: darkMode ? "#181818" : "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     width: "100%",
     paddingHorizontal: 20,
     paddingBottom: 5,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -635,7 +649,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   bottomSearchInput: {
     flex: 1,
     fontSize: 20,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   currentLocationButton: {
     position: "absolute",
@@ -644,10 +658,10 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: darkMode ? "#333" : "#fff",
+    backgroundColor: darkMode ? LIGHT_TEXT : WHITE,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 4 },
@@ -656,11 +670,11 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   searchAreaButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FF4D6D",
+    backgroundColor: RED_PINK,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -675,11 +689,11 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     marginLeft: 10,
     padding: 20,
     borderRadius: 20,
-    backgroundColor: "#FF4D6D",
+    backgroundColor: RED_PINK,
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
@@ -695,20 +709,20 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
   exploreButtonText: {
     fontSize: 27,
-    color: "#333",
+    color: LIGHT_TEXT,
     fontWeight: "600",
   },
   fakeSearchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: darkMode ? "#333" : "#f0f0f0",
+    backgroundColor: darkMode ? LIGHT_TEXT : GRAY_ULTRA_LIGHT2,
     borderRadius: 16,
     padding: 14,
     marginTop: 10,
   },
   fakeSearchText: {
     fontSize: 16,
-    color: darkMode ? "#aaa" : "#888",
+    color: darkMode ? GRAY_SOFT : GRAY_MEDIUM_LIGHT,
   },
   
   modalOverlay: {
@@ -725,7 +739,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: darkMode ? "#181818" : "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -747,13 +761,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: darkMode ? "#333" : "#f5f5f5",
+    backgroundColor: darkMode ? LIGHT_TEXT : GRAY_EXTRA_LIGHT,
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: darkMode ? "#555" : "#e0e0e0",
+    borderColor: darkMode ? GRAY_MEDIUM_DARK : GRAY_BRIGHT,
   },
   searchIcon: {
     marginRight: 10,
@@ -761,7 +775,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   modalSearchInput: {
     flex: 1,
     fontSize: 16,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   categoryTitle: {
     fontSize: 18,
@@ -867,7 +881,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
   activeLabel: {
     flexDirection: 'row',
-    backgroundColor: darkMode ? '#333' : '#fff',
+    backgroundColor: darkMode ? LIGHT_TEXT : WHITE,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
@@ -876,7 +890,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     marginTop: 130,
     alignItems: 'center',
     elevation: 3, // Android shadow
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -884,21 +898,21 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   activeLabelText: {
     fontSize: 14,
     marginRight: 6,
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? '#eee' : LIGHT_TEXT,
   },
   removeText: {
     fontSize: 14,
-    color: '#999',
+    color: GRAY_PLACEHOLDER,
   },
   searchPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkMode ? '#333' : '#fff',
+    backgroundColor: darkMode ? LIGHT_TEXT : WHITE,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -906,7 +920,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
   searchPillText: {
     fontSize: 14,
-    color: darkMode ? '#fff' : '#000',
+    color: darkMode ? WHITE : BLACK,
     fontWeight: '600',
     marginRight: 6,
   },

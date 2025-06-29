@@ -5,6 +5,27 @@ import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTheme } from '../app/context/ThemeContext';
+import {
+  WHITE,
+  BLACK,
+  PRIMARY,
+  SECONDARY,
+  GOLD,
+  LIGHT_TEXT,
+  DARK_TEXT,
+  GRAY,
+  GRAY_LIGHT,
+  GRAY_MEDIUM_DARK,
+  GRAY_LIGHTER,
+  GRAY_SOFT,
+  GRAY_DARKEST,
+  GRAY_EXTRA_LIGHT3,
+  GRAY_ULTRA_LIGHT4,
+  BLUE,
+  BLUE_SOFT,
+  TEAL,
+  DARK_BG,
+} from '../constants/colors';
 
 const { width, height } = Dimensions.get('window');
 
@@ -167,10 +188,10 @@ const DeckSwiper: React.FC = () => {
     const hasHalfStar = rating % 1 !== 0;
     
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Feather key={i} name="star" size={16} color="#FFD700" style={{ marginRight: 2 }} />);
+      stars.push(<Feather key={i} name="star" size={16} color={GOLD} style={{ marginRight: 2 }} />);
     }
     if (hasHalfStar) {
-      stars.push(<Feather key="half" name="star" size={16} color="#FFD700" style={{ marginRight: 2 }} />);
+      stars.push(<Feather key="half" name="star" size={16} color={GOLD} style={{ marginRight: 2 }} />);
     }
     return stars;
   };
@@ -329,7 +350,7 @@ const DeckSwiper: React.FC = () => {
             <>
               <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={closeCardDetails} style={styles.closeButton}>
-                  <Feather name="x" size={24} color="#333" />
+                  <Feather name="x" size={24} color={LIGHT_TEXT} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>{selectedCard.title}</Text>
               </View>
@@ -338,11 +359,11 @@ const DeckSwiper: React.FC = () => {
                 {/* Location and Distance */}
                 <View style={styles.locationSection}>
                   <View style={styles.row}>
-                    <Feather name="map-pin" size={18} color="#333" style={styles.icon} />
+                    <Feather name="map-pin" size={18} color={LIGHT_TEXT} style={styles.icon} />
                     <Text style={styles.modalLocationText}>{selectedCard.location}</Text>
                   </View>
                   <View style={styles.row}>
-                    <Feather name="navigation" size={18} color="#333" style={styles.icon} />
+                    <Feather name="navigation" size={18} color={LIGHT_TEXT} style={styles.icon} />
                     <Text style={styles.modalDistanceText}>{selectedCard.distance}</Text>
                   </View>
                 </View>
@@ -362,12 +383,12 @@ const DeckSwiper: React.FC = () => {
                 {/* Key Info */}
                 <View style={styles.infoGrid}>
                   <View style={styles.infoItem}>
-                    <Feather name="dollar-sign" size={16} color="#666" />
+                    <Feather name="dollar-sign" size={16} color={GRAY} />
                     <Text style={styles.infoLabel}>Price</Text>
                     <Text style={styles.infoValue}>{selectedCard.price}</Text>
                   </View>
                   <View style={styles.infoItem}>
-                    <Feather name="clock" size={16} color="#666" />
+                    <Feather name="clock" size={16} color={GRAY} />
                     <Text style={styles.infoLabel}>Duration</Text>
                     <Text style={styles.infoValue}>{selectedCard.duration}</Text>
                   </View>
@@ -396,7 +417,7 @@ const DeckSwiper: React.FC = () => {
                   <Text style={styles.sectionTitle}>Features</Text>
                   {selectedCard.features.map((feature: string, index: number) => (
                     <View key={index} style={styles.featureItem}>
-                      <Feather name="check" size={16} color="#4CAF50" />
+                      <Feather name="check" size={16} color={SECONDARY} />
                       <Text style={styles.featureText}>{feature}</Text>
                     </View>
                   ))}
@@ -463,13 +484,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     width: width * 0.85,
     height: height * 0.6,
     borderRadius: 30,
-    backgroundColor: darkMode ? '#181818' : '#f2f2f2',
+    backgroundColor: darkMode ? DARK_BG : GRAY_ULTRA_LIGHT4,
     padding: 20,
     marginTop: -55, //adjusts the heigh of the card
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 30,
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
@@ -481,12 +502,12 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: darkMode ? '#fff' : '#000',
+    color: darkMode ? WHITE : BLACK,
   },
 
   details: {
     fontSize: 16,
-    color: darkMode ? '#ccc' : '#555',
+    color: darkMode ? GRAY_LIGHT : GRAY_MEDIUM_DARK,
     marginBottom: 5,
   },
 
@@ -526,13 +547,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   vibePillText: {
     fontSize: 12,
-    color: darkMode ? '#90caf9' : '#264653', // dark teal blue
+    color: darkMode ? BLUE_SOFT : TEAL, // dark teal blue
     fontWeight: '600',
   },
 
   resetButton: {
     marginTop: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: BLUE,
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 25,
@@ -540,7 +561,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
 
   resetButtonText: {
-    color: '#fff',
+    color: WHITE,
     fontWeight: '600',
     fontSize: 16,
     textAlign: 'center',
@@ -557,13 +578,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   emptyTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: darkMode ? '#eee' : '#1a1a1a',
+    color: darkMode ? DARK_TEXT : DARKER_BG,
     marginBottom: 10,
   },
 
   emptySubtitle: {
     fontSize: 16,
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -585,8 +606,8 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     borderRadius: 15,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#fff',
-    backgroundColor: darkMode ? '#333' : '#eee',
+    borderColor: WHITE,
+    backgroundColor: darkMode ? LIGHT_TEXT : DARK_TEXT,
   },
 
   avatarImage: {
@@ -597,14 +618,14 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   friendText: {
     fontSize: 14,
-    color: darkMode ? '#ccc' : '#555',
+    color: darkMode ? GRAY_LIGHT : GRAY_MEDIUM_DARK,
     fontWeight: '500',
   },
 
   // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: darkMode ? '#000' : '#fff',
+    backgroundColor: darkMode ? BLACK : WHITE,
   },
 
   modalHeader: {
@@ -613,7 +634,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     padding: 20,
     paddingTop: 50,
     borderBottomWidth: 1,
-    borderBottomColor: darkMode ? '#333' : '#eee',
+    borderBottomColor: darkMode ? LIGHT_TEXT : DARK_TEXT,
   },
 
   closeButton: {
@@ -637,13 +658,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   modalLocationText: {
     fontSize: 16,
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     fontWeight: '500',
   },
 
   modalDistanceText: {
     fontSize: 16,
-    color: darkMode ? '#ccc' : '#666',
+    color: darkMode ? GRAY_LIGHT : GRAY,
   },
 
   ratingSection: {
@@ -666,13 +687,13 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   reviewsText: {
     fontSize: 14,
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
   },
 
   descriptionText: {
     fontSize: 16,
     lineHeight: 24,
-    color: darkMode ? '#ddd' : '#333',
+    color: darkMode ? GRAY_LIGHTER : LIGHT_TEXT,
     marginBottom: 20,
   },
 
@@ -686,14 +707,14 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 15,
-    backgroundColor: darkMode ? '#222' : '#f8f9fa',
+    backgroundColor: darkMode ? GRAY_DARKEST : GRAY_EXTRA_LIGHT3,
     borderRadius: 12,
     marginHorizontal: 5,
   },
 
   infoLabel: {
     fontSize: 12,
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
     marginTop: 5,
     marginBottom: 2,
   },
@@ -701,7 +722,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   infoValue: {
     fontSize: 14,
     fontWeight: '600',
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     textAlign: 'center',
   },
 
@@ -709,7 +730,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
 
   hoursSection: {
@@ -718,7 +739,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   hoursText: {
     fontSize: 14,
-    color: darkMode ? '#aaa' : '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
     lineHeight: 20,
   },
 
@@ -744,7 +765,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   modalVibePillText: {
     fontSize: 14,
-    color: darkMode ? '#90caf9' : '#264653',
+    color: darkMode ? BLUE_SOFT : TEAL,
     fontWeight: '600',
   },
 
@@ -760,7 +781,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   featureText: {
     fontSize: 14,
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     marginLeft: 8,
   },
 
@@ -788,7 +809,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
 
   modalFriendName: {
     fontSize: 12,
-    color: darkMode ? '#eee' : '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     fontWeight: '500',
   },
 

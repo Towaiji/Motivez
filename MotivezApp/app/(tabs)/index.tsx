@@ -6,6 +6,7 @@ import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
+import { BLACK, WHITE, LIGHT_BG, DARK_BG, GRAY, DARK_TEXT } from "../../constants/colors";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -32,21 +33,21 @@ const getStyles = (darkMode: boolean) =>
     container: {
       flex: 1,
       paddingTop: 150,
-      backgroundColor: darkMode ? '#000' : '#f4f6f8',
+      backgroundColor: darkMode ? BLACK : LIGHT_BG,
       alignItems: 'center',
       justifyContent: 'flex-start',
     },
     header: {
       fontSize: 30,
       fontWeight: 'bold',
-      color: darkMode ? '#fff' : '#000',
+      color: darkMode ? WHITE : BLACK,
       alignSelf: 'flex-start',
       marginLeft: 60,
       marginTop: -15,
     },
     subtext: {
       fontSize: 16,
-      color: darkMode ? '#aaa' : '#666',
+      color: darkMode ? GRAY_LIGHT : GRAY,
       marginBottom: 20,
       alignSelf: 'flex-start',
       marginLeft: 60,

@@ -12,6 +12,17 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../app/context/ThemeContext";
+import {
+  WHITE,
+  BLACK,
+  DARK_BG,
+  LIGHT_CARD,
+  GRAY_DARK,
+  GRAY_LIGHTER,
+  DARK_TEXT,
+  LIGHT_TEXT,
+  GRAY_ULTRA_LIGHT,
+} from "../constants/colors";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -96,7 +107,7 @@ export default function BottomAccountDrawer({
           <Ionicons
             name="add-circle-outline"
             size={24}
-            color={darkMode ? "#eee" : "#333"}
+            color={darkMode ? DARK_TEXT : LIGHT_TEXT}
           />
           <Text style={styles.newAccountText}>Sign in with another account</Text>
         </TouchableOpacity>
@@ -122,14 +133,14 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    backgroundColor: darkMode ? "#181818" : "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 30,
     // Elevation/shadow for iOS & Android
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -139,7 +150,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     alignSelf: "center",
     width: 40,
     height: 5,
-    backgroundColor: darkMode ? "#555" : "#ccc",
+    backgroundColor: darkMode ? GRAY_DARK : GRAY_LIGHTER,
     borderRadius: 2.5,
     marginBottom: 10,
   },
@@ -147,7 +158,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 16,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   accountRow: {
     flexDirection: "row",
@@ -162,11 +173,11 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
   accountName: {
     fontSize: 16,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   divider: {
     height: 1,
-    backgroundColor: darkMode ? "#333" : "#ececec",
+    backgroundColor: darkMode ? GRAY_DARK : GRAY_ULTRA_LIGHT,
     marginVertical: 16,
   },
   newAccountRow: {
@@ -176,6 +187,6 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   newAccountText: {
     marginLeft: 10,
     fontSize: 16,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
 });

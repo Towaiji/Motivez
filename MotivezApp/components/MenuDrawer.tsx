@@ -16,6 +16,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomAccountDrawer from "./BottomAccountDrawer";
 import { useTheme } from "../app/context/ThemeContext";
+import {
+  PRIMARY,
+  WHITE,
+  BLACK,
+  GRAY_SOFT,
+  GRAY,
+  GRAY_LIGHTER,
+  GRAY_ULTRA_LIGHT3,
+  BLUE_SOFT,
+  BLUE,
+  DARK_BG,
+  LIGHT_CARD,
+  RED,
+  DARK_TEXT,
+  LIGHT_TEXT,
+} from "../constants/colors";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -82,7 +98,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
         >
           {/* Close “X” button */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={33} color={darkMode ? "#eee" : "#333"} />
+            <Ionicons name="close" size={33} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
           </TouchableOpacity>
 
           {/* Wrap all menu items in a ScrollView */}
@@ -109,7 +125,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="person-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Profile</Text>
             </TouchableOpacity>
 
@@ -121,7 +137,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="list-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="list-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>My Motives</Text>
             </TouchableOpacity>
 
@@ -133,7 +149,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-add-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="person-add-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Add / Invite Friends</Text>
             </TouchableOpacity>
 
@@ -147,7 +163,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="people-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="people-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Friends</Text>
             </TouchableOpacity>
 
@@ -158,7 +174,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="chatbubble-ellipses-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Messages</Text>
             </TouchableOpacity>
 
@@ -169,7 +185,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="bookmark-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="bookmark-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Saved Motives</Text>
             </TouchableOpacity>
 
@@ -183,7 +199,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="compass-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="compass-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Explore / Trending</Text>
             </TouchableOpacity>
 
@@ -194,7 +210,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="map-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="map-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Nearby Map</Text>
             </TouchableOpacity>
 
@@ -205,7 +221,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="pricetags-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="pricetags-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Categories</Text>
             </TouchableOpacity>
 
@@ -219,7 +235,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="calendar-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="calendar-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Upcoming Events</Text>
             </TouchableOpacity>
 
@@ -230,7 +246,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="time-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="time-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Past Memories</Text>
             </TouchableOpacity>
 
@@ -244,7 +260,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="settings-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="settings-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Settings</Text>
             </TouchableOpacity>
 
@@ -255,7 +271,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="notifications-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="notifications-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Notifications</Text>
             </TouchableOpacity>
 
@@ -266,7 +282,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="help-circle-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="help-circle-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>Help & Feedback</Text>
             </TouchableOpacity>
 
@@ -277,7 +293,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="information-circle-outline" size={22} color={darkMode ? "#eee" : "#333"} />
+              <Ionicons name="information-circle-outline" size={22} color={darkMode ? DARK_TEXT : LIGHT_TEXT} />
               <Text style={styles.drawerItemText}>About Motivez</Text>
             </TouchableOpacity>
 
@@ -291,8 +307,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 console.log("Logging out...");
               }}
             >
-              <Ionicons name="log-out-outline" size={22} color="#e53935" />
-              <Text style={[styles.drawerItemText, { color: "#e53935" }]}>Log Out</Text>
+              <Ionicons name="log-out-outline" size={22} color={RED} />
+              <Text style={[styles.drawerItemText, { color: RED }]}>Log Out</Text>
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>
@@ -327,9 +343,9 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     bottom: 0,
     left: 0,
     width: SCREEN_WIDTH * 0.8,
-    backgroundColor: darkMode ? "#181818" : "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     zIndex: 10,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -344,10 +360,10 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
     position: "absolute",
     top: 50,
     right: 20,
-    backgroundColor: darkMode ? "#333" : "#f1f1f1",
+    backgroundColor: darkMode ? LIGHT_TEXT : GRAY_ULTRA_LIGHT3,
     borderRadius: 20,
     padding: 6,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     zIndex: 20,
@@ -360,11 +376,11 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   profileName: {
     fontSize: 20,
     fontWeight: "bold",
-    color: darkMode ? "#eee" : "#000",
+    color: darkMode ? DARK_TEXT : BLACK,
   },
   profileSubtitle: {
     fontSize: 14,
-    color: darkMode ? "#66a3ff" : "#007AFF",
+    color: darkMode ? BLUE_LIGHT : BLUE,
     marginTop: 4,
   },
   profileImage: {
@@ -375,7 +391,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: darkMode ? "#333" : "#ececec",
+    backgroundColor: darkMode ? LIGHT_TEXT : GRAY_ULTRA_LIGHT,
     marginVertical: 20,
   },
   drawerItemRow: {
@@ -386,7 +402,7 @@ const getStyles = (darkMode: boolean) => StyleSheet.create({
   drawerItemText: {
     marginLeft: 14,
     fontSize: 18,
-    color: darkMode ? "#eee" : "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   logoutRow: {
     marginTop: 16,

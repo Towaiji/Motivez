@@ -7,6 +7,7 @@ import MenuDrawer from "../../components/MenuDrawer";
 import { useScroll } from "../context/ScrollContext";
 import { useDevAuth } from "../../hooks/useDevAuth";
 import { useTheme } from "../context/ThemeContext";
+import { WHITE, BLACK, CREAM } from "../../constants/colors";
 
 export default function TabsLayout() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -40,7 +41,7 @@ export default function TabsLayout() {
         <Ionicons
           name="person-circle-outline"
           size={40}
-          color={darkMode ? "#fff" : "black"}
+          color={darkMode ? WHITE : BLACK}
         />
       </TouchableOpacity>
 
@@ -76,7 +77,7 @@ export default function TabsLayout() {
                 <Ionicons
                   name="person-add-outline"
                   size={30}
-                  color={darkMode ? "#fff" : "black"}
+                  color={darkMode ? WHITE : BLACK}
                 />
               </TouchableOpacity>
             ),
@@ -104,7 +105,7 @@ export default function TabsLayout() {
                 <Ionicons
                   name="person-add-outline"
                   size={30}
-                  color={darkMode ? "#fff" : "black"}
+                  color={darkMode ? WHITE : BLACK}
                 />
               </TouchableOpacity>
             ),
@@ -122,7 +123,7 @@ const getStyles = (darkMode: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: darkMode ? '#000' : '#fffdf8',
+      backgroundColor: darkMode ? BLACK : CREAM,
     },
     floatingIcon: {
       position: 'absolute',
