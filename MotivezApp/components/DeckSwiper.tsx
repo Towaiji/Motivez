@@ -68,8 +68,8 @@ const defaultCards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
-    latitude: 0,
-    longitude: 0
+    latitude: 43.6529,
+    longitude: -79.3849,
   },
   {
     id: '2',
@@ -88,8 +88,8 @@ const defaultCards: Card[] = [
       { username: 'sara', avatar: { uri: 'https://randomuser.me/api/portraits/women/68.jpg' } },
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
-    latitude: 0,
-    longitude: 0
+    latitude: 43.65107,
+    longitude: -79.347015
   },
   {
     id: '3',
@@ -107,8 +107,8 @@ const defaultCards: Card[] = [
     friends: [
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
-    latitude: 0,
-    longitude: 0
+    latitude: 43.65107,
+    longitude: -79.347015
   },
   {
     id: '4',
@@ -128,8 +128,8 @@ const defaultCards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
-    latitude: 0,
-    longitude: 0
+    latitude: 43.6532,
+    longitude: -79.3832
   },
   {
     id: '5',
@@ -147,8 +147,8 @@ const defaultCards: Card[] = [
     friends: [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
-    latitude: 0,
-    longitude: 0
+    latitude: 43.6529,
+    longitude: -79.3849,
   },
 ];
 
@@ -317,28 +317,30 @@ const DeckSwiper: React.FC = () => {
                 </View>
               )}
 
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                initialRegion={{
-                  latitude: card.latitude,
-                  longitude: card.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                showsUserLocation={false}
-                showsMyLocationButton={false}
-              >
-                <Marker
-                  coordinate={{
+              <View style={styles.mapContainer}>
+                <MapView
+                  provider={PROVIDER_GOOGLE}
+                  style={StyleSheet.absoluteFillObject}
+                  initialRegion={{
                     latitude: card.latitude,
                     longitude: card.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                   }}
-                  title="Activity Location"
-                />
-              </MapView>
+                  scrollEnabled={false}
+                  zoomEnabled={false}
+                  showsUserLocation={false}
+                  showsMyLocationButton={false}
+                >
+                  <Marker
+                    coordinate={{
+                      latitude: card.latitude,
+                      longitude: card.longitude,
+                    }}
+                    title="Activity Location"
+                  />
+                </MapView>
+              </View>
             </TouchableOpacity>
           )}
 
@@ -553,6 +555,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 30,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
@@ -583,7 +586,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 
-  map: {
+  mapContainer: {
     width: '100%',
     height: 250,
     borderRadius: 30,
