@@ -17,9 +17,9 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -178,6 +178,11 @@ const DeckSwiper: React.FC = () => {
     setSwiperKey(prev => prev + 1); // Force re-render of swiper
   };
 
+  const formatVibe = (vibe: string): string => {
+    const withSpaces = vibe.replace(/_/g, ' ');
+    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1).toLowerCase();
+  };
+
   const openCardDetails = (card: Card): void => {
     setSelectedCard(card);
     setDetailModalVisible(true);
@@ -247,7 +252,7 @@ const DeckSwiper: React.FC = () => {
     const stars: JSX.Element[] = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<Feather key={i} name="star" size={16} color="#FFD700" style={{ marginRight: 2 }} />);
     }
@@ -273,8 +278,8 @@ const DeckSwiper: React.FC = () => {
           ref={swiperRef}
           cards={cards}
           renderCard={(card: Card) => (
-            <TouchableOpacity 
-              style={styles.card} 
+            <TouchableOpacity
+              style={styles.card}
               onPress={() => openCardDetails(card)}
               activeOpacity={0.95}
             >
@@ -294,7 +299,7 @@ const DeckSwiper: React.FC = () => {
               <View style={styles.vibePillsContainer}>
                 {card.vibes.map((vibe: string) => (
                   <View key={vibe} style={styles.vibePill}>
-                    <Text style={styles.vibePillText}>{vibe}</Text>
+                    <Text style={styles.vibePillText}>{formatVibe(vibe)}</Text>
                   </View>
                 ))}
               </View>
@@ -336,7 +341,7 @@ const DeckSwiper: React.FC = () => {
               </MapView>
             </TouchableOpacity>
           )}
-      
+
           onSwiped={(index: number) => console.log('Swiped index:', index)}
           onSwipedAll={() => {
             console.log('All cards swiped');
@@ -344,7 +349,7 @@ const DeckSwiper: React.FC = () => {
           }}
           onSwipedRight={handleSwipeRight}
           onSwipedLeft={handleSwipeLeft}
-          
+
           // 🔥 Native Stack Effect
           stackSize={3}
           showSecondCard={true}
@@ -467,7 +472,7 @@ const DeckSwiper: React.FC = () => {
                   <View style={styles.modalVibePillsContainer}>
                     {selectedCard.vibes.map((vibe: string) => (
                       <View key={vibe} style={styles.modalVibePill}>
-                        <Text style={styles.modalVibePillText}>{vibe}</Text>
+                        <Text style={styles.modalVibePillText}>{formatVibe(vibe)}</Text>
                       </View>
                     ))}
                   </View>
@@ -531,7 +536,7 @@ const DeckSwiper: React.FC = () => {
       </Modal>
     </View>
   );
-}; 
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -586,7 +591,7 @@ const styles = StyleSheet.create({
     height: 250,
     borderRadius: 30,
     overflow: 'hidden',
-  }, 
+  },
 
   vibePillsContainer: {
     flexDirection: 'row',
