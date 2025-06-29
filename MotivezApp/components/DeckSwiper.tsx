@@ -443,9 +443,6 @@ const DeckSwiper: React.FC = () => {
                   <Text style={styles.reviewsText}>({selectedCard.reviews} reviews)</Text>
                 </View>
 
-                {/* Description */}
-                <Text style={styles.descriptionText}>{selectedCard.description}</Text>
-
                 {/* Key Info */}
                 <View style={styles.infoGrid}>
                   <View style={styles.infoItem}>
