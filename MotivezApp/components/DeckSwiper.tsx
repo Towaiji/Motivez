@@ -1,6 +1,6 @@
 import { transform } from '@babel/core';
 import React, { useState, useRef, JSX, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -154,7 +154,8 @@ const defaultCards: Card[] = [
 
 const DeckSwiper: React.FC = () => {
   const swiperRef = useRef<Swiper<Card>>(null);
-  const [cards, setCards] = useState<Card[]>(defaultCards);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
 
@@ -176,6 +177,8 @@ const DeckSwiper: React.FC = () => {
   const resetDeck = (): void => {
     setAllSwiped(false);
     setSwiperKey(prev => prev + 1); // Force re-render of swiper
+    setLoading(true);
+    loadPlaces();
   };
 
   const formatVibe = (vibe: string): string => {
@@ -193,57 +196,63 @@ const DeckSwiper: React.FC = () => {
     setSelectedCard(null);
   };
 
-  useEffect(() => {
-    const loadPlaces = async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.warn('Location permission not granted');
-          return;
-        }
-
-        const loc = await Location.getCurrentPositionAsync({});
-        const results = await fetchNearbyPlaces(
-          loc.coords.latitude,
-          loc.coords.longitude
-        );
-
-        if (results && results.length > 0) {
-          const mapped = results.map((place: any): Card => {
-            const lat = place.geometry?.location?.lat || 43.65107;
-            const lng = place.geometry?.location?.lng || -79.347015;
-            const dist = getDistanceKm(
-              loc.coords.latitude,
-              loc.coords.longitude,
-              lat,
-              lng
-            ).toFixed(1);
-
-            return {
-              id: place.place_id || place.id?.toString() || Math.random().toString(),
-              title: place.name,
-              location: place.vicinity || place.formatted_address || 'Unknown',
-              distance: `${dist} km`,
-              vibes: place.types || [],
-              description: place.types ? place.types.join(', ') : '',
-              price: 'N/A',
-              duration: 'N/A',
-              rating: place.rating || 0,
-              reviews: place.user_ratings_total || 0,
-              openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
-              features: [],
-              friends: [],
-              latitude: lat,
-              longitude: lng,
-            };
-          });
-          setCards(mapped);
-        }
-      } catch (err) {
-        console.error('Error loading nearby places', err);
+  const loadPlaces = async (): Promise<void> => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Location permission not granted');
+        setLoading(false);
+        return;
       }
-    };
 
+      const loc = await Location.getCurrentPositionAsync({});
+      const results = await fetchNearbyPlaces(
+        loc.coords.latitude,
+        loc.coords.longitude
+      );
+
+      if (results && results.length > 0) {
+        const mapped = results.map((place: any): Card => {
+          const lat = place.geometry?.location?.lat || 43.65107;
+          const lng = place.geometry?.location?.lng || -79.347015;
+          const dist = getDistanceKm(
+            loc.coords.latitude,
+            loc.coords.longitude,
+            lat,
+            lng
+          ).toFixed(1);
+
+          return {
+            id: place.place_id || place.id?.toString() || Math.random().toString(),
+            title: place.name,
+            location: place.vicinity || place.formatted_address || 'Unknown',
+            distance: `${dist} km`,
+            vibes: place.types || [],
+            description: place.types ? place.types.join(', ') : '',
+            price: 'N/A',
+            duration: 'N/A',
+            rating: place.rating || 0,
+            reviews: place.user_ratings_total || 0,
+            openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
+            features: [],
+            friends: [],
+            latitude: lat,
+            longitude: lng,
+          };
+        });
+        setCards(mapped);
+      } else {
+        setCards(defaultCards);
+      }
+    } catch (err) {
+      console.error('Error loading nearby places', err);
+      setCards(defaultCards);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadPlaces();
   }, []);
 
@@ -264,7 +273,11 @@ const DeckSwiper: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {allSwiped ? (
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : allSwiped ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>Time for a Break!</Text>
           <Text style={styles.emptySubtitle}>Check back later for new adventures</Text>
@@ -629,6 +642,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+  
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
 
   emptyState: {
     paddingTop: 200,
