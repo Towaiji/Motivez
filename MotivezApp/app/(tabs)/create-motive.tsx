@@ -16,6 +16,7 @@ import ProgressBar from '../../components/ProgressBar';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from "expo-router";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 
 export default function CreateMotiveScreen() {
@@ -28,11 +29,12 @@ export default function CreateMotiveScreen() {
   const [modeSelected, setModeSelected] = useState<'friends' | 'public' | null>(null);
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [title, setTitle] = useState('');
-  const [timeOfDay, setTimeOfDay] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string | null>(null);
-  const [experienceLevel, setExperienceLevel] = useState<string | null>(null);
-  const [goals, setGoals] = useState('');
   const [notes, setNotes] = useState('');
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  
 
   
 
@@ -40,9 +42,7 @@ export default function CreateMotiveScreen() {
   const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const timeSlots = ["🌅 Morning", "☀️ Afternoon", "🌆 Evening", "🌙 Night"];
-  const durations = ["⏱️ 1-2 hours", "⏱️ 2-4 hours", "⏱️ 4-6 hours", "⏱️ All day"];
-  const levels = ["🌱 Beginner", "🌿 Intermediate", "🌳 Expert"];
+  const [selectedPlace, setSelectedPlace] = useState<{ coordinates: { latitude: number, longitude: number } } | null>(null);
 
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -79,18 +79,17 @@ export default function CreateMotiveScreen() {
         title,
         description,
         category: selectedCategory,
-        location,
         image_url: image || null,
         privacy: modeSelected === 'public' ? 'Public' : 'Friends',
-        time_of_day: timeOfDay,
-        duration,
-        experience_level: experienceLevel,
-        goals,
         notes,
-        requires_approval: requiresApproval,
+        start_time: startTime?.toISOString() ?? null,
+        end_time: endTime?.toISOString() ?? null,
+        latitude: selectedPlace?.coordinates.latitude ?? null,
+        longitude: selectedPlace?.coordinates.longitude ?? null,
+        requires_approval: modeSelected === 'public' ? requiresApproval : false,
       }
-      
     ]);
+    
     
   
     if (error) {
@@ -200,43 +199,52 @@ export default function CreateMotiveScreen() {
               placeholderTextColor="#666"
             />
 
-            <Text style={styles.subheading}>When?</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.chipRow}
-            >
-              {timeSlots.map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[styles.chip, timeOfDay === t && styles.chipSelected]}
-                  onPress={() => setTimeOfDay(timeOfDay === t ? null : t)}
-                >
-                  <Text style={[styles.chipText, timeOfDay === t && styles.chipTextSelected]}>
-                    {t}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {/* START TIME PICKER */}
+            <View style={{ width: '100%', marginBottom: 15 }}>
+              <Text style={styles.subheading}>Start Time</Text>
+              <TouchableOpacity
+                style={[styles.input, { justifyContent: 'center' }]}
+                onPress={() => setShowStartPicker(true)}
+              >
+                <Text style={{ color: startTime ? '#000' : '#888' }}>
+                  {startTime ? startTime.toLocaleString() : 'Select start time'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            <Text style={styles.subheading}>Duration</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.chipRow}
-            >
-              {durations.map((d) => (
-                <TouchableOpacity
-                  key={d}
-                  style={[styles.chip, duration === d && styles.chipSelected]}
-                  onPress={() => setDuration(duration === d ? null : d)}
-                >
-                  <Text style={[styles.chipText, duration === d && styles.chipTextSelected]}>
-                    {d}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {/* END TIME PICKER */}
+            <View style={{ width: '100%', marginBottom: 15 }}>
+              <Text style={styles.subheading}>End Time</Text>
+              <TouchableOpacity
+                style={[styles.input, { justifyContent: 'center' }]}
+                onPress={() => setShowEndPicker(true)}
+              >
+                <Text style={{ color: endTime ? '#000' : '#888' }}>
+                  {endTime ? endTime.toLocaleString() : 'Select end time'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* MODALS */}
+            <DateTimePickerModal
+              isVisible={showStartPicker}
+              mode="datetime"
+              onConfirm={(date) => {
+                setStartTime(date);
+                setShowStartPicker(false);
+              }}
+              onCancel={() => setShowStartPicker(false)}
+            />
+
+            <DateTimePickerModal
+              isVisible={showEndPicker}
+              mode="datetime"
+              onConfirm={(date) => {
+                setEndTime(date);
+                setShowEndPicker(false);
+              }}
+              onCancel={() => setShowEndPicker(false)}
+            />
 
             <TextInput
               placeholder="Budget (CAD)"
@@ -244,34 +252,6 @@ export default function CreateMotiveScreen() {
               keyboardType="numeric"
               value={price}
               onChangeText={setPrice}
-              placeholderTextColor="#666"
-            />
-
-            <Text style={styles.subheading}>Experience Level</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.chipRow}
-            >
-              {levels.map((l) => (
-                <TouchableOpacity
-                  key={l}
-                  style={[styles.chip, experienceLevel === l && styles.chipSelected]}
-                  onPress={() => setExperienceLevel(experienceLevel === l ? null : l)}
-                >
-                  <Text style={[styles.chipText, experienceLevel === l && styles.chipTextSelected]}>
-                    {l}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <TextInput
-              placeholder="Goals (e.g., 'Learn a new skill', 'Relax and unwind')"
-              style={[styles.input, { color: '#000', height: 60 }]}
-              multiline
-              value={goals}
-              onChangeText={setGoals}
               placeholderTextColor="#666"
             />
 
