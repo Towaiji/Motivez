@@ -4,7 +4,7 @@ import axios from 'axios';
 export async function fetchNearbyPlaces(
   lat: number,
   lng: number,
-  type: string = 'tourist_attraction',
+  type: string = 'point_of_interest',
   radius: number = 10000
 ) {
   const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;

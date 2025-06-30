@@ -10,6 +10,21 @@ import { updatePreference, sortCardsByPreference } from '@/lib/userPreferences';
 
 const { width, height } = Dimensions.get('window');
 
+// Variety of place types to fetch
+const placeTypes = [
+  'restaurant',
+  'bar',
+  'cafe',
+  'park',
+  'museum',
+  'movie_theater',
+  'gym',
+  'shopping_mall',
+  'night_club',
+  'tourist_attraction',
+];
+
+
 // Helper to calculate distance between two coordinates in km
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // Earth radius in km
@@ -209,13 +224,32 @@ const DeckSwiper: React.FC = () => {
       }
 
       const loc = await Location.getCurrentPositionAsync({});
-      const results = await fetchNearbyPlaces(
-        loc.coords.latitude,
-        loc.coords.longitude
+      const randomTypes = Array.from(
+        new Set(
+          Array.from({ length: 3 }, () =>
+            placeTypes[Math.floor(Math.random() * placeTypes.length)]
+          )
+        )
       );
+      const resultsArrays = await Promise.all(
+        randomTypes.map((t) =>
+          fetchNearbyPlaces(loc.coords.latitude, loc.coords.longitude, t)
+        )
+      );
+      const results = resultsArrays.flat();
 
       if (results && results.length > 0) {
-        const mapped = results.map((place: any): Card => {
+        // Remove duplicate places that might appear across queries
+        const uniqueMap = new Map<string, any>();
+        results.forEach((p: any) => {
+          const id = p.place_id || p.id;
+          if (id && !uniqueMap.has(id)) {
+            uniqueMap.set(id, p);
+          }
+        });
+        const unique = Array.from(uniqueMap.values());
+        const shuffled = unique.sort(() => Math.random() - 0.5);
+        const mapped = shuffled.map((place: any): Card => {
           const lat = place.geometry?.location?.lat || 43.65107;
           const lng = place.geometry?.location?.lng || -79.347015;
           const dist = getDistanceKm(
