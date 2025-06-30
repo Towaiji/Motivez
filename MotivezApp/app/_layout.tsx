@@ -3,11 +3,13 @@ import { Stack } from "expo-router";
 import { LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollProvider } from "./context/ScrollContext";
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { supabase } from '../lib/supabaseClient';
 
 LogBox.ignoreAllLogs(true);
 
-export default function RootLayout() {
+function RootLayoutInner() {
+  const { darkMode } = useTheme();
 
   useEffect(() => {
     const login = async () => {
@@ -23,8 +25,8 @@ export default function RootLayout() {
   
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
+    <>
+      <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
       <ScrollProvider>
         <Stack
           screenOptions={{
@@ -58,6 +60,16 @@ export default function RootLayout() {
           />
         </Stack>
       </ScrollProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <RootLayoutInner />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

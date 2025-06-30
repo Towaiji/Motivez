@@ -21,6 +21,31 @@ import CarouselRow from "../../components/CarouselRow";
 import { useRouter } from "expo-router";
 import { useScroll } from "../context/ScrollContext";
 import Slider from '@react-native-community/slider';
+import { useTheme } from "../context/ThemeContext";
+import {
+  PRIMARY,
+  SECONDARY,
+  WHITE,
+  BLACK,
+  GRAY,
+  GRAY_LIGHT,
+  GRAY_DARK,
+  GRAY_MUTED,
+  GRAY_BORDER,
+  LIGHT_BG,
+  DARK_BG,
+  LILAC,
+  DARKER_BG,
+  RED_SOFT,
+  GREEN,
+  DARK_TEXT,
+  GRAY_LIGHTER,
+  GRAY_MEDIUM_LIGHT,
+  GRAY_PLACEHOLDER,
+  GRAY_SOFT,
+  GRAY_ULTRA_LIGHT3,
+  LIGHT_TEXT,
+} from "../../constants/colors";
 
 // 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
@@ -121,6 +146,8 @@ export default function Motives() {
   });
   const router = useRouter();
   const { scrollY } = useScroll();
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
   const lastScrollY = useRef(0);
   const scrollDirection = useRef<'up' | 'down'>('up');
   const [distance, setDistance] = useState(8); // Changed from 5 miles to 8 km
@@ -248,13 +275,13 @@ export default function Motives() {
                 style={[styles.friendButton, styles.acceptButton]}
                 onPress={() => handleAcceptFriend(friend.id)}
               >
-                <Ionicons name="checkmark" size={24} color="#fff" />
+                <Ionicons name="checkmark" size={24} color={WHITE} />
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.friendButton, styles.rejectButton]}
                 onPress={() => handleRejectFriend(friend.id)}
               >
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={WHITE} />
               </TouchableOpacity>
             </View>
           </View>
@@ -279,7 +306,7 @@ export default function Motives() {
                 onPress={() => setIsFilterModalVisible(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={LIGHT_TEXT} />
               </TouchableOpacity>
             </View>
 
@@ -296,9 +323,9 @@ export default function Motives() {
                 step={1}
                 value={filters.distance}
                 onValueChange={(value) => handleFilterChange('distance', value)}
-                minimumTrackTintColor="#e91e63"
-                maximumTrackTintColor="#ddd"
-                thumbTintColor="#e91e63"
+                minimumTrackTintColor={PRIMARY}
+                maximumTrackTintColor={GRAY_LIGHTER}
+                thumbTintColor={PRIMARY}
               />
               <View style={styles.distanceMarkers}>
                 <Text style={styles.markerText}>1 km</Text>
@@ -375,7 +402,7 @@ export default function Motives() {
           onPress={() => router.push("../maps/_index")}
           style={styles.mapButton}
         >
-          <Ionicons name="map-outline" size={24} color="#e91e63" />
+          <Ionicons name="map-outline" size={24} color={PRIMARY} />
         </TouchableOpacity>
       </View>
 
@@ -393,10 +420,10 @@ export default function Motives() {
         <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
           {/* Search Bar */}
           <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+            <Ionicons name="search" size={20} color={GRAY_SOFT} style={{ marginRight: 8 }} />
             <TextInput
               placeholder="Search motives..."
-              placeholderTextColor="#999"
+              placeholderTextColor={GRAY_PLACEHOLDER}
               style={styles.input}
               value={search}
               onChangeText={setSearch}
@@ -405,7 +432,7 @@ export default function Motives() {
               style={styles.filterButton}
               onPress={() => setIsFilterModalVisible(true)}
             >
-              <Ionicons name="options-outline" size={20} color="#666" />
+              <Ionicons name="options-outline" size={20} color={GRAY} />
             </TouchableOpacity>
           </View>
 
@@ -469,10 +496,11 @@ export default function Motives() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (darkMode: boolean) =>
+  StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f6f8",
+    backgroundColor: darkMode ? BLACK : LIGHT_BG,
   },
   fixedHeader: {
     position: 'absolute',
@@ -490,7 +518,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#000",
+    color: darkMode ? WHITE : BLACK,
     paddingHorizontal: 10,
   },
   searchBar: {
@@ -498,7 +526,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f1f1f1",
+    backgroundColor: darkMode ? DARK_BG : GRAY_ULTRA_LIGHT3,
     borderRadius: 25,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -508,7 +536,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -521,23 +549,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activeButton: {
-    backgroundColor: "#e91e63",
+    backgroundColor: PRIMARY,
   },
   toggleText: {
-    color: "rgba(0,0,0,0.5)",
+    color: darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
     fontWeight: "500",
     fontSize: 14,
   },
   activeText: {
-    color: "#000",
+    color: darkMode ? WHITE : BLACK,
     fontWeight: "600",
   },
   card: {
     marginBottom: 20,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     borderRadius: 12,
     padding: 12,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
@@ -555,22 +583,22 @@ const styles = StyleSheet.create({
   },
   user: {
     fontSize: 14,
-    color: "#666",
+    color: darkMode ? GRAY_SOFT : GRAY,
   },
   mapButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   stickyTabsContainer: {
-    backgroundColor: "#efe7ee",
+    backgroundColor: darkMode ? DARKER_BG : LILAC,
     paddingVertical: 10,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
+    borderBottomColor: GRAY_LIGHT,
     zIndex: 10,
   },
   activeIndicator: {
@@ -578,7 +606,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#e91e63",
+    backgroundColor: PRIMARY,
   },
   headerCard: {
     position: "absolute",
@@ -586,12 +614,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: height * 0.28,
-    backgroundColor: "#fff",
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingTop: 100,
     paddingHorizontal: 24,
-    shadowColor: "#000",
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -609,7 +637,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#333",
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     textAlign: "center",
   },
   suggestedFriendsContainer: {
@@ -620,16 +648,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   suggestedFriendCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -641,8 +669,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     marginRight: 16,
     borderWidth: 2,
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: WHITE,
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -654,17 +682,17 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     marginBottom: 2,
   },
   friendUsername: {
     fontSize: 14,
-    color: '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
     marginBottom: 4,
   },
   mutualFriends: {
     fontSize: 13,
-    color: '#888',
+    color: darkMode ? GRAY_MUTED : GRAY_MEDIUM_LIGHT,
     fontWeight: '500',
   },
   friendActions: {
@@ -677,26 +705,26 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   acceptButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: SECONDARY,
   },
   rejectButton: {
-    backgroundColor: '#FF5252',
+    backgroundColor: RED_SOFT,
   },
   filterButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -713,12 +741,12 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? BLACK : WHITE,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     maxHeight: '80%',
-    shadowColor: '#000',
+    shadowColor: BLACK,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -733,7 +761,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   closeButton: {
     padding: 5,
@@ -744,7 +772,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     marginBottom: 10,
   },
   filterOptions: {
@@ -756,30 +784,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: darkMode ? LIGHT_TEXT : GRAY_ULTRA_LIGHT3,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: darkMode ? GRAY_DARK : GRAY_LIGHTER,
   },
   filterOptionSelected: {
-    backgroundColor: '#e91e63',
-    borderColor: '#e91e63',
+    backgroundColor: PRIMARY,
+    borderColor: PRIMARY,
   },
   filterOptionText: {
-    color: '#666',
+    color: darkMode ? GRAY_LIGHT : GRAY,
     fontSize: 14,
   },
   filterOptionTextSelected: {
-    color: '#fff',
+    color: WHITE,
   },
   applyButton: {
-    backgroundColor: '#e91e63',
+    backgroundColor: PRIMARY,
     padding: 15,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
   },
   applyButtonText: {
-    color: '#fff',
+    color: WHITE,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -792,7 +820,7 @@ const styles = StyleSheet.create({
   distanceValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#e91e63',
+    color: PRIMARY,
   },
   slider: {
     width: '100%',
@@ -806,6 +834,6 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 12,
-    color: '#666',
+    color: darkMode ? GRAY_SOFT : GRAY,
   },
 });

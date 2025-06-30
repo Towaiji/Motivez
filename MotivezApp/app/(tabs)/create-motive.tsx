@@ -17,6 +17,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabaseClient";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
+import { useTheme } from "../context/ThemeContext";
+import {
+  PRIMARY,
+  SECONDARY,
+  WHITE,
+  BLACK,
+  GRAY,
+  GRAY_DARK,
+  GRAY_LIGHT,
+  GRAY_LIGHTER,
+  DARK_TEXT,
+  LIGHT_TEXT,
+  LIGHT_BG,
+  DARK_BG,
+} from "../../constants/colors";
 
 
 export default function CreateMotiveScreen() {
@@ -59,6 +74,8 @@ export default function CreateMotiveScreen() {
   };
 
   const router = useRouter();
+  const { darkMode } = useTheme();
+  const styles = getStyles(darkMode);
 
   const handleSubmit = async () => {
     if (!title || !location || !price || !selectedCategory) {
@@ -117,7 +134,7 @@ export default function CreateMotiveScreen() {
             Create a Motive
           </Text>
 
-          <Text style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' }}>
+          <Text style={{ fontSize: 16, color: GRAY, marginBottom: 40, textAlign: 'center' }}>
             Is this just for the crew, or for the world?
           </Text>
 
@@ -180,7 +197,7 @@ export default function CreateMotiveScreen() {
               }}
               style={{ marginBottom: 20 }}
             >
-              <Text style={{ color: '#e91e63', textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
+              <Text style={{ color: PRIMARY, textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
             </TouchableOpacity>
           </>
         )}
@@ -190,18 +207,18 @@ export default function CreateMotiveScreen() {
           <>
             <TextInput
               placeholder="Title"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: BLACK }]}
               value={title}
               onChangeText={setTitle}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             <TextInput
               placeholder="Location"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: BLACK }]}
               value={location}
               onChangeText={setLocation}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             <Text style={styles.subheading}>When?</Text>
@@ -244,11 +261,11 @@ export default function CreateMotiveScreen() {
 
             <TextInput
               placeholder="Budget (CAD)"
-              style={[styles.input, { color: '#000' }]}
+              style={[styles.input, { color: BLACK }]}
               keyboardType="numeric"
               value={price}
               onChangeText={setPrice}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             <Text style={styles.subheading}>Experience Level</Text>
@@ -272,29 +289,29 @@ export default function CreateMotiveScreen() {
 
             <TextInput
               placeholder="Goals (e.g., 'Learn a new skill', 'Relax and unwind')"
-              style={[styles.input, { color: '#000', height: 60 }]}
+              style={[styles.input, { color: BLACK, height: 60 }]}
               multiline
               value={goals}
               onChangeText={setGoals}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             <TextInput
               placeholder="Description"
-              style={[styles.input, { color: '#000', height: 80 }]}
+              style={[styles.input, { color: BLACK, height: 80 }]}
               multiline
               value={description}
               onChangeText={setDescription}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             <TextInput
               placeholder="Additional Notes"
-              style={[styles.input, { color: '#000', height: 60 }]}
+              style={[styles.input, { color: BLACK, height: 60 }]}
               multiline
               value={notes}
               onChangeText={setNotes}
-              placeholderTextColor="#666"
+              placeholderTextColor={GRAY}
             />
 
             {/* Category Chips */}
@@ -386,31 +403,32 @@ export default function CreateMotiveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#f4f6f8', paddingTop: 50 },
+const getStyles = (darkMode: boolean) =>
+  StyleSheet.create({
+  safeContainer: { flex: 1, backgroundColor: darkMode ? BLACK : LIGHT_BG, paddingTop: 50 },
   stepIndicator: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? DARK_BG : WHITE,
   },
   stepWrapper: { alignItems: 'center' },
   stepCircle: {
     width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#ddd', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: darkMode ? GRAY_DARK : GRAY_LIGHTER, justifyContent: 'center', alignItems: 'center',
   },
-  stepCircleActive: { backgroundColor: '#e91e63' },
-  stepNumber: { color: '#444', fontSize: 12 },
-  stepNumberActive: { color: '#fff', fontWeight: 'bold' },
-  stepLabel: { fontSize: 10, color: '#666', marginTop: 2 },
-  stepLabelActive: { color: '#e91e63', fontWeight: '600' },
+  stepCircleActive: { backgroundColor: PRIMARY },
+  stepNumber: { color: darkMode ? GRAY_LIGHT : GRAY_DARK, fontSize: 12 },
+  stepNumberActive: { color: WHITE, fontWeight: 'bold' },
+  stepLabel: { fontSize: 10, color: darkMode ? GRAY_LIGHT : GRAY, marginTop: 2 },
+  stepLabelActive: { color: PRIMARY, fontWeight: '600' },
 
   headerRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingBottom: 4,
   },
   headerTitle: {
-    fontSize: 24, fontWeight: 'bold', color: '#333',
+    fontSize: 24, fontWeight: 'bold', color: darkMode ? DARK_TEXT : LIGHT_TEXT,
     marginLeft: 10,
   },
 
@@ -418,16 +436,16 @@ const styles = StyleSheet.create({
     padding: 20, flexGrow: 1, alignItems: 'center',
   },
   imagePicker: {
-    width: '100%', height: 200, backgroundColor: '#ddd',
+    width: '100%', height: 200, backgroundColor: darkMode ? GRAY_DARK : GRAY_LIGHTER,
     borderRadius: 12, justifyContent: 'center',
     alignItems: 'center', overflow: 'hidden', marginBottom: 20,
   },
-  imagePlaceholder: { color: '#666' },
+  imagePlaceholder: { color: darkMode ? GRAY_LIGHT : GRAY },
   image: { width: '100%', height: '100%' },
 
   input: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
@@ -438,7 +456,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: darkMode ? DARK_TEXT : LIGHT_TEXT,
   },
   chipRow: {
     width: '100%',
@@ -446,21 +464,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   chip: {
-    backgroundColor: '#fff',
+    backgroundColor: darkMode ? DARK_BG : WHITE,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 10,
   },
   chipSelected: {
-    backgroundColor: '#e91e63',
+    backgroundColor: PRIMARY,
   },
   chipText: {
-    color: '#444',
+    color: darkMode ? GRAY_LIGHT : GRAY_DARK,
     fontSize: 14,
   },
   chipTextSelected: {
-    color: '#fff',
+    color: WHITE,
     fontWeight: '600',
   },
 
@@ -468,13 +486,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     marginBottom: 20,
   },
-  label: { marginHorizontal: 8, color: '#444' },
+  label: { marginHorizontal: 8, color: darkMode ? GRAY_LIGHT : GRAY_DARK },
 
   preview: { alignItems: 'flex-start', width: '100%' },
   previewImage: {
     width: '100%', height: 200, borderRadius: 12, marginBottom: 15,
   },
-  previewText: { fontSize: 16, color: '#333', marginBottom: 6 },
+  previewText: { fontSize: 16, color: darkMode ? DARK_TEXT : LIGHT_TEXT, marginBottom: 6 },
   bold: { fontWeight: '600' },
 
   navRow: {
@@ -483,16 +501,16 @@ const styles = StyleSheet.create({
   },
   navBtn: {
     paddingVertical: 10, paddingHorizontal: 20,
-    borderRadius: 8, backgroundColor: '#ddd',
+    borderRadius: 8, backgroundColor: darkMode ? GRAY_DARK : GRAY_LIGHTER,
   },
-  navText: { fontSize: 16, color: '#444' },
-  nextBtn: { backgroundColor: '#e91e63' },
-  nextText: { color: '#fff' },
-  submitBtn: { backgroundColor: '#4CAF50' },
-  submitText: { color: '#fff', fontWeight: 'bold' },
+  navText: { fontSize: 16, color: darkMode ? GRAY_LIGHT : GRAY_DARK },
+  nextBtn: { backgroundColor: PRIMARY },
+  nextText: { color: WHITE },
+  submitBtn: { backgroundColor: SECONDARY },
+  submitText: { color: WHITE, fontWeight: 'bold' },
 
   bubbleBtn: {
-  backgroundColor: '#e91e63',
+  backgroundColor: PRIMARY,
   paddingHorizontal: 28,
   paddingVertical: 12,
   borderRadius: 50,
@@ -502,7 +520,7 @@ const styles = StyleSheet.create({
   bubbleText: {
   fontSize: 16,
   fontWeight: '600',
-  color: '#fff',
+  color: WHITE,
   },
 
 });
