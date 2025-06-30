@@ -6,6 +6,7 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
+import { updatePreference, sortCardsByPreference } from '@/lib/userPreferences';
 
 const { width, height } = Dimensions.get('window');
 
@@ -161,12 +162,14 @@ const DeckSwiper: React.FC = () => {
 
   const handleSwipeRight = (index: number): void => {
     console.log('Liked:', cards[index]?.title);
+    updatePreference(cards[index]?.vibes || [], true);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'like')
   };
 
   const handleSwipeLeft = (index: number): void => {
     console.log('Skipped:', cards[index]?.title);
+    updatePreference(cards[index]?.vibes || [], false);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'skip')
   };
@@ -239,14 +242,17 @@ const DeckSwiper: React.FC = () => {
             latitude: lat,
             longitude: lng,
           };
-        });
-        setCards(mapped);
+       });
+        const sorted: Card[] = await sortCardsByPreference(mapped as Card[]);
+        setCards(sorted);
       } else {
-        setCards(defaultCards);
+        const sorted: Card[] = await sortCardsByPreference(defaultCards as Card[]);
+        setCards(sorted);
       }
     } catch (err) {
       console.error('Error loading nearby places', err);
-      setCards(defaultCards);
+      const sorted = await sortCardsByPreference(defaultCards);
+      setCards(sorted);
     } finally {
       setLoading(false);
     }
@@ -642,7 +648,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  
+
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
