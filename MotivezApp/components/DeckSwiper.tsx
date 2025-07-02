@@ -6,6 +6,7 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
+import { fetchPlaceDetails } from '@/lib/fetchPlaceDetails';
 import { updatePreference, sortCardsByPreference } from '@/lib/userPreferences';
 
 const { width, height } = Dimensions.get('window');
@@ -58,6 +59,7 @@ interface Card {
   rating: number;
   reviews: number;
   openHours: string;
+  weeklyHours: string[];
   features: string[];
   friends: Friend[];
   latitude: number;
@@ -86,6 +88,7 @@ const defaultCards: Card[] = [
     ],
     latitude: 43.6529,
     longitude: -79.3849,
+    weeklyHours: []
   },
   {
     id: '2',
@@ -105,7 +108,8 @@ const defaultCards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
     latitude: 43.65107,
-    longitude: -79.347015
+    longitude: -79.347015,
+    weeklyHours: []
   },
   {
     id: '3',
@@ -124,7 +128,8 @@ const defaultCards: Card[] = [
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
     latitude: 43.65107,
-    longitude: -79.347015
+    longitude: -79.347015,
+    weeklyHours: []
   },
   {
     id: '4',
@@ -145,7 +150,8 @@ const defaultCards: Card[] = [
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
     latitude: 43.6532,
-    longitude: -79.3832
+    longitude: -79.3832,
+    weeklyHours: []
   },
   {
     id: '5',
@@ -165,6 +171,7 @@ const defaultCards: Card[] = [
     ],
     latitude: 43.6529,
     longitude: -79.3849,
+    weeklyHours: []
   },
 ];
 
@@ -249,34 +256,38 @@ const DeckSwiper: React.FC = () => {
         });
         const unique = Array.from(uniqueMap.values());
         const shuffled = unique.sort(() => Math.random() - 0.5);
-        const mapped = shuffled.map((place: any): Card => {
-          const lat = place.geometry?.location?.lat || 43.65107;
-          const lng = place.geometry?.location?.lng || -79.347015;
-          const dist = getDistanceKm(
-            loc.coords.latitude,
-            loc.coords.longitude,
-            lat,
-            lng
-          ).toFixed(1);
+        const mapped = await Promise.all(
+          shuffled.map(async (place: any): Promise<Card> => {
+            const lat = place.geometry?.location?.lat || 43.65107;
+            const lng = place.geometry?.location?.lng || -79.347015;
+            const dist = getDistanceKm(
+              loc.coords.latitude,
+              loc.coords.longitude,
+              lat,
+              lng
+            ).toFixed(1);
 
-          return {
-            id: place.place_id || place.id?.toString() || Math.random().toString(),
-            title: place.name,
-            location: place.vicinity || place.formatted_address || 'Unknown',
-            distance: `${dist} km`,
-            vibes: place.types || [],
-            description: place.types ? place.types.join(', ') : '',
-            price: 'N/A',
-            duration: 'N/A',
-            rating: place.rating || 0,
-            reviews: place.user_ratings_total || 0,
-            openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
-            features: [],
-            friends: [],
-            latitude: lat,
-            longitude: lng,
-          };
-       });
+            const details = await fetchPlaceDetails(place.place_id);
+            return {
+              id: place.place_id || place.id?.toString() || Math.random().toString(),
+              title: place.name,
+              location: place.vicinity || place.formatted_address || 'Unknown',
+              distance: `${dist} km`,
+              vibes: place.types || [],
+              description: place.types ? place.types.join(', ') : '',
+              price: 'N/A',
+              duration: 'N/A',
+              rating: place.rating || 0,
+              reviews: place.user_ratings_total || 0,
+              openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
+              weeklyHours: details?.opening_hours?.weekday_text || [],
+              features: [],
+              friends: [],
+              latitude: lat,
+              longitude: lng,
+            };
+          })
+        );
         const sorted: Card[] = await sortCardsByPreference(mapped as Card[]);
         setCards(sorted);
       } else {
@@ -516,6 +527,9 @@ const DeckSwiper: React.FC = () => {
                 <View style={styles.hoursSection}>
                   <Text style={styles.sectionTitle}>Hours</Text>
                   <Text style={styles.hoursText}>{selectedCard.openHours}</Text>
+                  {selectedCard.weeklyHours.map((h: string, idx: number) => (
+                    <Text key={idx} style={styles.hoursText}>{h}</Text>
+                  ))}
                 </View>
 
                 {/* Vibes */}
