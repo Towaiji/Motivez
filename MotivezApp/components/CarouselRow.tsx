@@ -34,9 +34,12 @@ export default function CarouselRow({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const router = useRouter();
 
+  // Ensure data is always an array
+  const safeData = Array.isArray(data) ? data : [];
+
   const carouselData: (Activity | { id: string})[] = [
     { id: "left-spacer" },
-    ...data,
+    ...safeData,
     { id: "right-spacer" },
   ];
 

@@ -3,14 +3,12 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      [
-        'module-resolver',
-        {
-          alias: {
-            '@': './',
-          },
-        },
-      ],
+      ['babel-plugin-dotenv-import', {
+        moduleName: '@env',
+        path: '.env',
+        safe: false,
+        allowUndefined: true,
+      }],
     ],
   };
 };
