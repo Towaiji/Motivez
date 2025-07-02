@@ -343,67 +343,69 @@ const DeckSwiper: React.FC = () => {
           cards={cards}
           renderCard={(card: Card) => (
             <TouchableOpacity
-              style={styles.card}
+              style={styles.cardWrapper}
               onPress={() => openCardDetails(card)}
               activeOpacity={0.95}
             >
-              <Text style={styles.title}>{card.title}</Text>
+              <View style={styles.card}>
+                <Text style={styles.title}>{card.title}</Text>
 
-              <View style={styles.row}>
-                <Feather name="map-pin" size={16} color="black" style={styles.icon} />
-                <Text style={styles.details}>{card.location}</Text>
-              </View>
-
-              <View style={styles.row}>
-                <Feather name="navigation" size={16} color="black" style={styles.icon} />
-                <Text style={styles.details}>{card.distance}</Text>
-              </View>
-
-              {/* Vibe Pills replacing the type line */}
-              <View style={styles.vibePillsContainer}>
-                {card.vibes.map((vibe: string) => (
-                  <View key={vibe} style={styles.vibePill}>
-                    <Text style={styles.vibePillText}>{formatVibe(vibe)}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {card.friends && card.friends.length > 0 && (
-                <View style={styles.friendRow}>
-                  <View style={styles.avatarGroup}>
-                    {card.friends.slice(0, 5).map((friend: Friend, index: number) => (
-                      <View key={friend.username} style={[styles.avatarContainer, { marginLeft: index === 0 ? 0 : -12 }]}>
-                        <Image source={friend.avatar} style={styles.avatarImage} />
-                      </View>
-                    ))}
-                  </View>
-                  <Text style={styles.friendText}>Friends have visited</Text>
+                <View style={styles.row}>
+                  <Feather name="map-pin" size={16} color="black" style={styles.icon} />
+                  <Text style={styles.details}>{card.location}</Text>
                 </View>
-              )}
 
-              <View style={styles.mapContainer}>
-                <MapView
-                  provider={PROVIDER_GOOGLE}
-                  style={StyleSheet.absoluteFillObject}
-                  initialRegion={{
-                    latitude: card.latitude,
-                    longitude: card.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }}
-                  scrollEnabled={false}
-                  zoomEnabled={false}
-                  showsUserLocation={false}
-                  showsMyLocationButton={false}
-                >
-                  <Marker
-                    coordinate={{
+                <View style={styles.row}>
+                  <Feather name="navigation" size={16} color="black" style={styles.icon} />
+                  <Text style={styles.details}>{card.distance}</Text>
+                </View>
+
+                {/* Vibe Pills replacing the type line */}
+                <View style={styles.vibePillsContainer}>
+                  {card.vibes.map((vibe: string) => (
+                    <View key={vibe} style={styles.vibePill}>
+                      <Text style={styles.vibePillText}>{formatVibe(vibe)}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {card.friends && card.friends.length > 0 && (
+                  <View style={styles.friendRow}>
+                    <View style={styles.avatarGroup}>
+                      {card.friends.slice(0, 5).map((friend: Friend, index: number) => (
+                        <View key={friend.username} style={[styles.avatarContainer, { marginLeft: index === 0 ? 0 : -12 }]}>
+                          <Image source={friend.avatar} style={styles.avatarImage} />
+                        </View>
+                      ))}
+                    </View>
+                    <Text style={styles.friendText}>Friends have visited</Text>
+                  </View>
+                )}
+
+                <View style={styles.mapContainer}>
+                  <MapView
+                    provider={PROVIDER_GOOGLE}
+                    style={StyleSheet.absoluteFillObject}
+                    initialRegion={{
                       latitude: card.latitude,
                       longitude: card.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
                     }}
-                    title="Activity Location"
-                  />
-                </MapView>
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    showsUserLocation={false}
+                    showsMyLocationButton={false}
+                  >
+                    <Marker
+                      coordinate={{
+                        latitude: card.latitude,
+                        longitude: card.longitude,
+                      }}
+                      title="Activity Location"
+                    />
+                  </MapView>
+                </View>
               </View>
             </TouchableOpacity>
           )}
@@ -612,25 +614,27 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 40,
   },
-  card: {
+  cardWrapper: {
     width: width * 0.85,
     height: height * 0.6,
+    marginTop: -55, //adjusts the height of the card
     borderRadius: 30,
-    backgroundColor: '#f2f2f2',
-    padding: 20,
-    marginTop: -55, //adjusts the heigh of the card
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    paddingTop: 30,
-    overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
     elevation: 8,
-    flex: 0.6,
+    backgroundColor: '#f2f2f2',
+  },
+
+  card: {
+    flex: 1,
+    borderRadius: 30,
+    padding: 20,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    paddingTop: 30,
+    overflow: 'hidden',
   },
 
   title: {
