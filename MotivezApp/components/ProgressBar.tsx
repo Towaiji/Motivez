@@ -1,39 +1,23 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const pink = '#e91e63';
 const grey = '#ccc';
 
 const ProgressBar = ({ steps, currentStep }: { steps: string[]; currentStep: number }) => {
-  const progressAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const stepFraction = currentStep / (steps.length - 1);
-    const LINE_WIDTH = width - 48; // 24 padding on each side
-    Animated.timing(progressAnim, {
-      toValue: LINE_WIDTH * stepFraction,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [currentStep, steps.length]);
-
   return (
     <View style={styles.wrapper}>
       {/* Full Grey Line */}
       <View style={styles.fullLine} />
-      {/* Filled gradient line up to current step */}
-      <Animated.View style={[styles.fullLine, styles.filledLine, { width: progressAnim }]}
-        pointerEvents="none"
-      >
-        <LinearGradient
-          colors={["#ff8a65", pink]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFill}
-        />
-      </Animated.View>
+      {/* Filled Pink Line up to current step */}
+      <View
+        style={[
+          styles.fullLine,
+          styles.filledLine,
+          { width: `${(currentStep / (steps.length - 1)) * 100}%` },
+        ]}
+      />
       {/* Circles */}
       <View style={styles.container}>
         {steps.map((_, index) => {
@@ -90,7 +74,6 @@ const styles = StyleSheet.create({
   },
   filledLine: {
     backgroundColor: pink,
-    overflow: 'hidden',
     zIndex: 1,
   },
   container: {

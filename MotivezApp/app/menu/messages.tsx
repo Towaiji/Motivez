@@ -7,149 +7,87 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { formatTime } from '../lib/formatTime';
-import { supabase } from '../lib/supabase';
 
-interface Chat {
-  id: string;
-  name: string;
-  avatar_url?: string | null;
-  last_message?: string | null;
-  updated_at: string;
-  unread?: number;
-}
-
-const CURRENT_USER_ID = 'demo-user';
+const dummyChats = [
+  {
+    id: '1',
+    name: 'Sara Ahmed',
+    avatar: 'https://i.pravatar.cc/150?u=sara.ahmed',
+    lastMessage: 'See you at 8!',
+    time: '10:24 AM',
+    unread: 2,
+  },
+  {
+    id: '2',
+    name: 'Jay Patel',
+    avatar: 'https://i.pravatar.cc/150?u=jay.patel',
+    lastMessage: 'On my way 🚗',
+    time: '9:11 AM',
+    unread: 0,
+  },
+  {
+    id: '3',
+    name: 'Go Kart Crew',
+    avatar: 'https://i.pravatar.cc/150?u=gokart.group',
+    lastMessage: 'Let’s book for Friday?',
+    time: 'Yesterday',
+    unread: 1,
+  },
+  {
+    id: '4',
+    name: 'Maria Garcia',
+    avatar: 'https://i.pravatar.cc/150?u=maria.garcia',
+    lastMessage: 'Had so much fun last night!',
+    time: 'Mon',
+    unread: 0,
+  },
+  {
+    id: '5',
+    name: 'Trivia Night',
+    avatar: 'https://i.pravatar.cc/150?u=trivia.group',
+    lastMessage: 'Scoreboard updated! 🏆',
+    time: 'Sun',
+    unread: 5,
+  },
+];
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState<typeof dummyChats>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [friends, setFriends] = useState([
-    { id: 'friend1', name: 'Alice' },
-    { id: 'friend2', name: 'Bob' },
-    // Add more friends as needed
-  ]);
-  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchChats();
+    // Simulate API call delay
+    setTimeout(() => {
+      setChats(dummyChats);
+      setLoading(false);
+    }, 600);
   }, []);
 
-  async function fetchChats() {
-    const { data } = await supabase
-      .from('chats')
-      .select('*')
-      .eq('user_id', CURRENT_USER_ID)
-      .order('updated_at', { ascending: false });
-
-    // If nothing is in Supabase, show a hardcoded example chat
-    if (!data || data.length === 0) {
-      setChats([
-        {
-          id: 'example-chat-1',
-          name: 'Alice, Bob (Example)',
-          avatar_url: 'https://ui-avatars.com/api/?name=Alice+Bob',
-          last_message: 'This is an example chat! 👋',
-          updated_at: new Date().toISOString(),
-          unread: 1,
-        },
-      ]);
-    } else {
-      setChats(data as Chat[]);
-    }
-    setLoading(false);
-  }
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
-  const handleFriendSelection = (friendId: string) => {
-    setSelectedFriends((prev) => {
-      if (prev.includes(friendId)) {
-        return prev.filter((id) => id !== friendId);
-      } else {
-        return [...prev, friendId];
-      }
-    });
-  };
-
-  const createNewChat = async () => {
-    if (selectedFriends.length === 0) {
-      alert('Select at least one friend!');
-      return;
-    }
-
-    // Compose a chat name
-    const selectedNames = friends
-      .filter(f => selectedFriends.includes(f.id))
-      .map(f => f.name);
-    const chatName = [CURRENT_USER_ID, ...selectedNames].join(', ');
-
-    // Try Supabase insert (will fail if table not set up)
-    let chatId: string;
-    try {
-      const { data: chat, error } = await supabase
-        .from('chats')
-        .insert([
-          {
-            name: chatName,
-            user_id: CURRENT_USER_ID,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error || !chat) throw new Error(error?.message || 'No chat created');
-      chatId = chat.id;
-      fetchChats();
-    } catch (e) {
-      // Fallback: just add locally if no Supabase
-      chatId = 'local-chat-' + Math.random().toString(36).substring(2, 10);
-      setChats((prev) => [
-        ...prev,
-        {
-          id: chatId,
-          name: chatName + ' (Local)',
-          avatar_url: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chatName),
-          last_message: 'Welcome to your new chat!',
-          updated_at: new Date().toISOString(),
-          unread: 0,
-        },
-      ]);
-    }
-
-    setIsModalVisible(false);
-    setSelectedFriends([]);
-    // Navigate to the new chat (works for both real and fake)
-    router.push(`/menu/messages/${chatId}`);
-  };
-
-
-
-  const renderChat = ({ item }: { item: Chat }) => (
+  const renderChat = ({ item }: { item: typeof dummyChats[0] }) => (
     <TouchableOpacity
       style={styles.chatRow}
-      onPress={() => router.push(`/menu/messages/${item.id}`)}
+      onPress={() => {
+        // router.push(`/menu/messages/${item.id}`);
+        // For now, just alert (replace with your navigation)
+        alert(`Go to chat with ${item.name}`);
+      }}
     >
-      <Image source={{ uri: item.avatar_url || undefined }} style={styles.avatar} />
+      <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.chatInfo}>
         <View style={styles.chatTitleRow}>
           <Text style={styles.chatName}>{item.name}</Text>
-          <Text style={styles.chatTime}>{formatTime(item.updated_at)}</Text>
+          <Text style={styles.chatTime}>{item.time}</Text>
         </View>
         <Text style={styles.lastMessage} numberOfLines={1}>
-          {item.last_message}
+          {item.lastMessage}
         </Text>
       </View>
-      {item.unread && item.unread > 0 && (
+      {item.unread > 0 && (
         <View style={styles.unreadBadge}>
           <Text style={styles.unreadText}>{item.unread}</Text>
         </View>
@@ -167,9 +105,7 @@ export default function MessagesScreen() {
             <Ionicons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Messages</Text>
-          <TouchableOpacity onPress={toggleModal}>
-            <Ionicons name="add" size={28} color="#333" />
-          </TouchableOpacity>
+          <View style={{ width: 32 }} /> {/* Spacer to center title */}
         </View>
 
         {loading ? (
@@ -191,39 +127,6 @@ export default function MessagesScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
-
-        <Modal
-          visible={isModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={toggleModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Select Friends</Text>
-              {friends.map((friend) => (
-                <TouchableOpacity
-                  key={friend.id}
-                  style={[
-                    styles.friendItem,
-                    selectedFriends.includes(friend.id) && styles.selectedFriendItem,
-                  ]}
-                  onPress={() => handleFriendSelection(friend.id)}
-                >
-                  <Text>{friend.name}</Text>
-                </TouchableOpacity>
-              ))}
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.modalButton} onPress={createNewChat}>
-                  <Text>Create Chat</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalButton} onPress={toggleModal}>
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </SafeAreaView>
     </>
   );
@@ -243,7 +146,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#dddddd',
-    justifyContent: 'space-between', // Added to push the add button to the right
   },
   backButton: {
     width: 32,
@@ -338,44 +240,5 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     fontWeight: '500',
-  },
-
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  friendItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  selectedFriendItem: {
-    backgroundColor: '#e0e0e0',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-  },
-  modalButton: {
-    padding: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
   },
 });
