@@ -274,7 +274,9 @@ const DeckSwiper: React.FC = () => {
               location: place.vicinity || place.formatted_address || 'Unknown',
               distance: `${dist} km`,
               vibes: place.types || [],
-              description: place.types ? place.types.join(', ') : '',
+              description:
+                details?.editorial_summary?.overview ||
+                (place.types ? place.types.join(', ') : ''),
               price: 'N/A',
               duration: 'N/A',
               rating: place.rating || 0,
@@ -510,6 +512,10 @@ const DeckSwiper: React.FC = () => {
                   </View>
                   <Text style={styles.reviewsText}>({selectedCard.reviews} reviews)</Text>
                 </View>
+
+                {selectedCard.description && (
+                  <Text style={styles.descriptionText}>{selectedCard.description}</Text>
+                )}
 
                 {/* Key Info */}
                 <View style={styles.infoGrid}>
