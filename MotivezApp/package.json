@@ -53,6 +53,8 @@
     "react-native-confetti-cannon": "^1.5.2",
     "react-native-deck-swiper": "^2.0.17",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-get-random-values": "^1.11.0",
+    "react-native-google-places-autocomplete": "^2.5.7",
     "react-native-maps": "1.20.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-paper": "^5.14.5",
@@ -79,7 +81,9 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
-        "exclude": ["react-native-confetti-cannon"]
+        "exclude": [
+          "react-native-confetti-cannon"
+        ]
       }
     }
   }

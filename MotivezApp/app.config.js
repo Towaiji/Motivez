@@ -36,6 +36,12 @@ export default {
     ],
     experiments: {
       typedRoutes: true
+    },
+    extra: {
+      googleMapsApiKey: "AIzaSyBsGkmdR142AN3buVYtWi91yZhkB7NDKSQ",
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     }
+
   }
 };

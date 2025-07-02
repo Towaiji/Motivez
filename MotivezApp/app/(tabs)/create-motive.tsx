@@ -17,7 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from "expo-router";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import Constants from 'expo-constants';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -34,15 +35,21 @@ export default function CreateMotiveScreen() {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  
-
-  
 
   // categories/chips state
-  const categories = ["🎉 Fun", "🌿 Chill", "⚽ Sports", "🎵 Music", "📚 Study", "🍔 Food"];
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const [selectedPlace, setSelectedPlace] = useState<{ coordinates: { latitude: number, longitude: number } } | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<{
+    name: string;
+    coordinates: { latitude: number; longitude: number };
+  } | null>(null);
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const pickImage = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -90,17 +97,13 @@ export default function CreateMotiveScreen() {
       }
     ]);
     
-    
-  
     if (error) {
       console.error("Supabase insert error:", error);
       return Alert.alert("Error", "Failed to post motive.");
     }
   
     router.push("/motive-success");
-    //*You can redirect to homepage or "My Motivez"}
   };
-  
 
   const steps = ['Photo', 'Details', 'Preview'];
 
@@ -115,7 +118,6 @@ export default function CreateMotiveScreen() {
           <Text style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' }}>
             Is this just for the crew, or for the world?
           </Text>
-
 
           <View style={{ flexDirection: 'row', gap: 16, marginTop: 40 }}>
             <TouchableOpacity
@@ -142,8 +144,6 @@ export default function CreateMotiveScreen() {
       </SafeAreaView>
     );
   }
-
-
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -184,51 +184,82 @@ export default function CreateMotiveScreen() {
         {step === 1 && (
           <>
             <TextInput
-              placeholder="Title"
-              style={[styles.input, { color: '#000' }]}
+              placeholder="Give your motive a title"
+              style={styles.titleInput}
               value={title}
               onChangeText={setTitle}
-              placeholderTextColor="#666"
+              placeholderTextColor="#aaa"
+              textAlign="left"
             />
+
+            <Text style={styles.subheading}>Where's it happening?</Text>
 
             <TextInput
               placeholder="Location"
-              style={[styles.input, { color: '#000' }]}
+              style={styles.titleInput}
               value={location}
               onChangeText={setLocation}
-              placeholderTextColor="#666"
+              placeholderTextColor="#aaa"
+              textAlign="left"
             />
 
-            {/* START TIME PICKER */}
-            <View style={{ width: '100%', marginBottom: 15 }}>
-              <Text style={styles.subheading}>Start Time</Text>
+
+            {/* Display selected location */}
+            {selectedPlace && (
+              <View style={styles.selectedLocationCard}>
+                <Ionicons name="location" size={16} color="#ed5b77" />
+                <Text style={styles.selectedLocationText} numberOfLines={2}>
+                  {selectedPlace.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setLocation('');
+                    setSelectedPlace(null);
+                  }}
+                  style={styles.clearLocationBtn}
+                >
+                  <Ionicons name="close-circle" size={20} color="#999" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <Text style={styles.subheading}>When does it start and end?</Text>
+
+            <View style={styles.timeRow}>
+              {/* START TIME */}
               <TouchableOpacity
-                style={[styles.input, { justifyContent: 'center' }]}
+                style={[
+                  styles.timeCard,
+                  startTime && styles.timeCardSelected,
+                ]}
                 onPress={() => setShowStartPicker(true)}
               >
-                <Text style={{ color: startTime ? '#000' : '#888' }}>
-                  {startTime ? startTime.toLocaleString() : 'Select start time'}
+                <Ionicons name="time-outline" size={20} color={startTime ? '#ed5b77' : '#aaa'} />
+                <Text style={styles.timeLabel}>Start</Text>
+                <Text style={styles.timeValue}>
+                  {startTime ? formatTime(startTime) : 'Select'}
                 </Text>
               </TouchableOpacity>
-            </View>
 
-            {/* END TIME PICKER */}
-            <View style={{ width: '100%', marginBottom: 15 }}>
-              <Text style={styles.subheading}>End Time</Text>
+              {/* END TIME */}
               <TouchableOpacity
-                style={[styles.input, { justifyContent: 'center' }]}
+                style={[
+                  styles.timeCard,
+                  endTime && styles.timeCardSelected,
+                ]}
                 onPress={() => setShowEndPicker(true)}
               >
-                <Text style={{ color: endTime ? '#000' : '#888' }}>
-                  {endTime ? endTime.toLocaleString() : 'Select end time'}
+                <Ionicons name="time-outline" size={20} color={endTime ? '#ed5b77' : '#aaa'} />
+                <Text style={styles.timeLabel}>End</Text>
+                <Text style={styles.timeValue}>
+                  {endTime ? formatTime(endTime) : 'Select'}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* MODALS */}
             <DateTimePickerModal
               isVisible={showStartPicker}
-              mode="datetime"
+              mode="time"
               onConfirm={(date) => {
                 setStartTime(date);
                 setShowStartPicker(false);
@@ -238,7 +269,7 @@ export default function CreateMotiveScreen() {
 
             <DateTimePickerModal
               isVisible={showEndPicker}
-              mode="datetime"
+              mode="time"
               onConfirm={(date) => {
                 setEndTime(date);
                 setShowEndPicker(false);
@@ -246,62 +277,125 @@ export default function CreateMotiveScreen() {
               onCancel={() => setShowEndPicker(false)}
             />
 
-            <TextInput
-              placeholder="Budget (CAD)"
-              style={[styles.input, { color: '#000' }]}
-              keyboardType="numeric"
-              value={price}
-              onChangeText={setPrice}
-              placeholderTextColor="#666"
-            />
+<TextInput
+  placeholder="Budget"
+  style={styles.titleInput}
+  keyboardType="numeric"
+  value={price}
+  onChangeText={setPrice}
+  placeholderTextColor="#aaa"
+  textAlign="left"
+/>
 
-            <TextInput
-              placeholder="Description"
-              style={[styles.input, { color: '#000', height: 80 }]}
-              multiline
-              value={description}
-              onChangeText={setDescription}
-              placeholderTextColor="#666"
-            />
 
-            <TextInput
-              placeholder="Additional Notes"
-              style={[styles.input, { color: '#000', height: 60 }]}
-              multiline
-              value={notes}
-              onChangeText={setNotes}
-              placeholderTextColor="#666"
-            />
+<TextInput
+  placeholder="Description"
+  style={[styles.titleInput, { height: 80 }]}
+  multiline
+  value={description}
+  onChangeText={setDescription}
+  placeholderTextColor="#aaa"
+  textAlign="left"
+/>
+
+<TextInput
+  placeholder="Additional Notes"
+  style={[styles.titleInput, { height: 60 }]}
+  multiline
+  value={notes}
+  onChangeText={setNotes}
+  placeholderTextColor="#aaa"
+  textAlign="left"
+/>
+
 
             {/* Category Chips */}
             <Text style={styles.subheading}>Choose a vibe</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.chipRow}
-            >
-              {categories.map((cat) => (
+            <View style={styles.gridContainer}>
+              {[
+                { name: 'Fun', icon: 'sparkles' },
+                { name: 'Chill', icon: 'cafe-outline' },
+                { name: 'Sports', icon: 'football-outline' },
+                { name: 'Music', icon: 'musical-notes-outline' },
+                { name: 'Adventurous', icon: 'walk-outline' },
+                { name: 'Food', icon: 'restaurant-outline' },
+              ].map((category) => (
                 <TouchableOpacity
-                  key={cat}
-                  style={[styles.chip, selectedCategory === cat && styles.chipSelected]}
-                  onPress={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                  key={category.name}
+                  style={[
+                    styles.chip,
+                    selectedCategory === category.name && styles.chipSelected,
+                  ]}
+                  onPress={() =>
+                    setSelectedCategory(selectedCategory === category.name ? null : category.name)
+                  }
                 >
-                  <Text style={[styles.chipText, selectedCategory === cat && styles.chipTextSelected]}>
-                    {cat}
+                  <Ionicons
+                    name={category.icon as any}
+                    size={28}
+                    color={selectedCategory === category.name ? '#fff' : '#333'}
+                    style={{ marginBottom: 6 }}
+                  />
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedCategory === category.name && styles.chipTextSelected,
+                    ]}
+                  >
+                    {category.name}
                   </Text>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
 
             {/* Privacy Switch */}
             {modeSelected === 'public' && (
-              <View style={styles.switchRow}>
-                <Text style={styles.label}>Allow anyone to join</Text>
-                <Switch
-                  value={!requiresApproval}
-                  onValueChange={() => setRequiresApproval((prev) => !prev)}
-                />
-                <Text style={styles.label}>Require approval</Text>
+              <View style={styles.segmentedContainer}>
+                <TouchableOpacity
+                  onPress={() => setRequiresApproval(false)}
+                  style={[
+                    styles.segmentedOption,
+                    !requiresApproval && styles.segmentedSelected,
+                  ]}
+                >
+                  <Ionicons
+                    name="earth-outline"
+                    size={18}
+                    color={!requiresApproval ? '#fff' : '#333'}
+                    style={{ marginBottom: 4 }}
+                  />
+                  <Text
+                    style={[
+                      styles.segmentedText,
+                      !requiresApproval && styles.segmentedTextSelected,
+                    ]}
+                  >
+                    Allow anyone
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setRequiresApproval(true)}
+                  style={[
+                    styles.segmentedOption,
+                    requiresApproval && styles.segmentedSelected,
+                  ]}
+                >
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={18}
+                    color={requiresApproval ? '#fff' : '#333'}
+                    style={{ marginBottom: 4 }}
+                  />
+                  <Text
+                    style={[
+                      styles.segmentedText,
+                      requiresApproval && styles.segmentedTextSelected,
+                    ]}
+                  >
+                    Require approval
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </>
@@ -311,6 +405,9 @@ export default function CreateMotiveScreen() {
         {step === 2 && (
           <View style={styles.preview}>
             {image && <Image source={{ uri: image }} style={styles.previewImage} />}
+            <Text style={styles.previewText}>
+              <Text style={styles.bold}>Title:</Text> {title}
+            </Text>
             <Text style={styles.previewText}>
               <Text style={styles.bold}>Location:</Text> {location}
             </Text>
@@ -323,9 +420,24 @@ export default function CreateMotiveScreen() {
             <Text style={styles.previewText}>
               <Text style={styles.bold}>Vibe:</Text> {selectedCategory}
             </Text>
+            {startTime && (
+              <Text style={styles.previewText}>
+                <Text style={styles.bold}>Start Time:</Text> {formatTime(startTime)}
+              </Text>
+            )}
+            {endTime && (
+              <Text style={styles.previewText}>
+                <Text style={styles.bold}>End Time:</Text> {formatTime(endTime)}
+              </Text>
+            )}
             {description.length > 0 && (
               <Text style={styles.previewText}>
                 <Text style={styles.bold}>Description:</Text> {description}
+              </Text>
+            )}
+            {notes.length > 0 && (
+              <Text style={styles.previewText}>
+                <Text style={styles.bold}>Notes:</Text> {notes}
               </Text>
             )}
           </View>
@@ -416,28 +528,153 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  titleInput: {
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    marginBottom: 24,
+    textAlign: 'left',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+
+  // Location styles
+  locationContainer: {
+    width: '100%',
+    marginBottom: 20,
+    zIndex: 1000,
+  },
+  selectedLocationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: '#ed5b77',
+  },
+  selectedLocationText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  clearLocationBtn: {
+    padding: 4,
+  },
+
   chipRow: {
     width: '100%',
     marginBottom: 20,
     paddingVertical: 10,
   },
   chip: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 10,
+    width: 100,
+    height: 100,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   chipSelected: {
-    backgroundColor: '#e91e63',
+    backgroundColor: '#ed5b77',
   },
   chipText: {
-    color: '#444',
     fontSize: 14,
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
   },
   chipTextSelected: {
     color: '#fff',
     fontWeight: '600',
+  },
+  segmentedContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    backgroundColor: '#f2f2f2',
+    borderRadius: 12,
+    padding: 4,
+    marginVertical: 16,
+  },
+  segmentedOption: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentedSelected: {
+    backgroundColor: '#ed5b77',
+  },
+  segmentedText: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  segmentedTextSelected: {
+    color: '#fff',
+  },
+  timeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    marginBottom: 20,
+    gap: 16,
+  },
+  timeCard: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  timeCardSelected: {
+    borderColor: '#ed5b77',
+    borderWidth: 1.5,
+  },
+  timeLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 6,
+  },
+  timeValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 2,
   },
 
   switchRow: {
@@ -468,17 +705,16 @@ const styles = StyleSheet.create({
   submitText: { color: '#fff', fontWeight: 'bold' },
 
   bubbleBtn: {
-  backgroundColor: '#e91e63',
-  paddingHorizontal: 28,
-  paddingVertical: 12,
-  borderRadius: 50,
-  alignItems: 'center',
-  justifyContent: 'center',
+    backgroundColor: '#e91e63',
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bubbleText: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
-
 });
