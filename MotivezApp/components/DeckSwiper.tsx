@@ -553,17 +553,6 @@ const DeckSwiper: React.FC = () => {
                   </View>
                 </View>
 
-                {/* Features */}
-                <View style={styles.featuresSection}>
-                  <Text style={styles.sectionTitle}>Features</Text>
-                  {selectedCard.features.map((feature: string, index: number) => (
-                    <View key={index} style={styles.featureItem}>
-                      <Feather name="check" size={16} color="#4CAF50" />
-                      <Text style={styles.featureText}>{feature}</Text>
-                    </View>
-                  ))}
-                </View>
-
                 {/* Friends */}
                 {selectedCard.friends && selectedCard.friends.length > 0 && (
                   <View style={styles.friendsSection}>
