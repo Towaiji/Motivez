@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     color: "#000",
     alignSelf: "flex-start",
     marginLeft: 60,
-    marginTop: -15,
+    marginTop: -27,
   },
   subtext: {
     fontSize: 16,
