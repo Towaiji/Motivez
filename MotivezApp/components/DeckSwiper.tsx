@@ -940,7 +940,7 @@ const styles = StyleSheet.create({
 
   modalMap: {
     width: '100%',
-    height: 300,
+    height: 250,
     borderRadius: 12,
     overflow: 'hidden',
   },
