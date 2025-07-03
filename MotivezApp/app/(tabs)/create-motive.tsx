@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -45,6 +45,8 @@ export default function CreateMotiveScreen() {
     coordinates: { latitude: number; longitude: number };
   } | null>(null);
 
+  const placesRef = useRef<any>(null);
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
@@ -68,6 +70,14 @@ export default function CreateMotiveScreen() {
   };
 
   const router = useRouter();
+
+  // ensure location text persists when navigating back to step 2
+  useEffect(() => {
+    if (step === 1 && placesRef.current) {
+      placesRef.current.setAddressText(location);
+    }
+  }, [step]);
+
 
   const handleSubmit = async () => {
     if (!title || !location || !price || !selectedCategory) {
@@ -197,6 +207,7 @@ export default function CreateMotiveScreen() {
 
             <View style={styles.locationContainer}>
               <GooglePlacesAutocomplete
+                ref={placesRef}
                 placeholder="Location"
                 fetchDetails
                 query={{
