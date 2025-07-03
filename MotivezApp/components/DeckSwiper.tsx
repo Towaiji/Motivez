@@ -42,11 +42,11 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): 
 }
 
 // Convert Google price_level to a friendly string
-function formatPriceLevel(level?: number): string {
-  if (level === undefined || level === null) return 'N/A';
-  if (level === 0) return 'Free';
-  return '$'.repeat(level);
-}
+const formatPriceLevel = (level?: number | null): string => {
+  if (level === null || level === undefined) return 'N/A';
+  const mapping = ['Free', '$', '$$', '$$$', '$$$$'];
+  return mapping[level] ?? 'N/A';
+};
 
 // Type definitions
 interface Friend {
@@ -275,6 +275,7 @@ const DeckSwiper: React.FC = () => {
             ).toFixed(1);
 
             const details = await fetchPlaceDetails(place.place_id);
+            const priceLevel = details?.price_level ?? place.price_level;
             return {
               id: place.place_id || place.id?.toString() || Math.random().toString(),
               title: place.name,
@@ -282,7 +283,7 @@ const DeckSwiper: React.FC = () => {
               distance: `${dist} km`,
               vibes: place.types || [],
               description: details?.editorial_summary?.overview || '',
-              price: formatPriceLevel(details?.price_level ?? place.price_level),
+              price: formatPriceLevel(priceLevel),
               duration: 'N/A',
               rating: place.rating || 0,
               reviews: place.user_ratings_total || 0,
