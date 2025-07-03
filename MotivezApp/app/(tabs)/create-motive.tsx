@@ -167,8 +167,7 @@ export default function CreateMotiveScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {/* Step 1: Photo */}
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="always">        {/* Step 1: Photo */}
         {step === 0 && (
           <>
             <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
@@ -241,27 +240,6 @@ export default function CreateMotiveScreen() {
                 minLength={1}
               />
             </View>
-
-
-
-            {/* Display selected location */}
-            {selectedPlace && (
-              <View style={styles.selectedLocationCard}>
-                <Ionicons name="location" size={16} color="#ed5b77" />
-                <Text style={styles.selectedLocationText} numberOfLines={2}>
-                  {selectedPlace.name}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setLocation('');
-                    setSelectedPlace(null);
-                  }}
-                  style={styles.clearLocationBtn}
-                >
-                  <Ionicons name="close-circle" size={20} color="#999" />
-                </TouchableOpacity>
-              </View>
-            )}
 
             <Text style={styles.subheading}>When does it start and end?</Text>
 
