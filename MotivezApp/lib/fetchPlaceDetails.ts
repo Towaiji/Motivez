@@ -8,8 +8,7 @@ export async function fetchPlaceDetails(placeId: string) {
     return null;
   }
 
-const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=opening_hours,editorial_summary&key=${apiKey}`;
-  try {
+  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=opening_hours,editorial_summary,price_level&key=${apiKey}`;  try {
     const res = await axios.get(url);
     return res.data.result;
   } catch (err) {

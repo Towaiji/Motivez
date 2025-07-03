@@ -41,6 +41,13 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): 
   return R * c;
 }
 
+// Convert Google price_level to a friendly string
+function formatPriceLevel(level?: number): string {
+  if (level === undefined || level === null) return 'N/A';
+  if (level === 0) return 'Free';
+  return '$'.repeat(level);
+}
+
 // Type definitions
 interface Friend {
   username: string;
@@ -275,7 +282,7 @@ const DeckSwiper: React.FC = () => {
               distance: `${dist} km`,
               vibes: place.types || [],
               description: details?.editorial_summary?.overview || '',
-              price: 'N/A',
+              price: formatPriceLevel(details?.price_level ?? place.price_level),
               duration: 'N/A',
               rating: place.rating || 0,
               reviews: place.user_ratings_total || 0,
