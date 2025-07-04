@@ -20,6 +20,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
 import 'react-native-get-random-values';
+const [scrollEnabled, setScrollEnabled] = useState(true);
 
 export default function CreateMotiveScreen() {
   // form state
@@ -167,8 +168,12 @@ export default function CreateMotiveScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="always">        {/* Step 1: Photo */}
-        {step === 0 && (
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="always"
+        scrollEnabled={scrollEnabled}
+      >
+        {/* Step 1: Photo */}        {step === 0 && (
           <>
             <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
               {image
@@ -236,6 +241,7 @@ export default function CreateMotiveScreen() {
                 textInputProps={{
                   value: location,
                   onChangeText: setLocation,
+                  placeholderTextColor: "#aaa",
                 }}
                 minLength={1}
               />
