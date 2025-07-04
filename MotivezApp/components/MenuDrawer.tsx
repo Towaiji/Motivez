@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomAccountDrawer from "./BottomAccountDrawer";
+import { useAuth } from "../app/_layout";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -36,6 +37,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
+  const { logout } = useAuth();
 
   useLayoutEffect(() => {
     if (isVisible) {
@@ -92,7 +94,9 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
               />
               <View>
                 <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
-                <TouchableOpacity onPress={() => setBottomVisible(true)}>
+                <TouchableOpacity onPress={() => {
+                  setBottomVisible(true);
+                }}>
                   <Text style={styles.profileSubtitle}>Switch Profile</Text>
                 </TouchableOpacity>
               </View>
@@ -283,9 +287,9 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             {/* ==== Log Out ==== */}
             <TouchableOpacity
               style={[styles.drawerItemRow, styles.logoutRow]}
-              onPress={() => {
-                /* Perform logout logic here */
-                console.log("Logging out...");
+              onPress={async () => {
+                await logout();
+                onClose();
               }}
             >
               <Ionicons name="log-out-outline" size={22} color="#e53935" />
@@ -298,7 +302,11 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
       {/* Bottom sheet for “Switch Profile” */}
       <BottomAccountDrawer
         isVisible={bottomVisible}
-        onClose={() => setBottomVisible(false)}
+        onClose={async () => {
+          setBottomVisible(false);
+          // After closing, log out to go to login screen
+          await logout();
+        }}
         accounts={DUMMY_ACCOUNTS}
       />
     </>
