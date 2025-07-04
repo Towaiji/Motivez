@@ -14,10 +14,14 @@ export const AuthContext = createContext<{
   user: any;
   setUser: (user: any) => void;
   logout: () => Promise<void>;
+  profile: any;
+  setProfile: (profile: any) => void;
 }>({
   user: null,
   setUser: () => {},
   logout: async () => {},
+  profile: null,
+  setProfile: () => {},
 });
 
 export function useAuth() {
@@ -26,6 +30,7 @@ export function useAuth() {
 
 export default function RootLayout() {
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [authScreen, setAuthScreen] = useState<'login' | 'signup'>('login');
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +43,7 @@ export default function RootLayout() {
     };
     getSession();
     // Listen for auth state changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
     });
     return () => {
@@ -46,9 +51,28 @@ export default function RootLayout() {
     };
   }, []);
 
+  // Fetch profile when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      if (!error) setProfile(data);
+      else setProfile(null);
+    };
+    fetchProfile();
+  }, [user]);
+
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setProfile(null);
     setAuthScreen('login');
   };
 
@@ -57,7 +81,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
-      <AuthContext.Provider value={{ user, setUser, logout }}>
+      <AuthContext.Provider value={{ user, setUser, logout, profile, setProfile }}>
         {user ? (
           <ScrollProvider>
             <Stack

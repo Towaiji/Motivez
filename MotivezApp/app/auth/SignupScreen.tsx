@@ -10,17 +10,41 @@ interface SignupScreenProps {
 export default function SignupScreen({ onLogin }: SignupScreenProps) {
   const { setUser } = useAuth();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState(""); // <-- Add username state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [verifyPassword, setVerifyPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
+    if (!username.trim()) {
+      Alert.alert("Username required", "Please enter a username.");
+      return;
+    }
     if (password !== verifyPassword) {
       Alert.alert("Passwords do not match", "Please make sure both passwords match.");
       return;
     }
     setLoading(true);
+
+    // Check if username is taken
+    const { data: existing, error: usernameError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", username.trim())
+      .single();
+
+    if (existing) {
+      setLoading(false);
+      Alert.alert("Username Taken", "Please choose a different username.");
+      return;
+    }
+    if (usernameError && usernameError.code !== "PGRST116") {
+      setLoading(false);
+      Alert.alert("Error", usernameError.message);
+      return;
+    }
+
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       setLoading(false);
@@ -31,7 +55,7 @@ export default function SignupScreen({ onLogin }: SignupScreenProps) {
     const userId = data.user?.id;
     if (userId) {
       const { error: profileError } = await supabase.from("profiles").insert([
-        { id: userId, name, email }
+        { id: userId, name, email, username: username.trim() }
       ]);
       setLoading(false);
       if (profileError) {
@@ -56,6 +80,15 @@ export default function SignupScreen({ onLogin }: SignupScreenProps) {
         placeholderTextColor="#888"
         value={name}
         onChangeText={setName}
+      />
+      <Text style={styles.label}>Username</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Pick a username"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        value={username}
+        onChangeText={setUsername}
       />
       <Text style={styles.label}>Email</Text>
       <TextInput
@@ -96,8 +129,8 @@ export default function SignupScreen({ onLogin }: SignupScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#fff" },
-  welcome: { fontSize: 22, fontWeight: "600", textAlign: "center", marginBottom: 4, color: "#e91e63" },
+  container: { flex: 1, justifyContent: "flex-start", padding: 16, backgroundColor: "#fff" },
+  welcome: { fontSize: 22, fontWeight: "600", textAlign: "center", marginBottom: 4, color: "#e91e63", marginTop: 80 },
   subtitle: { fontSize: 16, textAlign: "center", marginBottom: 16, color: "#e91e63" },
   label: { fontSize: 14, color: "#333", marginBottom: 4, marginLeft: 2 },
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12, marginBottom: 16 },

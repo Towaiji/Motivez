@@ -14,17 +14,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import BottomAccountDrawer from "./BottomAccountDrawer";
 import { useAuth } from "../app/_layout";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-
-// Dummy accounts for demonstration (replace with real data)
-const DUMMY_ACCOUNTS = [
-  { id: "1", name: "@motive_user", avatarUri: "https://i.pravatar.cc/100?u=motive_user" },
-  { id: "2", name: "@john_doe",    avatarUri: "https://i.pravatar.cc/100?u=john_doe"    },
-  { id: "3", name: "@jane_smith",  avatarUri: "https://i.pravatar.cc/100?u=jane_smith"  },
-];
 
 interface MenuDrawerProps {
   isVisible: boolean;
@@ -32,16 +24,13 @@ interface MenuDrawerProps {
 }
 
 export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
-  // Keep the drawer mounted until its "slide-out" animation completes
   const [drawerMounted, setDrawerMounted] = useState(isVisible);
-  const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user, profile } = useAuth();
 
   useLayoutEffect(() => {
     if (isVisible) {
-      // Mount first, then slide in
       setDrawerMounted(true);
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -49,7 +38,6 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
         useNativeDriver: false,
       }).start();
     } else {
-      // Slide out, then unmount at end
       Animated.timing(slideAnim, {
         toValue: -SCREEN_WIDTH,
         duration: 300,
@@ -60,7 +48,6 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
     }
   }, [isVisible]);
 
-  // If nothing is mounted, render nothing
   if (!drawerMounted) return null;
 
   return (
@@ -89,15 +76,25 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             {/* ==== 1) User Account Section ==== */}
             <View style={styles.profileSection}>
               <Image
-                source={{ uri: DUMMY_ACCOUNTS[0].avatarUri }}
+                source={{ uri: profile?.avatar_url || "https://i.pravatar.cc/100?u=default" }}
                 style={styles.profileImage}
               />
               <View>
-                <Text style={styles.profileName}>Hey, Mohammad 👋</Text>
-                <TouchableOpacity onPress={() => {
-                  setBottomVisible(true);
-                }}>
-                  <Text style={styles.profileSubtitle}>Switch Profile</Text>
+                <Text style={styles.profileName}>
+                  {profile?.name
+                    ? `Hey, ${profile.name} 👋`
+                    : "Hey there 👋"}
+                </Text>
+                {/* Switch Accounts row */}
+                <TouchableOpacity
+                  style={styles.switchAccountRow}
+                  onPress={() => {
+                    // TODO: Open switch accounts drawer/modal
+                    console.log("Switch accounts pressed");
+                  }}
+                >
+                  <Ionicons name="swap-horizontal-outline" size={18} color="#007AFF" />
+                  <Text style={styles.switchAccountText}>Switch Accounts</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -298,17 +295,6 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
           </ScrollView>
         </Animated.View>
       </View>
-
-      {/* Bottom sheet for “Switch Profile” */}
-      <BottomAccountDrawer
-        isVisible={bottomVisible}
-        onClose={async () => {
-          setBottomVisible(false);
-          // After closing, log out to go to login screen
-          await logout();
-        }}
-        accounts={DUMMY_ACCOUNTS}
-      />
     </>
   );
 }
@@ -366,11 +352,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  profileSubtitle: {
-    fontSize: 14,
-    color: "#007AFF",
-    marginTop: 4,
-  },
   profileImage: {
     width: 50,
     height: 50,
@@ -394,5 +375,16 @@ const styles = StyleSheet.create({
   },
   logoutRow: {
     marginTop: 16,
+  },
+  switchAccountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  switchAccountText: {
+    marginLeft: 6,
+    color: "#007AFF",
+    fontSize: 15,
+    fontWeight: "500",
   },
 });
