@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import { useRouter } from "expo-router";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
+import 'react-native-get-random-values';
+const [scrollEnabled, setScrollEnabled] = useState(true);
 
 export default function CreateMotiveScreen() {
   // form state
@@ -44,6 +46,8 @@ export default function CreateMotiveScreen() {
     coordinates: { latitude: number; longitude: number };
   } | null>(null);
 
+  const placesRef = useRef<any>(null);
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
       hour: '2-digit',
@@ -68,17 +72,25 @@ export default function CreateMotiveScreen() {
 
   const router = useRouter();
 
+  // ensure location text persists when navigating back to step 2
+  useEffect(() => {
+    if (step === 1 && placesRef.current) {
+      placesRef.current.setAddressText(location);
+    }
+  }, [step]);
+
+
   const handleSubmit = async () => {
     if (!title || !location || !price || !selectedCategory) {
       return Alert.alert("Missing Info", "Please fill out all required fields.");
     }
-  
+
     // Get logged-in user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return Alert.alert("Error", "Unable to identify user.");
     }
-  
+
     // Insert into Supabase
     const { error } = await supabase.from("motives").insert([
       {
@@ -96,12 +108,12 @@ export default function CreateMotiveScreen() {
         requires_approval: modeSelected === 'public' ? requiresApproval : false,
       }
     ]);
-    
+
     if (error) {
       console.error("Supabase insert error:", error);
       return Alert.alert("Error", "Failed to post motive.");
     }
-  
+
     router.push("/motive-success");
   };
 
@@ -156,9 +168,12 @@ export default function CreateMotiveScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Step 1: Photo */}
-        {step === 0 && (
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="always"
+        scrollEnabled={scrollEnabled}
+      >
+        {/* Step 1: Photo */}        {step === 0 && (
           <>
             <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
               {image
@@ -194,34 +209,43 @@ export default function CreateMotiveScreen() {
 
             <Text style={styles.subheading}>Where's it happening?</Text>
 
-            <TextInput
-              placeholder="Location"
-              style={styles.titleInput}
-              value={location}
-              onChangeText={setLocation}
-              placeholderTextColor="#aaa"
-              textAlign="left"
-            />
-
-
-            {/* Display selected location */}
-            {selectedPlace && (
-              <View style={styles.selectedLocationCard}>
-                <Ionicons name="location" size={16} color="#ed5b77" />
-                <Text style={styles.selectedLocationText} numberOfLines={2}>
-                  {selectedPlace.name}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setLocation('');
-                    setSelectedPlace(null);
-                  }}
-                  style={styles.clearLocationBtn}
-                >
-                  <Ionicons name="close-circle" size={20} color="#999" />
-                </TouchableOpacity>
-              </View>
-            )}
+            <View style={styles.locationContainer}>
+              <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder="Location"
+                fetchDetails
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                  language: 'en',
+                }}
+                onPress={(data, details = null) => {
+                  const name = data.description;
+                  setLocation(name);
+                  if (details?.geometry?.location) {
+                    setSelectedPlace({
+                      name,
+                      coordinates: {
+                        latitude: details.geometry.location.lat,
+                        longitude: details.geometry.location.lng,
+                      },
+                    });
+                  }
+                }}
+                enablePoweredByContainer={false}
+                styles={{
+                  textInput: styles.titleInput,
+                  listView: { backgroundColor: '#fff', zIndex: 999 },
+                  container: { flex: 0, zIndex: 999 },
+                }}
+                predefinedPlaces={[]}
+                textInputProps={{
+                  value: location,
+                  onChangeText: setLocation,
+                  placeholderTextColor: "#aaa",
+                }}
+                minLength={1}
+              />
+            </View>
 
             <Text style={styles.subheading}>When does it start and end?</Text>
 
@@ -277,36 +301,36 @@ export default function CreateMotiveScreen() {
               onCancel={() => setShowEndPicker(false)}
             />
 
-<TextInput
-  placeholder="Budget"
-  style={styles.titleInput}
-  keyboardType="numeric"
-  value={price}
-  onChangeText={setPrice}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Budget"
+              style={styles.titleInput}
+              keyboardType="numeric"
+              value={price}
+              onChangeText={setPrice}
+              placeholderTextColor="#aaa"
+              textAlign="left"
+            />
 
 
-<TextInput
-  placeholder="Description"
-  style={[styles.titleInput, { height: 80 }]}
-  multiline
-  value={description}
-  onChangeText={setDescription}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Description"
+              style={[styles.titleInput, { height: 80 }]}
+              multiline
+              value={description}
+              onChangeText={setDescription}
+              placeholderTextColor="#aaa"
+              textAlign="left"
+            />
 
-<TextInput
-  placeholder="Additional Notes"
-  style={[styles.titleInput, { height: 60 }]}
-  multiline
-  value={notes}
-  onChangeText={setNotes}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Additional Notes"
+              style={[styles.titleInput, { height: 60 }]}
+              multiline
+              value={notes}
+              onChangeText={setNotes}
+              placeholderTextColor="#aaa"
+              textAlign="left"
+            />
 
 
             {/* Category Chips */}
