@@ -1,4 +1,4 @@
-// components/BottomAccountDrawer.tsx
+// (This file has been removed as per the latest changes.)
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
