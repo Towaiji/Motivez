@@ -25,6 +25,7 @@ interface Chat {
 }
 
 const CURRENT_USER_ID = 'demo-user';
+const PINK = '#e91e63';
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -375,7 +376,10 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     padding: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: PINK,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
     borderRadius: 5,
   },
 });

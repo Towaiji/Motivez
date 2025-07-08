@@ -24,6 +24,7 @@ interface Message {
 }
 
 const CURRENT_USER_ID = 'demo-user'; // replace with your auth user id
+const PINK = '#e91e63';
 
 interface DoubleTapProps {
   children: React.ReactNode;
@@ -219,7 +220,7 @@ export default function ChatDetail() {
             placeholder="Message"
           />
           <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-            <Ionicons name="send" size={24} color="#007AFF" />
+            <Ionicons name="send" size={24} color={PINK} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     maxWidth: '80%',
   },
-  me: { alignSelf: 'flex-end', backgroundColor: '#DCF8C6' },
+  me: { alignSelf: 'flex-end', backgroundColor: '#ffe5ee' },
   them: { alignSelf: 'flex-start', backgroundColor: '#f2f2f2' },
   text: { fontSize: 16 },
   metaRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 },
