@@ -4,6 +4,7 @@ import { LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollProvider } from "./context/ScrollContext";
 import { supabase } from '../lib/supabaseClient';
+import { ThemeProvider } from '../lib/ThemeContext';
 
 LogBox.ignoreAllLogs(true);
 
@@ -23,6 +24,7 @@ export default function RootLayout() {
   
 
   return (
+    <ThemeProvider>
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
       <ScrollProvider>
@@ -59,5 +61,6 @@ export default function RootLayout() {
         </Stack>
       </ScrollProvider>
     </SafeAreaProvider>
+    </ThemeProvider>
   );
 }

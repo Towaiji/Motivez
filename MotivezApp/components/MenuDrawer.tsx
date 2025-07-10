@@ -15,6 +15,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomAccountDrawer from "./BottomAccountDrawer";
+import { useTheme } from '../lib/ThemeContext';
+import { getColors } from '../lib/colors';
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -36,6 +38,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   const [bottomVisible, setBottomVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const router = useRouter();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
 
   useLayoutEffect(() => {
     if (isVisible) {
@@ -61,6 +65,91 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
   // If nothing is mounted, render nothing
   if (!drawerMounted) return null;
 
+  const styles = StyleSheet.create({
+    drawerWrapper: {
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9999,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.2)",
+    },
+    drawer: {
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      width: SCREEN_WIDTH * 0.8,
+      backgroundColor: colors.drawerBg,
+      zIndex: 10,
+      shadowColor: colors.drawerShadow,
+      shadowOffset: { width: 2, height: 0 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    drawerContent: {
+      paddingTop: 100,
+      paddingHorizontal: 20,
+      paddingBottom: 40, // Add some bottom padding to avoid cut‐off content
+    },
+    closeButton: {
+      position: "absolute",
+      top: 50,
+      right: 20,
+      backgroundColor: colors.drawerCloseBg,
+      borderRadius: 20,
+      padding: 6,
+      shadowColor: colors.drawerShadow,
+      shadowOpacity: 0.1,
+      shadowOffset: { width: 0, height: 2 },
+      zIndex: 20,
+    },
+    profileSection: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    profileName: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.drawerProfileName,
+    },
+    profileSubtitle: {
+      fontSize: 14,
+      color: colors.drawerProfileSubtitle,
+      marginTop: 4,
+    },
+    profileImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      marginRight: 20,
+    },
+    sectionDivider: {
+      height: 1,
+      backgroundColor: colors.drawerDivider,
+      marginVertical: 20,
+    },
+    drawerItemRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    drawerItemText: {
+      marginLeft: 14,
+      fontSize: 18,
+      color: colors.drawerItemText,
+    },
+    logoutRow: {
+      marginTop: 16,
+    },
+  });
+
   return (
     <>
       {/* Full-screen wrapper, including backdrop */}
@@ -79,7 +168,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
         >
           {/* Close “X” button */}
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={33} color="#333" />
+            <Ionicons name="close" size={33} color={colors.drawerCloseIcon} />
           </TouchableOpacity>
 
           {/* Wrap all menu items in a ScrollView */}
@@ -106,7 +195,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-outline" size={22} color="#333" />
+              <Ionicons name="person-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Profile</Text>
             </TouchableOpacity>
 
@@ -118,7 +207,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="list-outline" size={22} color="#333" />
+              <Ionicons name="list-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>My Motives</Text>
             </TouchableOpacity>
 
@@ -130,7 +219,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="person-add-outline" size={22} color="#333" />
+              <Ionicons name="person-add-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Add / Invite Friends</Text>
             </TouchableOpacity>
 
@@ -144,7 +233,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="people-outline" size={22} color="#333" />
+              <Ionicons name="people-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Friends</Text>
             </TouchableOpacity>
 
@@ -155,7 +244,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="chatbubble-ellipses-outline" size={22} color="#333" />
+              <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Messages</Text>
             </TouchableOpacity>
 
@@ -166,7 +255,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="bookmark-outline" size={22} color="#333" />
+              <Ionicons name="bookmark-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Saved Motives</Text>
             </TouchableOpacity>
 
@@ -180,7 +269,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="compass-outline" size={22} color="#333" />
+              <Ionicons name="compass-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Explore / Trending</Text>
             </TouchableOpacity>
 
@@ -191,7 +280,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="map-outline" size={22} color="#333" />
+              <Ionicons name="map-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Nearby Map</Text>
             </TouchableOpacity>
 
@@ -202,7 +291,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="pricetags-outline" size={22} color="#333" />
+              <Ionicons name="pricetags-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Categories</Text>
             </TouchableOpacity>
 
@@ -216,7 +305,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="calendar-outline" size={22} color="#333" />
+              <Ionicons name="calendar-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Upcoming Events</Text>
             </TouchableOpacity>
 
@@ -227,7 +316,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="time-outline" size={22} color="#333" />
+              <Ionicons name="time-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Past Memories</Text>
             </TouchableOpacity>
 
@@ -241,7 +330,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="settings-outline" size={22} color="#333" />
+              <Ionicons name="settings-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Settings</Text>
             </TouchableOpacity>
 
@@ -252,7 +341,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="notifications-outline" size={22} color="#333" />
+              <Ionicons name="notifications-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Notifications</Text>
             </TouchableOpacity>
 
@@ -263,7 +352,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="help-circle-outline" size={22} color="#333" />
+              <Ionicons name="help-circle-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>Help & Feedback</Text>
             </TouchableOpacity>
 
@@ -274,7 +363,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 onClose();
               }}
             >
-              <Ionicons name="information-circle-outline" size={22} color="#333" />
+              <Ionicons name="information-circle-outline" size={22} color={colors.drawerItemIcon} />
               <Text style={styles.drawerItemText}>About Motivez</Text>
             </TouchableOpacity>
 
@@ -288,8 +377,8 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
                 console.log("Logging out...");
               }}
             >
-              <Ionicons name="log-out-outline" size={22} color="#e53935" />
-              <Text style={[styles.drawerItemText, { color: "#e53935" }]}>Log Out</Text>
+              <Ionicons name="log-out-outline" size={22} color={colors.drawerLogoutIcon} />
+              <Text style={[styles.drawerItemText, { color: colors.drawerLogout }]}>Log Out</Text>
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>
@@ -304,87 +393,3 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  drawerWrapper: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.2)",
-  },
-  drawer: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: SCREEN_WIDTH * 0.8,
-    backgroundColor: "#fff",
-    zIndex: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  drawerContent: {
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    paddingBottom: 40, // Add some bottom padding to avoid cut‐off content
-  },
-  closeButton: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    backgroundColor: "#f1f1f1",
-    borderRadius: 20,
-    padding: 6,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    zIndex: 20,
-  },
-  profileSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  profileSubtitle: {
-    fontSize: 14,
-    color: "#007AFF",
-    marginTop: 4,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 20,
-  },
-  sectionDivider: {
-    height: 1,
-    backgroundColor: "#ececec",
-    marginVertical: 20,
-  },
-  drawerItemRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  drawerItemText: {
-    marginLeft: 14,
-    fontSize: 18,
-    color: "#333",
-  },
-  logoutRow: {
-    marginTop: 16,
-  },
-});
