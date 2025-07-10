@@ -13,10 +13,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../lib/ThemeContext';
+import { getColors } from '../lib/colors';
 
 const { width, height } = Dimensions.get('window');
 
 export default function MotiveDetail() {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
   const { id, title, description, image } = useLocalSearchParams();
   const router = useRouter();
   const [isLiked, setIsLiked] = useState(false);
@@ -45,6 +49,178 @@ export default function MotiveDetail() {
     console.log('Share motive!');
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.inputBorder,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.lightCard,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+      flex: 1,
+      textAlign: 'center',
+      marginHorizontal: 20,
+    },
+    heartButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.lightCard,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scrollView: {
+      flex: 1,
+    },
+    imageContainer: {
+      position: 'relative',
+    },
+    image: {
+      width: width,
+      height: 250,
+      resizeMode: 'cover',
+    },
+    gradientOverlay: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 100,
+    },
+    contentContainer: {
+      padding: 20,
+      backgroundColor: colors.cardBg,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: colors.text,
+    },
+    description: {
+      fontSize: 16,
+      color: colors.secondary,
+      lineHeight: 24,
+      marginBottom: 20,
+    },
+    detailsContainer: {
+      marginTop: 20,
+      padding: 15,
+      backgroundColor: colors.cardAltBg,
+      borderRadius: 12,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      marginBottom: 15,
+      color: colors.text,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.lightBorder,
+    },
+    detailLabel: {
+      fontSize: 16,
+      color: colors.secondary,
+    },
+    detailValue: {
+      fontSize: 16,
+      color: colors.text,
+      fontWeight: '500',
+    },
+    aboutContainer: {
+      marginTop: 20,
+      padding: 15,
+      backgroundColor: colors.cardAltBg,
+      borderRadius: 12,
+    },
+    aboutContent: {
+      marginTop: 10,
+    },
+    aboutText: {
+      fontSize: 16,
+      color: colors.cardTitle,
+      lineHeight: 24,
+      marginBottom: 15,
+    },
+    highlightsContainer: {
+      marginTop: 10,
+    },
+    highlightItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    highlightText: {
+      fontSize: 15,
+      color: colors.cardTitle,
+      marginLeft: 10,
+    },
+    mapContainer: {
+      marginTop: 20,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    map: {
+      width: '100%',
+      height: 200,
+      borderRadius: 12,
+    },
+    pickButton: {
+      marginTop: 30,
+      marginBottom: 10,
+      backgroundColor: colors.primaryBlue,
+      padding: 15,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    pickButtonText: {
+      color: colors.submitBtnText,
+      fontSize: 18,
+      fontWeight: '600',
+    },
+    shareButton: {
+      marginBottom: 20,
+      backgroundColor: colors.cardBg,
+      padding: 15,
+      borderRadius: 12,
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.primaryBlue,
+    },
+    shareButtonText: {
+      color: colors.primaryBlue,
+      fontSize: 18,
+      fontWeight: '600',
+    },
+    shareIcon: {
+      marginRight: 8,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -53,7 +229,7 @@ export default function MotiveDetail() {
           style={styles.backButton}
           onPress={handleBack}
         >
-          <Ionicons name="chevron-back" size={28} color="#333" />
+          <Ionicons name="chevron-back" size={28} color={colors.text} />
         </TouchableOpacity>
         
         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -67,7 +243,7 @@ export default function MotiveDetail() {
           <Ionicons 
             name={isLiked ? "heart" : "heart-outline"} 
             size={24} 
-            color={isLiked ? "#ff3b30" : "#333"} 
+            color={isLiked ? colors.primaryRed : colors.text} 
           />
         </TouchableOpacity>
       </View>
@@ -120,15 +296,15 @@ export default function MotiveDetail() {
               </Text>
               <View style={styles.highlightsContainer}>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="time-outline" size={24} color="#007AFF" />
+                  <Ionicons name="time-outline" size={24} color={colors.primaryBlue} />
                   <Text style={styles.highlightText}>Duration: 2-3 hours</Text>
                 </View>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="people-outline" size={24} color="#007AFF" />
+                  <Ionicons name="people-outline" size={24} color={colors.primaryBlue} />
                   <Text style={styles.highlightText}>Group Size: 4-8 people</Text>
                 </View>
                 <View style={styles.highlightItem}>
-                  <Ionicons name="cash-outline" size={24} color="#007AFF" />
+                  <Ionicons name="cash-outline" size={24} color={colors.primaryBlue} />
                   <Text style={styles.highlightText}>Estimated Cost: $25-40 per person</Text>
                 </View>
               </View>
@@ -167,7 +343,7 @@ export default function MotiveDetail() {
             style={styles.shareButton}
             onPress={handleShare}
           >
-            <Ionicons name="share-outline" size={20} color="#007AFF" style={styles.shareIcon} />
+            <Ionicons name="share-outline" size={20} color={colors.primaryBlue} style={styles.shareIcon} />
             <Text style={styles.shareButtonText}>Share this motive</Text>
           </TouchableOpacity>
         </View>
@@ -175,175 +351,3 @@ export default function MotiveDetail() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 20,
-  },
-  heartButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  imageContainer: {
-    position: 'relative',
-  },
-  image: {
-    width: width,
-    height: 250,
-    resizeMode: 'cover',
-  },
-  gradientOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 100,
-  },
-  contentContainer: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#000',
-  },
-  description: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 24,
-    marginBottom: 20,
-  },
-  detailsContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: '#000',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  detailLabel: {
-    fontSize: 16,
-    color: '#666',
-  },
-  detailValue: {
-    fontSize: 16,
-    color: '#000',
-    fontWeight: '500',
-  },
-  aboutContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-  },
-  aboutContent: {
-    marginTop: 10,
-  },
-  aboutText: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-    marginBottom: 15,
-  },
-  highlightsContainer: {
-    marginTop: 10,
-  },
-  highlightItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  highlightText: {
-    fontSize: 15,
-    color: '#333',
-    marginLeft: 10,
-  },
-  mapContainer: {
-    marginTop: 20,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  map: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-  },
-  pickButton: {
-    marginTop: 30,
-    marginBottom: 10,
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  pickButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  shareButton: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#007AFF',
-  },
-  shareButtonText: {
-    color: '#007AFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  shareIcon: {
-    marginRight: 8,
-  },
-});

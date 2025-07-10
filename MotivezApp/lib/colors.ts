@@ -89,7 +89,9 @@ export const LightColors = {
     drawerProfileSubtitle: '#007AFF',
     drawerLogout: '#e53935',
     drawerLogoutIcon: '#e53935',
+    primaryRed: '#ff3b30',
     mapMarker: '#2E8B57',
+    cardAltBg: '#f4f6f8',
   };
   
   export const DarkColors = {
@@ -183,7 +185,9 @@ export const LightColors = {
     drawerProfileSubtitle: '#4fa3ff',
     drawerLogout: '#ff6b6b',
     drawerLogoutIcon: '#ff6b6b',
+    primaryRed: '#ff453a',
     mapMarker: '#4fa3ff',
+    cardAltBg: '#18181a',
   };
   
   export const getColors = (theme: 'light' | 'dark') =>
