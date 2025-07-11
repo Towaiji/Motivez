@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  ScrollView,
   Alert,
   Switch,
 } from 'react-native';
@@ -22,7 +21,7 @@ import Constants from 'expo-constants';
 import 'react-native-get-random-values';
 import { useTheme } from '../../lib/ThemeContext';
 import { getColors } from '../../lib/colors';
-const [scrollEnabled, setScrollEnabled] = useState(true);
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -39,6 +38,7 @@ export default function CreateMotiveScreen() {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   // categories/chips state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -197,7 +197,7 @@ export default function CreateMotiveScreen() {
     locationContainer: {
       width: '100%',
       marginBottom: 20,
-      zIndex: 1000,
+      //zIndex: 1000,
     },
     selectedLocationCard: {
       flexDirection: 'row',
@@ -405,15 +405,63 @@ export default function CreateMotiveScreen() {
       <ProgressBar steps={steps} currentStep={step} />
 
       {/* Title */}
-      <View style={styles.headerRow}>
+      <View style={{ flex: 1 }}>
         <Text style={styles.headerTitle}>{steps[step]}</Text>
       </View>
 
+      {step === 1 && (
+        <>
+          <Text style={styles.subheading}>Where's it happening?</Text>
+          <View style={[styles.locationContainer, { pointerEvents: 'auto'}]}>
+          <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder="Location"
+                fetchDetails
+                listViewDisplayed='auto'  // Add this line
+                keyboardShouldPersistTaps='handled'  // Add this line
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                  language: 'en',
+                }}
+                onPress={(data, details = null) => {
+                  console.log('Address selected:', data.description);
+                  const name = data.description;
+                  setLocation(name);
+                  if (details?.geometry?.location) {
+                    setSelectedPlace({
+                      name,
+                      coordinates: {
+                        latitude: details.geometry.location.lat,
+                        longitude: details.geometry.location.lng,
+                      },
+                    });
+                  }
+                }}
+                onFail={(error) => console.log('Error:', error)}  // Add this line
+                onTimeout={() => console.log('Timeout')}  // Add this line
+                enablePoweredByContainer={false}
+                styles={{
+                  textInput: styles.titleInput,
+                  listView: { backgroundColor: colors.card, zIndex: 999, elevation: 999, position: 'relative' },
+                  container: { flex: 0, zIndex: 999, elevation: 999 },
+                }} 
+                predefinedPlaces={[]}
+                textInputProps={{
+                  placeholderTextColor: colors.inputPlaceholder,
+                  onChangeText: (text) => console.log('Typing:', text),
+                }}
+                minLength={2}
+              />
+          </View>
+        </>
+      )}
+
       {/* Content */}
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="always"
-        scrollEnabled={scrollEnabled}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        extraScrollHeight={100}
       >
         {/* Step 1: Photo */}        {step === 0 && (
           <>
@@ -448,46 +496,6 @@ export default function CreateMotiveScreen() {
               placeholderTextColor={colors.inputPlaceholder}
               textAlign="left"
             />
-
-            <Text style={styles.subheading}>Where's it happening?</Text>
-
-            <View style={styles.locationContainer}>
-              <GooglePlacesAutocomplete
-                ref={placesRef}
-                placeholder="Location"
-                fetchDetails
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-                  language: 'en',
-                }}
-                onPress={(data, details = null) => {
-                  const name = data.description;
-                  setLocation(name);
-                  if (details?.geometry?.location) {
-                    setSelectedPlace({
-                      name,
-                      coordinates: {
-                        latitude: details.geometry.location.lat,
-                        longitude: details.geometry.location.lng,
-                      },
-                    });
-                  }
-                }}
-                enablePoweredByContainer={false}
-                styles={{
-                  textInput: styles.titleInput,
-                  listView: { backgroundColor: colors.card, zIndex: 999 },
-                  container: { flex: 0, zIndex: 999 },
-                }}
-                predefinedPlaces={[]}
-                textInputProps={{
-                  value: location,
-                  onChangeText: setLocation,
-                  placeholderTextColor: colors.inputPlaceholder,
-                }}
-                minLength={1}
-              />
-            </View>
 
             <Text style={styles.subheading}>When does it start and end?</Text>
 
@@ -708,7 +716,7 @@ export default function CreateMotiveScreen() {
             )}
           </View>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Navigation Buttons */}
       <View style={styles.navRow}>
