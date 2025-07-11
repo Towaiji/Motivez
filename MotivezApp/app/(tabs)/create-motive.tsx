@@ -409,52 +409,6 @@ export default function CreateMotiveScreen() {
         <Text style={styles.headerTitle}>{steps[step]}</Text>
       </View>
 
-      {step === 1 && (
-        <>
-          <Text style={styles.subheading}>Where's it happening?</Text>
-          <View style={[styles.locationContainer, { pointerEvents: 'auto'}]}>
-          <GooglePlacesAutocomplete
-                ref={placesRef}
-                placeholder="Location"
-                fetchDetails
-                listViewDisplayed='auto'  // Add this line
-                keyboardShouldPersistTaps='handled'  // Add this line
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-                  language: 'en',
-                }}
-                onPress={(data, details = null) => {
-                  console.log('Address selected:', data.description);
-                  const name = data.description;
-                  setLocation(name);
-                  if (details?.geometry?.location) {
-                    setSelectedPlace({
-                      name,
-                      coordinates: {
-                        latitude: details.geometry.location.lat,
-                        longitude: details.geometry.location.lng,
-                      },
-                    });
-                  }
-                }}
-                onFail={(error) => console.log('Error:', error)}  // Add this line
-                onTimeout={() => console.log('Timeout')}  // Add this line
-                enablePoweredByContainer={false}
-                styles={{
-                  textInput: styles.titleInput,
-                  listView: { backgroundColor: colors.card, zIndex: 999, elevation: 999, position: 'relative' },
-                  container: { flex: 0, zIndex: 999, elevation: 999 },
-                }} 
-                predefinedPlaces={[]}
-                textInputProps={{
-                  placeholderTextColor: colors.inputPlaceholder,
-                  onChangeText: (text) => console.log('Typing:', text),
-                }}
-                minLength={2}
-              />
-          </View>
-        </>
-      )}
 
       {/* Content */}
       <KeyboardAwareScrollView
@@ -496,6 +450,62 @@ export default function CreateMotiveScreen() {
               placeholderTextColor={colors.inputPlaceholder}
               textAlign="left"
             />
+
+<Text style={styles.subheading}>Where's it happening?</Text>
+          <View style={[styles.locationContainer, { pointerEvents: 'auto'}]}>
+          <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder="Location"
+                fetchDetails
+                listViewDisplayed='auto'  // Add this line
+                keyboardShouldPersistTaps='handled'  // Add this line
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                  language: 'en',
+                }}
+                onPress={(data, details = null) => {
+                  console.log('Address selected:', data.description);
+                  const name = data.description;
+                  setLocation(name);
+                  if (details?.geometry?.location) {
+                    setSelectedPlace({
+                      name,
+                      coordinates: {
+                        latitude: details.geometry.location.lat,
+                        longitude: details.geometry.location.lng,
+                      },
+                    });
+                  }
+                }}
+                onFail={(error) => console.log('Error:', error)}  // Add this line
+                onTimeout={() => console.log('Timeout')}  // Add this line
+                enablePoweredByContainer={false}
+                styles={{
+                  textInput: styles.titleInput,
+                  listView: {
+                    position: 'absolute',
+                    top: 60, // adjust depending on your input height
+                    left: 0,
+                    right: 0,
+                    backgroundColor: colors.card,
+                    zIndex: 999,
+                    elevation: 10,
+                    borderRadius: 8,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.1,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowRadius: 4,
+                  },
+                  container: { flex: 0, zIndex: 999, elevation: 999 },
+                }} 
+                predefinedPlaces={[]}
+                textInputProps={{
+                  placeholderTextColor: colors.inputPlaceholder,
+                }}
+                minLength={2}
+              />
+          </View>
+
 
             <Text style={styles.subheading}>When does it start and end?</Text>
 
