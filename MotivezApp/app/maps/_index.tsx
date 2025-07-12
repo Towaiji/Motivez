@@ -249,8 +249,8 @@ export default function MapScreen() {
       backgroundColor: colors.filterOptionSelectedBg,
       borderColor: colors.filterOptionSelectedBorder,
     },
-    categoryEmoji: {
-      fontSize: 24,
+    categoryIcon: {
+      marginBottom: 4,
     },
     categoryLabel: {
       fontSize: 12,
@@ -305,8 +305,7 @@ export default function MapScreen() {
       shadowOffset: { width: 0, height: 2 },
       elevation: 4,
     },
-    activeCategoryEmoji: {
-      fontSize: 16,
+    activeCategoryIcon: {
       marginRight: 4,
     },
     activeCategoryLabel: {
@@ -750,15 +749,47 @@ export default function MapScreen() {
                 )}
                 {selectedCategories.map((category) => {
                   const categoryData = [
-                    { emoji: "🍕", label: "Food", type: "restaurant" },
-                    { emoji: "🎳", label: "Fun", type: "amusement_park" },
-                    { emoji: "🎶", label: "Music", type: "night_club" },
-                    { emoji: "🌿", label: "Nature", type: "park" },
-                    { emoji: "🧘", label: "Chill", type: "spa" },
-                    { emoji: "🧠", label: "Learn", type: "museum" },
-                    { emoji: "🛍️", label: "Shopping", type: "shopping_mall" },
-                    { emoji: "🎮", label: "Games", type: "arcade" },
-                  ].find(item => item.type === category);
+                    {
+                      icon: "pizza",
+                      label: "Food",
+                      type: ["restaurant", "cafe", "bakery", "meal_takeaway", "meal_delivery"],
+                    },
+                    {
+                      icon: "game-controller",
+                      label: "Games",
+                      type: ["arcade", "video_store", "gaming_cafe"],
+                    },
+                    {
+                      icon: "sparkles",
+                      label: "Fun",
+                      type: ["amusement_park", "bowling_alley", "movie_theater", "zoo"],
+                    },
+                    {
+                      icon: "leaf",
+                      label: "Nature",
+                      type: ["park", "campground", "tourist_attraction", "hiking_trail"],
+                    },
+                    {
+                      icon: "body",
+                      label: "Chill",
+                      type: ["spa", "beauty_salon", "massage_spa"],
+                    },
+                    {
+                      icon: "school",
+                      label: "Learn",
+                      type: ["museum", "library", "university", "art_gallery"],
+                    },
+                    {
+                      icon: "bag-handle",
+                      label: "Shopping",
+                      type: ["shopping_mall", "department_store", "clothing_store", "shoe_store"],
+                    },
+                    {
+                      icon: "musical-notes",
+                      label: "Music",
+                      type: ["night_club", "bar", "concert_hall", "music_store"],
+                    },
+                  ].find(item => item.type.includes(category));
                   if (!categoryData) return null;
                   return (
                     <TouchableOpacity
@@ -766,7 +797,7 @@ export default function MapScreen() {
                       style={styles.activeCategoryChip}
                       onPress={() => handleCategoryToggle(category)}
                     >
-                      <Text style={styles.activeCategoryEmoji}>{categoryData.emoji}</Text>
+                      <Ionicons name={categoryData.icon as any} size={16} color={colors.text} style={styles.activeCategoryIcon} />
                       <Text style={styles.activeCategoryLabel}>{categoryData.label}</Text>
                       <Ionicons name="close" size={16} color={colors.secondary} style={styles.activeCategoryClose} />
                     </TouchableOpacity>
@@ -869,16 +900,48 @@ export default function MapScreen() {
                 <ScrollView style={styles.categoryScrollView} showsVerticalScrollIndicator={false}>
                   <View style={styles.categoryGrid}>
                     {[
-                      { emoji: "🍕", label: "Food", type: "restaurant" },
-                      { emoji: "🎳", label: "Fun", type: "amusement_park" },
-                      { emoji: "🎶", label: "Music", type: "night_club" },
-                      { emoji: "🌿", label: "Nature", type: "park" },
-                      { emoji: "🧘", label: "Chill", type: "spa" },
-                      { emoji: "🧠", label: "Learn", type: "museum" },
-                      { emoji: "🛍️", label: "Shopping", type: "shopping_mall" },
-                      { emoji: "🎮", label: "Games", type: "arcade" },
+                      {
+                        icon: "pizza",
+                        label: "Food",
+                        type: ["restaurant", "cafe", "bakery", "meal_takeaway", "meal_delivery"],
+                      },
+                      {
+                        icon: "game-controller",
+                        label: "Games",
+                        type: ["arcade", "video_store", "gaming_cafe"],
+                      },
+                      {
+                        icon: "sparkles",
+                        label: "Fun",
+                        type: ["amusement_park", "bowling_alley", "movie_theater", "zoo"],
+                      },
+                      {
+                        icon: "leaf",
+                        label: "Nature",
+                        type: ["park", "campground", "tourist_attraction", "hiking_trail"],
+                      },
+                      {
+                        icon: "body",
+                        label: "Chill",
+                        type: ["spa", "beauty_salon", "massage_spa"],
+                      },
+                      {
+                        icon: "school",
+                        label: "Learn",
+                        type: ["museum", "library", "university", "art_gallery"],
+                      },
+                      {
+                        icon: "bag-handle",
+                        label: "Shopping",
+                        type: ["shopping_mall", "department_store", "clothing_store", "shoe_store"],
+                      },
+                      {
+                        icon: "musical-notes",
+                        label: "Music",
+                        type: ["night_club", "bar", "concert_hall", "music_store"],
+                      },
                     ].map((item, index) => {
-                      const isSelected = selectedCategories.includes(item.type);
+                      const isSelected = selectedCategories.some(cat => item.type.includes(cat));
                       return (
                         <TouchableOpacity
                           key={index}
@@ -886,9 +949,19 @@ export default function MapScreen() {
                             styles.categoryButton,
                             isSelected && styles.categoryButtonSelected
                           ]}
-                          onPress={() => handleCategoryToggle(item.type)}
+                          onPress={() => {
+                            // Toggle all types in this category
+                            const hasAnySelected = selectedCategories.some(cat => item.type.includes(cat));
+                            if (hasAnySelected) {
+                              // Remove all types from this category
+                              setSelectedCategories(prev => prev.filter(cat => !item.type.includes(cat)));
+                            } else {
+                              // Add the first type from this category
+                              setSelectedCategories(prev => [...prev, item.type[0]]);
+                            }
+                          }}
                         >
-                          <Text style={styles.categoryEmoji}>{item.emoji}</Text>
+                          <Ionicons name={item.icon as any} size={24} color={colors.text} style={styles.categoryIcon} />
                           <Text style={[
                             styles.categoryLabel,
                             isSelected && styles.categoryLabelSelected
