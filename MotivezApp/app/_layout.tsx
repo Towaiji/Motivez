@@ -6,21 +6,32 @@ import { ScrollProvider } from "./context/ScrollContext";
 import { supabase } from '../lib/supabaseClient';
 import { ThemeProvider } from '../lib/ThemeContext';
 
+
 LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
 
   useEffect(() => {
     const login = async () => {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: "test@motivez.com",
-        password: "test123",
-      });
-      if (error) console.error("Login failed", error);
-      else console.log("✅ Test user logged in");
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData.session;
+  
+      if (!session) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: "test@motivez.com",
+          password: "test123",
+        });
+  
+        if (error) console.error("❌ Dev login failed:", error.message);
+        else console.log("✅ Test user logged in");
+      } else {
+        console.log("✅ Session already active for test user");
+      }
     };
+  
     login();
   }, []);
+  
   
 
   return (

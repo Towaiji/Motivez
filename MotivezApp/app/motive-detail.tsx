@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -15,40 +15,14 @@ import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/ThemeContext';
 import { getColors } from '../lib/colors';
+import { supabase } from '../lib/supabaseClient';
+import * as Location from 'expo-location';
 
 const { width, height } = Dimensions.get('window');
 
 export default function MotiveDetail() {
   const { theme } = useTheme();
   const colors = getColors(theme);
-  const { id, title, description, image } = useLocalSearchParams();
-  const router = useRouter();
-  const [isLiked, setIsLiked] = useState(false);
-
-  // Sample location (New York City)
-  const initialRegion = {
-    latitude: 40.7128,
-    longitude: -74.0060,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
-
-  const handleBack = () => {
-    router.back();
-  };
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-  };
-
-  const handlePickMotive = () => {
-    console.log('Motive picked!');
-  };
-
-  const handleShare = () => {
-    console.log('Share motive!');
-  };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -135,10 +109,15 @@ export default function MotiveDetail() {
     },
     detailRow: {
       flexDirection: 'row',
+      alignItems: 'center',
       justifyContent: 'space-between',
       paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.lightBorder,
+      marginBottom: 6, // Add spacing between rows
+    },
+    detailLabelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: 8,
     },
     detailLabel: {
       fontSize: 16,
@@ -220,6 +199,133 @@ export default function MotiveDetail() {
       marginRight: 8,
     },
   });
+  const { id } = useLocalSearchParams();
+  const [motive, setMotive] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [isLiked, setIsLiked] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [distance, setDistance] = useState<string | null>(null);
+
+  // Use motive fields for all details
+  const latitude = motive?.latitude;
+  const longitude = motive?.longitude;
+
+  // Get user location and calculate distance to motive
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setUserLocation(null);
+        setDistance(null);
+        return;
+      }
+      let locationObj = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: locationObj.coords.latitude,
+        longitude: locationObj.coords.longitude,
+      });
+    })();
+  }, []);
+
+  // Calculate distance when userLocation and motive location are available
+  useEffect(() => {
+    if (userLocation && latitude && longitude) {
+      const toRad = (value: number) => (value * Math.PI) / 180;
+      const R = 6371; // Radius of the earth in km
+      const dLat = toRad(parseFloat(latitude) - userLocation.latitude);
+      const dLon = toRad(parseFloat(longitude) - userLocation.longitude);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(userLocation.latitude)) *
+          Math.cos(toRad(parseFloat(latitude))) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const d = R * c; // Distance in km
+      setDistance(d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(2)} km`);
+    } else {
+      setDistance(null);
+    }
+  }, [userLocation, latitude, longitude]);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    supabase
+      .from('motives')
+      .select('*')
+      .eq('id', id)
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          setMotive(null);
+        } else {
+          setMotive(data);
+        }
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!motive) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Motive not found.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Use motive fields for all details
+  const {
+    title,
+    description,
+    image_url,
+    category,
+    notes,
+    start_time,
+    end_time,
+    location,
+    price,
+  } = motive;
+
+  // Format date/time
+  const formatDate = (iso: string | null) => iso ? new Date(iso).toLocaleDateString() : 'N/A';
+  const formatTime = (iso: string | null) => iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+
+  // Map region
+  const region = latitude && longitude ? {
+    latitude: parseFloat(latitude),
+    longitude: parseFloat(longitude),
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  } : null;
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+  };
+
+  const handlePickMotive = () => {
+    console.log('Motive picked!');
+  };
+
+  const handleShare = () => {
+    console.log('Share motive!');
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -256,7 +362,7 @@ export default function MotiveDetail() {
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <Image 
-            source={{ uri: image as string }} 
+            source={{ uri: image_url as string }} 
             style={styles.image}
           />
           <LinearGradient
@@ -268,69 +374,85 @@ export default function MotiveDetail() {
         {/* Content */}
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{title}</Text>
-          {description && (
-            <Text style={styles.description}>{description}</Text>
+          {distance && (
+            <Text style={styles.description}>{distance} away</Text>
           )}
-          
           <View style={styles.detailsContainer}>
             <Text style={styles.sectionTitle}>Details</Text>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Location</Text>
-              <Text style={styles.detailValue}>Downtown Area</Text>
+              <View style={styles.detailLabelRow}>
+                <Ionicons name="location-outline" size={20} color={colors.primaryPink} style={{ marginRight: 4 }} />
+                <Text style={styles.detailLabel}>Location</Text>
+              </View>
+              <Text
+                style={[styles.detailValue, { fontSize: 14, maxWidth: '60%' }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {location || 'N/A'}
+              </Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Date</Text>
-              <Text style={styles.detailValue}>March 15, 2024</Text>
+              <View style={styles.detailLabelRow}>
+                <Ionicons name="calendar-outline" size={20} color={colors.primaryPink} style={{ marginRight: 4 }} />
+                <Text style={styles.detailLabel}>Date</Text>
+              </View>
+              <Text style={styles.detailValue}>{formatDate(start_time)}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Time</Text>
-              <Text style={styles.detailValue}>7:00 PM</Text>
+              <View style={styles.detailLabelRow}>
+                <Ionicons name="time-outline" size={20} color={colors.primaryPink} style={{ marginRight: 4 }} />
+                <Text style={styles.detailLabel}>Time</Text>
+              </View>
+              <Text style={styles.detailValue}>{formatTime(start_time)} - {formatTime(end_time)}</Text>
             </View>
           </View>
 
           <View style={styles.aboutContainer}>
-            <Text style={styles.sectionTitle}>About this Motive</Text>
+            <Text style={styles.sectionTitle}>About this motive</Text>
             <View style={styles.aboutContent}>
-              <Text style={styles.aboutText}>
-                Experience the vibrant energy of downtown as we explore the city's hidden gems and local hotspots. This motive is perfect for those who love urban adventures and discovering new places.
-              </Text>
-              <View style={styles.highlightsContainer}>
-                <View style={styles.highlightItem}>
-                  <Ionicons name="time-outline" size={24} color={colors.primaryBlue} />
-                  <Text style={styles.highlightText}>Duration: 2-3 hours</Text>
+              <Text style={styles.aboutText}>{description || 'No description provided.'}</Text>
+              <View style={styles.detailRow}>
+                <View style={styles.detailLabelRow}>
+                  <Ionicons name="happy-outline" size={20} color={colors.primaryPink} style={{ marginRight: 4 }} />
+                  <Text style={styles.detailLabel}>Vibe</Text>
                 </View>
-                <View style={styles.highlightItem}>
-                  <Ionicons name="people-outline" size={24} color={colors.primaryBlue} />
-                  <Text style={styles.highlightText}>Group Size: 4-8 people</Text>
+                <Text style={styles.detailValue}>{category || 'N/A'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <View style={styles.detailLabelRow}>
+                  <Ionicons name="cash-outline" size={20} color={colors.primaryPink} style={{ marginRight: 4 }} />
+                  <Text style={styles.detailLabel}>Price</Text>
                 </View>
-                <View style={styles.highlightItem}>
-                  <Ionicons name="cash-outline" size={24} color={colors.primaryBlue} />
-                  <Text style={styles.highlightText}>Estimated Cost: $25-40 per person</Text>
-                </View>
+                <Text style={styles.detailValue}>{price ? `$${price}` : 'N/A'}</Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.mapContainer}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            <MapView
-              style={styles.map}
-              initialRegion={initialRegion}
-              provider="google"
-              scrollEnabled={false}
-              zoomEnabled={false}
-              rotateEnabled={false}
-              pitchEnabled={false}
-            >
-              <Marker
-                coordinate={{
-                  latitude: initialRegion.latitude,
-                  longitude: initialRegion.longitude,
-                }}
-                title="Event Location"
-              />
-            </MapView>
-          </View>
+          {region && (
+            <View style={styles.mapContainer}>
+              <Text style={styles.sectionTitle}>Location</Text>
+              {/* Show the address above the map */}
+              <Text style={[styles.detailValue, { marginBottom: 8 }]}>{location || 'N/A'}</Text>
+              <MapView
+                style={styles.map}
+                initialRegion={region}
+                provider="google"
+                scrollEnabled={false}
+                zoomEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: region.latitude,
+                    longitude: region.longitude,
+                  }}
+                  title={location || title}
+                />
+              </MapView>
+            </View>
+          )}
 
           <TouchableOpacity 
             style={styles.pickButton}

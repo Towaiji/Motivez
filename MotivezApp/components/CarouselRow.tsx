@@ -68,9 +68,6 @@ export default function CarouselRow({
       pathname: "/motive-detail",
       params: {
         id: activityItem.id,
-        title: activityItem.title,
-        description: activityItem.description || '',
-        image: activityItem.image,
       },
     });
   };

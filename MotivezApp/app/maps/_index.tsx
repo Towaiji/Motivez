@@ -11,6 +11,44 @@ import { fetchPlacesByTextSearch } from "@/lib/fetchNearbyPlaces";
 import { useTheme } from "../../lib/ThemeContext";
 import { getColors } from "../../lib/colors";
 
+// Add this function to fetch public motives near a region and matching a category
+async function fetchPublicMotives({
+  category,
+  region,
+  radiusKm = 10,
+}: {
+  category: string;
+  region: { latitude: number; longitude: number; latitudeDelta?: number; longitudeDelta?: number };
+  radiusKm?: number;
+}) {
+  // Calculate bounding box for latitude/longitude
+  const lat = region.latitude;
+  const lng = region.longitude;
+  const latDelta = region.latitudeDelta || 0.1;
+  const lngDelta = region.longitudeDelta || 0.1;
+  const minLat = lat - latDelta;
+  const maxLat = lat + latDelta;
+  const minLng = lng - lngDelta;
+  const maxLng = lng + lngDelta;
+
+  let query = supabase
+    .from('motives')
+    .select('*')
+    .eq('privacy', 'Public')
+    .eq('category', category)
+    .gte('latitude', minLat)
+    .lte('latitude', maxLat)
+    .gte('longitude', minLng)
+    .lte('longitude', maxLng);
+
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error fetching public motives:', error);
+    return [];
+  }
+  return data || [];
+}
+
 export default function MapScreen() {
   const { theme } = useTheme();
   const colors = getColors(theme);
@@ -385,6 +423,7 @@ export default function MapScreen() {
   const searchPanelAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const [activeSearchLabel, setActiveSearchLabel] = useState<string | null>(null);
+  const [publicMotives, setPublicMotives] = useState<any[]>([]);
 
 
   const panelTranslateY = searchPanelAnim.interpolate({
@@ -476,20 +515,13 @@ export default function MapScreen() {
       }
     } else if (mapRegion) {
       const results = await fetchPlacesByTextSearch(searchQuery, mapRegion.latitude, mapRegion.longitude);
-      if (results.length > 0) {
-        setGooglePlaces(results);
-        const first = results[0];
-        const lat = first.geometry?.location?.lat;
-        const lng = first.geometry?.location?.lng;
-        if (mapRef.current && lat && lng) {
-          mapRef.current.animateToRegion({
-            latitude: lat,
-            longitude: lng,
-            latitudeDelta: 0.03,
-            longitudeDelta: 0.03,
-          }, 300);
-        }
-      }
+      setGooglePlaces(results);
+      // Fetch public motives for this category
+      const motives = await fetchPublicMotives({
+        category: searchQuery,
+        region: mapRegion,
+      });
+      setPublicMotives(motives);
     }
   };
   
@@ -521,21 +553,33 @@ export default function MapScreen() {
         [categoryType]: results
       }));
     }
+    // Fetch public motives for this category
+    const motives = await fetchPublicMotives({
+      category: categoryType,
+      region: mapRegion,
+    });
+    setPublicMotives(motives);
   };
 
   // Get all places to display based on selected categories
   const getDisplayPlaces = () => {
+    let display = [];
     if (selectedCategories.length === 0) {
-      return googlePlaces; // Show default places when no categories selected
-    }
-    
-    const allCategoryPlaces = [];
-    for (const category of selectedCategories) {
-      if (categoryPlaces[category]) {
-        allCategoryPlaces.push(...categoryPlaces[category]);
+      display = googlePlaces;
+    } else {
+      const allCategoryPlaces = [];
+      for (const category of selectedCategories) {
+        if (categoryPlaces[category]) {
+          allCategoryPlaces.push(...categoryPlaces[category]);
+        }
       }
+      display = allCategoryPlaces;
     }
-    return allCategoryPlaces;
+    // Merge public motives
+    return [
+      ...display.map((place) => ({ ...place, _type: 'google' })),
+      ...publicMotives.map((motive) => ({ ...motive, _type: 'motive' })),
+    ];
   };
   
 
@@ -623,6 +667,12 @@ export default function MapScreen() {
     if (activeSearchLabel) {
       const results = await fetchPlacesByTextSearch(activeSearchLabel, latitude, longitude);
       setGooglePlaces(results);
+      // Fetch public motives for this category
+      const motives = await fetchPublicMotives({
+        category: activeSearchLabel,
+        region: mapRegion,
+      });
+      setPublicMotives(motives);
     } else if (selectedCategories.length > 0) {
       const newCategoryPlaces = { ...categoryPlaces };
       for (const categoryType of selectedCategories) {
@@ -630,9 +680,20 @@ export default function MapScreen() {
         newCategoryPlaces[categoryType] = results;
       }
       setCategoryPlaces(newCategoryPlaces);
+      // Fetch public motives for this category
+      const motives = await fetchPublicMotives({
+        category: selectedCategories[0], // Assuming the first category for the area search
+        region: mapRegion,
+      });
+      setPublicMotives(motives);
     } else {
       const results = await fetchNearbyPlaces(latitude, longitude);
       setGooglePlaces(results);
+      const motives = await fetchPublicMotives({
+        category: "all", // For general area search, no specific category
+        region: mapRegion,
+      });
+      setPublicMotives(motives);
     }
   };
   
@@ -704,18 +765,34 @@ export default function MapScreen() {
           })}
 
           {/* Google Places - now filtered by selected categories */}
-          {displayPlaces.map((place, index) => (
-            <Marker
-              key={`google-${index}`}
-              coordinate={{
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
-              }}
-              title={place.name}
-              description={place.vicinity}
-              pinColor={colors.mapMarker}
-            />
-          ))}
+          {displayPlaces.map((place, index) => {
+            if (place._type === 'motive') {
+              // Render motive marker
+              return (
+                <Marker
+                  key={`motive-${place.id}`}
+                  coordinate={{ latitude: parseFloat(place.latitude), longitude: parseFloat(place.longitude) }}
+                  title={place.title}
+                  description={place.description}
+                  pinColor={colors.primaryPink} // Use a distinct color for motives
+                />
+              );
+            } else {
+              // Google Place marker
+              return (
+                <Marker
+                  key={`google-${index}`}
+                  coordinate={{
+                    latitude: place.geometry.location.lat,
+                    longitude: place.geometry.location.lng,
+                  }}
+                  title={place.name}
+                  description={place.vicinity}
+                  pinColor={colors.mapMarker}
+                />
+              );
+            }
+          })}
         </MapView>
 
 

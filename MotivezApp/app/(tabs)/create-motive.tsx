@@ -63,7 +63,7 @@ export default function CreateMotiveScreen() {
       return Alert.alert('Permission Required', 'We need access to your gallery.');
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'], // updated to fix deprecation warning and linter error
       allowsEditing: true,
       quality: 0.7,
     });
@@ -108,6 +108,8 @@ export default function CreateMotiveScreen() {
         latitude: selectedPlace?.coordinates.latitude ?? null,
         longitude: selectedPlace?.coordinates.longitude ?? null,
         requires_approval: modeSelected === 'public' ? requiresApproval : false,
+        location: location, // Save the address string
+        price: price,    // Save the budget/price
       }
     ]);
 
@@ -155,12 +157,29 @@ export default function CreateMotiveScreen() {
       padding: 20, flexGrow: 1, alignItems: 'center',
     },
     imagePicker: {
-      width: '100%', height: 200, backgroundColor: colors.inputBorder,
-      borderRadius: 12, justifyContent: 'center',
-      alignItems: 'center', overflow: 'hidden', marginBottom: 20,
+      width: 350, // changed from '100%' to 350 for more horizontal length
+      height: 200,
+      borderRadius: 12, // from first definition
+      borderWidth: 1,
+      borderColor: '#ccc',
+      justifyContent: 'center', // centers vertically
+      alignItems: 'center',     // centers horizontally
+      backgroundColor: '#f9f9f9', // from second definition
+      marginBottom: 20,
+      overflow: 'hidden', // from first definition
     },
-    imagePlaceholder: { color: colors.secondary },
-    image: { width: '100%', height: '100%' },
+    image: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 10,
+      resizeMode: 'cover',
+    },
+    imagePlaceholder: {
+      color: '#888',
+      fontSize: 16,
+      textAlign: 'center',
+      paddingHorizontal: 10,
+    },
     input: {
       width: '100%',
       backgroundColor: colors.card,
@@ -417,27 +436,33 @@ export default function CreateMotiveScreen() {
         showsVerticalScrollIndicator={false}
         extraScrollHeight={100}
       >
-        {/* Step 1: Photo */}        {step === 0 && (
-          <>
-            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-              {image
-                ? <Image source={{ uri: image }} style={styles.image} />
-                : <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
-              }
-            </TouchableOpacity>
+       {/* Step 1: Photo */}
+{step === 0 && (
+  <View>
+    <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+      {image ? (
+        <Image source={{ uri: image }} style={styles.image} />
+      ) : (
+        <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
+      )}
+    </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                setModeSelected(null);
-                setStep(0);
-                setImage(null);
-              }}
-              style={{ marginBottom: 20 }}
-            >
-              <Text style={{ color: colors.primaryPink, textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
-            </TouchableOpacity>
-          </>
-        )}
+    <TouchableOpacity
+      onPress={() => {
+        setModeSelected(null);
+        setStep(0);
+        setImage(null);
+      }}
+      style={{ marginBottom: 20 }}
+    >
+      <Text style={{ color: colors.primaryPink, textAlign: 'center' }}>
+        ← Change mode (Friends/Public)
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
+
+
 
         {/* Step 2: Details */}
         {step === 1 && (
