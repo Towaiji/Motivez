@@ -4,6 +4,7 @@ import { LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollProvider } from "./context/ScrollContext";
 import { supabase } from '../lib/supabaseClient';
+import { ThemeProvider } from '../lib/ThemeContext';
 import LoginScreen from './auth/LoginScreen';
 import SignupScreen from './auth/SignupScreen';
 
@@ -79,6 +80,7 @@ export default function RootLayout() {
   if (loading) return null;
 
   return (
+    <ThemeProvider>
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
       <AuthContext.Provider value={{ user, setUser, logout, profile, setProfile }}>
@@ -125,5 +127,6 @@ export default function RootLayout() {
         )}
       </AuthContext.Provider>
     </SafeAreaProvider>
+    </ThemeProvider>
   );
 }

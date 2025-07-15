@@ -6,10 +6,15 @@ import { useState } from "react";
 import MenuDrawer from "../../components/MenuDrawer";
 import { useScroll } from "../context/ScrollContext";
 import { useDevAuth } from "../../hooks/useDevAuth";
+import { useTheme } from "../../lib/ThemeContext";
+import { getColors } from "../../lib/colors";
 
 export default function TabsLayout() {
   const [menuVisible, setMenuVisible] = useState(false);
   const { scrollY } = useScroll();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
   
   useDevAuth(); // This will log in the test user during dev
 
@@ -28,13 +33,13 @@ export default function TabsLayout() {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* 👤 Floating User Icon (no white box) */}
       <TouchableOpacity
         onPress={() => setMenuVisible((prev) => !prev)}
         style={styles.floatingIcon}
       >
-        <Ionicons name="person-circle-outline" size={40} color="black" />
+        <Ionicons name="person-circle-outline" size={40} color={colors.text} />
       </TouchableOpacity>
 
       <Tabs
@@ -66,7 +71,7 @@ export default function TabsLayout() {
                 onPress={() => console.log("Add Friend pressed")}
                 style={{ marginRight: 15 }}
               >
-                <Ionicons name="person-add-outline" size={30} color="black" />
+                <Ionicons name="person-add-outline" size={30} color={colors.text} />
               </TouchableOpacity>
             ),
           }}
@@ -106,7 +111,7 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fffdf8",
+    //backgroundColor: "#fffdf8",
   },
   floatingIcon: {
     position: "absolute",

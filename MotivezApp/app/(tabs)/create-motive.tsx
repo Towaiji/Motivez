@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  ScrollView,
   Alert,
   Switch,
 } from 'react-native';
@@ -19,6 +18,10 @@ import { useRouter } from "expo-router";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
+import 'react-native-get-random-values';
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CreateMotiveScreen() {
   // form state
@@ -35,6 +38,7 @@ export default function CreateMotiveScreen() {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   // categories/chips state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -43,6 +47,8 @@ export default function CreateMotiveScreen() {
     name: string;
     coordinates: { latitude: number; longitude: number };
   } | null>(null);
+
+  const placesRef = useRef<any>(null);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
@@ -57,7 +63,7 @@ export default function CreateMotiveScreen() {
       return Alert.alert('Permission Required', 'We need access to your gallery.');
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'], // updated to fix deprecation warning and linter error
       allowsEditing: true,
       quality: 0.7,
     });
@@ -68,17 +74,25 @@ export default function CreateMotiveScreen() {
 
   const router = useRouter();
 
+  // ensure location text persists when navigating back to step 2
+  useEffect(() => {
+    if (step === 1 && placesRef.current) {
+      placesRef.current.setAddressText(location);
+    }
+  }, [step]);
+
+
   const handleSubmit = async () => {
     if (!title || !location || !price || !selectedCategory) {
       return Alert.alert("Missing Info", "Please fill out all required fields.");
     }
-  
+
     // Get logged-in user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return Alert.alert("Error", "Unable to identify user.");
     }
-  
+
     // Insert into Supabase
     const { error } = await supabase.from("motives").insert([
       {
@@ -94,28 +108,287 @@ export default function CreateMotiveScreen() {
         latitude: selectedPlace?.coordinates.latitude ?? null,
         longitude: selectedPlace?.coordinates.longitude ?? null,
         requires_approval: modeSelected === 'public' ? requiresApproval : false,
+        location: location, // Save the address string
+        price: price,    // Save the budget/price
       }
     ]);
-    
+
     if (error) {
       console.error("Supabase insert error:", error);
       return Alert.alert("Error", "Failed to post motive.");
     }
-  
+
     router.push("/motive-success");
   };
 
   const steps = ['Photo', 'Details', 'Preview'];
 
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  // Move styles here so colors is in scope
+  const styles = StyleSheet.create({
+    safeContainer: { flex: 1, backgroundColor: colors.background, paddingTop: 50 },
+    stepIndicator: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 10,
+      backgroundColor: colors.card,
+    },
+    stepWrapper: { alignItems: 'center' },
+    stepCircle: {
+      width: 24, height: 24, borderRadius: 12,
+      backgroundColor: colors.inputBorder, justifyContent: 'center', alignItems: 'center',
+    },
+    stepCircleActive: { backgroundColor: colors.stepActiveBg },
+    stepNumber: { color: colors.stepInactiveText, fontSize: 12 },
+    stepNumberActive: { color: colors.chipSelectedText, fontWeight: 'bold' },
+    stepLabel: { fontSize: 10, color: colors.stepInactiveLabel, marginTop: 2 },
+    stepLabelActive: { color: colors.stepActiveLabel, fontWeight: '600' },
+    headerRow: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: 20, paddingBottom: 4,
+    },
+    headerTitle: {
+      fontSize: 24, fontWeight: 'bold', color: colors.text,
+      marginLeft: 10,
+    },
+    container: {
+      padding: 20, flexGrow: 1, alignItems: 'center',
+    },
+    imagePicker: {
+      width: 350, // changed from '100%' to 350 for more horizontal length
+      height: 200,
+      borderRadius: 12, // from first definition
+      borderWidth: 1,
+      borderColor: '#ccc',
+      justifyContent: 'center', // centers vertically
+      alignItems: 'center',     // centers horizontally
+      backgroundColor: '#f9f9f9', // from second definition
+      marginBottom: 20,
+      overflow: 'hidden', // from first definition
+    },
+    image: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 10,
+      resizeMode: 'cover',
+    },
+    imagePlaceholder: {
+      color: '#888',
+      fontSize: 16,
+      textAlign: 'center',
+      paddingHorizontal: 10,
+    },
+    input: {
+      width: '100%',
+      backgroundColor: colors.card,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 15,
+      fontSize: 16,
+      color: colors.text,
+    },
+    subheading: {
+      alignSelf: 'flex-start',
+      marginBottom: 8,
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    titleInput: {
+      width: '100%',
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.text,
+      marginBottom: 24,
+      textAlign: 'left',
+      shadowColor: colors.inputShadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 3,
+    },
+    locationContainer: {
+      width: '100%',
+      marginBottom: 20,
+      //zIndex: 1000,
+    },
+    selectedLocationCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.previewBg,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginBottom: 16,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primaryPink,
+    },
+    selectedLocationText: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text,
+      marginLeft: 8,
+      fontWeight: '500',
+    },
+    clearLocationBtn: {
+      padding: 4,
+    },
+    chipRow: {
+      width: '100%',
+      marginBottom: 20,
+      paddingVertical: 10,
+    },
+    chip: {
+      width: 100,
+      height: 100,
+      backgroundColor: colors.chipUnselectedBg,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8,
+      elevation: 3,
+      shadowColor: colors.inputShadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    chipSelected: {
+      backgroundColor: colors.chipSelectedBg,
+    },
+    chipText: {
+      fontSize: 14,
+      color: colors.chipUnselectedText,
+      textAlign: 'center',
+      fontWeight: '500',
+    },
+    gridContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    chipTextSelected: {
+      color: colors.chipSelectedText,
+      fontWeight: '600',
+    },
+    segmentedContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      backgroundColor: colors.segmentedBg,
+      borderRadius: 12,
+      padding: 4,
+      marginVertical: 16,
+    },
+    segmentedOption: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    segmentedSelected: {
+      backgroundColor: colors.primaryPink,
+    },
+    segmentedText: {
+      fontSize: 13,
+      color: colors.chipUnselectedText,
+      fontWeight: '500',
+      textAlign: 'center',
+    },
+    segmentedTextSelected: {
+      color: colors.chipSelectedText,
+    },
+    timeRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 12,
+      marginBottom: 20,
+      gap: 16,
+    },
+    timeCard: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.inputShadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 2,
+    },
+    timeCardSelected: {
+      borderColor: colors.primaryPink,
+      borderWidth: 1.5,
+    },
+    timeLabel: {
+      fontSize: 12,
+      color: colors.secondary,
+      marginTop: 6,
+    },
+    timeValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      marginTop: 2,
+    },
+    switchRow: {
+      flexDirection: 'row', alignItems: 'center',
+      marginBottom: 20,
+    },
+    label: { marginHorizontal: 8, color: colors.stepInactiveText },
+    preview: { alignItems: 'flex-start', width: '100%' },
+    previewImage: {
+      width: '100%', height: 200, borderRadius: 12, marginBottom: 15,
+    },
+    previewText: { fontSize: 16, color: colors.previewText, marginBottom: 6 },
+    bold: { fontWeight: '600' },
+    navRow: {
+      flexDirection: 'row', justifyContent: 'space-between',
+      paddingHorizontal: 20, paddingVertical: 10, paddingBottom: 80,
+    },
+    navBtn: {
+      paddingVertical: 10, paddingHorizontal: 20,
+      borderRadius: 8, backgroundColor: colors.navBtnBg,
+    },
+    navText: { fontSize: 16, color: colors.navText },
+    nextBtn: { backgroundColor: colors.nextBtnBg },
+    nextText: { color: colors.nextText },
+    submitBtn: { backgroundColor: colors.submitBtnBg },
+    submitText: { color: colors.submitBtnText, fontWeight: 'bold' },
+    bubbleBtn: {
+      backgroundColor: colors.primaryPink,
+      paddingHorizontal: 28,
+      paddingVertical: 12,
+      borderRadius: 50,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bubbleText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.chipSelectedText,
+    },
+  });
+
   if (!modeSelected) {
     return (
       <SafeAreaView style={styles.safeContainer}>
         <View style={{ alignItems: 'center', marginTop: 150 }}>
-          <Text style={{ fontSize: 35, fontWeight: 'bold', marginBottom: 20 }}>
+          <Text style={{ fontSize: 35, fontWeight: 'bold', marginBottom: 20, color: colors.text }}>
             Create a Motive
           </Text>
 
-          <Text style={{ fontSize: 16, color: '#666', marginBottom: 40, textAlign: 'center' }}>
+          <Text style={{ fontSize: 16, color: colors.secondary, marginBottom: 40, textAlign: 'center' }}>
             Is this just for the crew, or for the world?
           </Text>
 
@@ -151,34 +424,45 @@ export default function CreateMotiveScreen() {
       <ProgressBar steps={steps} currentStep={step} />
 
       {/* Title */}
-      <View style={styles.headerRow}>
+      <View style={{ flex: 1 }}>
         <Text style={styles.headerTitle}>{steps[step]}</Text>
       </View>
 
-      {/* Content */}
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Step 1: Photo */}
-        {step === 0 && (
-          <>
-            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-              {image
-                ? <Image source={{ uri: image }} style={styles.image} />
-                : <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
-              }
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                setModeSelected(null);
-                setStep(0);
-                setImage(null);
-              }}
-              style={{ marginBottom: 20 }}
-            >
-              <Text style={{ color: '#e91e63', textAlign: 'center' }}>← Change mode (Friends/Public)</Text>
-            </TouchableOpacity>
-          </>
-        )}
+      {/* Content */}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        extraScrollHeight={100}
+      >
+       {/* Step 1: Photo */}
+{step === 0 && (
+  <View>
+    <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+      {image ? (
+        <Image source={{ uri: image }} style={styles.image} />
+      ) : (
+        <Text style={styles.imagePlaceholder}>Tap to select photo</Text>
+      )}
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => {
+        setModeSelected(null);
+        setStep(0);
+        setImage(null);
+      }}
+      style={{ marginBottom: 20 }}
+    >
+      <Text style={{ color: colors.primaryPink, textAlign: 'center' }}>
+        ← Change mode (Friends/Public)
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
+
+
 
         {/* Step 2: Details */}
         {step === 1 && (
@@ -188,40 +472,65 @@ export default function CreateMotiveScreen() {
               style={styles.titleInput}
               value={title}
               onChangeText={setTitle}
-              placeholderTextColor="#aaa"
+              placeholderTextColor={colors.inputPlaceholder}
               textAlign="left"
             />
 
-            <Text style={styles.subheading}>Where's it happening?</Text>
+<Text style={styles.subheading}>Where's it happening?</Text>
+          <View style={[styles.locationContainer, { pointerEvents: 'auto'}]}>
+          <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder="Location"
+                fetchDetails
+                listViewDisplayed='auto'  // Add this line
+                keyboardShouldPersistTaps='handled'  // Add this line
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                  language: 'en',
+                }}
+                onPress={(data, details = null) => {
+                  console.log('Address selected:', data.description);
+                  const name = data.description;
+                  setLocation(name);
+                  if (details?.geometry?.location) {
+                    setSelectedPlace({
+                      name,
+                      coordinates: {
+                        latitude: details.geometry.location.lat,
+                        longitude: details.geometry.location.lng,
+                      },
+                    });
+                  }
+                }}
+                onFail={(error) => console.log('Error:', error)}  // Add this line
+                onTimeout={() => console.log('Timeout')}  // Add this line
+                enablePoweredByContainer={false}
+                styles={{
+                  textInput: styles.titleInput,
+                  listView: {
+                    position: 'absolute',
+                    top: 60, // adjust depending on your input height
+                    left: 0,
+                    right: 0,
+                    backgroundColor: colors.card,
+                    zIndex: 999,
+                    elevation: 10,
+                    borderRadius: 8,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.1,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowRadius: 4,
+                  },
+                  container: { flex: 0, zIndex: 999, elevation: 999 },
+                }} 
+                predefinedPlaces={[]}
+                textInputProps={{
+                  placeholderTextColor: colors.inputPlaceholder,
+                }}
+                minLength={2}
+              />
+          </View>
 
-            <TextInput
-              placeholder="Location"
-              style={styles.titleInput}
-              value={location}
-              onChangeText={setLocation}
-              placeholderTextColor="#aaa"
-              textAlign="left"
-            />
-
-
-            {/* Display selected location */}
-            {selectedPlace && (
-              <View style={styles.selectedLocationCard}>
-                <Ionicons name="location" size={16} color="#ed5b77" />
-                <Text style={styles.selectedLocationText} numberOfLines={2}>
-                  {selectedPlace.name}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setLocation('');
-                    setSelectedPlace(null);
-                  }}
-                  style={styles.clearLocationBtn}
-                >
-                  <Ionicons name="close-circle" size={20} color="#999" />
-                </TouchableOpacity>
-              </View>
-            )}
 
             <Text style={styles.subheading}>When does it start and end?</Text>
 
@@ -234,7 +543,7 @@ export default function CreateMotiveScreen() {
                 ]}
                 onPress={() => setShowStartPicker(true)}
               >
-                <Ionicons name="time-outline" size={20} color={startTime ? '#ed5b77' : '#aaa'} />
+                <Ionicons name="time-outline" size={20} color={startTime ? colors.primaryPink : colors.inputPlaceholder} />
                 <Text style={styles.timeLabel}>Start</Text>
                 <Text style={styles.timeValue}>
                   {startTime ? formatTime(startTime) : 'Select'}
@@ -249,7 +558,7 @@ export default function CreateMotiveScreen() {
                 ]}
                 onPress={() => setShowEndPicker(true)}
               >
-                <Ionicons name="time-outline" size={20} color={endTime ? '#ed5b77' : '#aaa'} />
+                <Ionicons name="time-outline" size={20} color={endTime ? colors.primaryPink : colors.inputPlaceholder} />
                 <Text style={styles.timeLabel}>End</Text>
                 <Text style={styles.timeValue}>
                   {endTime ? formatTime(endTime) : 'Select'}
@@ -277,36 +586,36 @@ export default function CreateMotiveScreen() {
               onCancel={() => setShowEndPicker(false)}
             />
 
-<TextInput
-  placeholder="Budget"
-  style={styles.titleInput}
-  keyboardType="numeric"
-  value={price}
-  onChangeText={setPrice}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Budget"
+              style={styles.titleInput}
+              keyboardType="numeric"
+              value={price}
+              onChangeText={setPrice}
+              placeholderTextColor={colors.inputPlaceholder}
+              textAlign="left"
+            />
 
 
-<TextInput
-  placeholder="Description"
-  style={[styles.titleInput, { height: 80 }]}
-  multiline
-  value={description}
-  onChangeText={setDescription}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Description"
+              style={[styles.titleInput, { height: 80 }]}
+              multiline
+              value={description}
+              onChangeText={setDescription}
+              placeholderTextColor={colors.inputPlaceholder}
+              textAlign="left"
+            />
 
-<TextInput
-  placeholder="Additional Notes"
-  style={[styles.titleInput, { height: 60 }]}
-  multiline
-  value={notes}
-  onChangeText={setNotes}
-  placeholderTextColor="#aaa"
-  textAlign="left"
-/>
+            <TextInput
+              placeholder="Additional Notes"
+              style={[styles.titleInput, { height: 60 }]}
+              multiline
+              value={notes}
+              onChangeText={setNotes}
+              placeholderTextColor={colors.inputPlaceholder}
+              textAlign="left"
+            />
 
 
             {/* Category Chips */}
@@ -333,7 +642,7 @@ export default function CreateMotiveScreen() {
                   <Ionicons
                     name={category.icon as any}
                     size={28}
-                    color={selectedCategory === category.name ? '#fff' : '#333'}
+                    color={selectedCategory === category.name ? colors.chipSelectedText : colors.chipUnselectedText}
                     style={{ marginBottom: 6 }}
                   />
                   <Text
@@ -361,7 +670,7 @@ export default function CreateMotiveScreen() {
                   <Ionicons
                     name="earth-outline"
                     size={18}
-                    color={!requiresApproval ? '#fff' : '#333'}
+                    color={!requiresApproval ? colors.chipSelectedText : colors.chipUnselectedText}
                     style={{ marginBottom: 4 }}
                   />
                   <Text
@@ -384,7 +693,7 @@ export default function CreateMotiveScreen() {
                   <Ionicons
                     name="lock-closed-outline"
                     size={18}
-                    color={requiresApproval ? '#fff' : '#333'}
+                    color={requiresApproval ? colors.chipSelectedText : colors.chipUnselectedText}
                     style={{ marginBottom: 4 }}
                   />
                   <Text
@@ -442,7 +751,7 @@ export default function CreateMotiveScreen() {
             )}
           </View>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Navigation Buttons */}
       <View style={styles.navRow}>
@@ -473,248 +782,3 @@ export default function CreateMotiveScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeContainer: { flex: 1, backgroundColor: '#f4f6f8', paddingTop: 50 },
-  stepIndicator: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-  },
-  stepWrapper: { alignItems: 'center' },
-  stepCircle: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#ddd', justifyContent: 'center', alignItems: 'center',
-  },
-  stepCircleActive: { backgroundColor: '#e91e63' },
-  stepNumber: { color: '#444', fontSize: 12 },
-  stepNumberActive: { color: '#fff', fontWeight: 'bold' },
-  stepLabel: { fontSize: 10, color: '#666', marginTop: 2 },
-  stepLabelActive: { color: '#e91e63', fontWeight: '600' },
-
-  headerRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 20, paddingBottom: 4,
-  },
-  headerTitle: {
-    fontSize: 24, fontWeight: 'bold', color: '#333',
-    marginLeft: 10,
-  },
-
-  container: {
-    padding: 20, flexGrow: 1, alignItems: 'center',
-  },
-  imagePicker: {
-    width: '100%', height: 200, backgroundColor: '#ddd',
-    borderRadius: 12, justifyContent: 'center',
-    alignItems: 'center', overflow: 'hidden', marginBottom: 20,
-  },
-  imagePlaceholder: { color: '#666' },
-  image: { width: '100%', height: '100%' },
-
-  input: {
-    width: '100%',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  subheading: {
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  titleInput: {
-    width: '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    marginBottom: 24,
-    textAlign: 'left',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-
-  // Location styles
-  locationContainer: {
-    width: '100%',
-    marginBottom: 20,
-    zIndex: 1000,
-  },
-  selectedLocationCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: '#ed5b77',
-  },
-  selectedLocationText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  clearLocationBtn: {
-    padding: 4,
-  },
-
-  chipRow: {
-    width: '100%',
-    marginBottom: 20,
-    paddingVertical: 10,
-  },
-  chip: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  chipSelected: {
-    backgroundColor: '#ed5b77',
-  },
-  chipText: {
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  chipTextSelected: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  segmentedContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: '#f2f2f2',
-    borderRadius: 12,
-    padding: 4,
-    marginVertical: 16,
-  },
-  segmentedOption: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  segmentedSelected: {
-    backgroundColor: '#ed5b77',
-  },
-  segmentedText: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  segmentedTextSelected: {
-    color: '#fff',
-  },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-    marginBottom: 20,
-    gap: 16,
-  },
-  timeCard: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  timeCardSelected: {
-    borderColor: '#ed5b77',
-    borderWidth: 1.5,
-  },
-  timeLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 6,
-  },
-  timeValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 2,
-  },
-
-  switchRow: {
-    flexDirection: 'row', alignItems: 'center',
-    marginBottom: 20,
-  },
-  label: { marginHorizontal: 8, color: '#444' },
-
-  preview: { alignItems: 'flex-start', width: '100%' },
-  previewImage: {
-    width: '100%', height: 200, borderRadius: 12, marginBottom: 15,
-  },
-  previewText: { fontSize: 16, color: '#333', marginBottom: 6 },
-  bold: { fontWeight: '600' },
-
-  navRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingVertical: 10, paddingBottom: 80,
-  },
-  navBtn: {
-    paddingVertical: 10, paddingHorizontal: 20,
-    borderRadius: 8, backgroundColor: '#ddd',
-  },
-  navText: { fontSize: 16, color: '#444' },
-  nextBtn: { backgroundColor: '#e91e63' },
-  nextText: { color: '#fff' },
-  submitBtn: { backgroundColor: '#4CAF50' },
-  submitText: { color: '#fff', fontWeight: 'bold' },
-
-  bubbleBtn: {
-    backgroundColor: '#e91e63',
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bubbleText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-});

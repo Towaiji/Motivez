@@ -13,6 +13,8 @@ import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from "../../lib/supabaseClient";
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -70,6 +72,28 @@ export default function MyMotivesScreen() {
   
   const [loading, setLoading] = useState(true);
 
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 20, paddingBottom: 10, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
+    backButton: { width: 32, alignItems: 'flex-start' },
+    topTitle: { flex: 1, fontSize: 20, fontWeight: '600', color: colors.text, textAlign: 'center' },
+    loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+    loadingText: { marginTop: 12, fontSize: 16, color: colors.secondary },
+    listContent: { padding: 12, paddingBottom: 40 },
+    motiveCard: { backgroundColor: colors.card, borderRadius: 16, marginHorizontal: 16, marginVertical: 8, padding: 16, shadowColor: colors.icon, shadowOpacity: 0.08, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: colors.border },
+    motiveImage: { width: 90, height: 90, borderTopLeftRadius: 16, borderBottomLeftRadius: 16 },
+    motiveInfo: { flex: 1, padding: 12, justifyContent: 'center' },
+    motiveTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 4 },
+    motiveDate: { fontSize: 14, color: colors.secondary },
+    motivePrivacy: { fontSize: 13, marginTop: 3, color: colors.secondary },
+    motiveAttendees: { fontSize: 13, marginTop: 3, color: colors.secondary },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+    emptyText: { marginTop: 12, fontSize: 17, color: colors.secondary, textAlign: 'center', fontWeight: '500' },
+  });
+
 
   useEffect(() => {
     const fetchMyMotives = async () => {
@@ -123,12 +147,12 @@ export default function MyMotivesScreen() {
           <Ionicons
             name={item.privacy === "Friends" ? "lock-closed" : "earth"}
             size={15}
-            color={item.privacy === "Friends" ? "#e91e63" : "#4CAF50"}
+            color={item.privacy === "Friends" ? colors.primaryPink : colors.featureGreen}
           />{" "}
           {item.privacy || "Public"}
         </Text>
         <Text style={styles.motiveAttendees}>
-          <Ionicons name="people-outline" size={15} color="#007AFF" />{" "}
+          <Ionicons name="people-outline" size={15} color={colors.primaryBlue} />{" "}
           {item.attendees || 0} Attending
         </Text>
       </View>
@@ -143,7 +167,7 @@ export default function MyMotivesScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.icon} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>My Motivez</Text>
           <View style={{ width: 32 }} /> {/* Spacer to center title */}
@@ -151,12 +175,12 @@ export default function MyMotivesScreen() {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primaryBlue} />
             <Text style={styles.loadingText}>Loading your Motivez...</Text>
           </View>
         ) : motives.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="create-outline" size={60} color="#cccccc" />
+            <Ionicons name="create-outline" size={60} color={colors.icon} />
             <Text style={styles.emptyText}>You haven't created any Motivez yet.</Text>
           </View>
         ) : (
@@ -172,100 +196,3 @@ export default function MyMotivesScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f4f6f8',
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
-  },
-  backButton: {
-    width: 32,
-    alignItems: 'flex-start',
-  },
-  topTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333333',
-    textAlign: 'center',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#555555',
-  },
-  listContent: {
-    padding: 12,
-    paddingBottom: 40,
-  },
-  motiveCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
-    flexDirection: 'row',
-  },
-  motiveImage: {
-    width: 90,
-    height: 90,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  motiveInfo: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-  },
-  motiveTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  motiveDate: {
-    fontSize: 14,
-    color: '#555',
-  },
-  motivePrivacy: {
-    fontSize: 13,
-    marginTop: 3,
-    color: '#666',
-  },
-  motiveAttendees: {
-    fontSize: 13,
-    marginTop: 3,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    marginTop: 12,
-    fontSize: 17,
-    color: '#888',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-});

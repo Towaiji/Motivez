@@ -23,6 +23,8 @@ import { useRouter } from "expo-router";
 import { useScroll } from "../context/ScrollContext";
 import Slider from '@react-native-community/slider';
 import { supabase } from "../../lib/supabaseClient";
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
 
 // 🔹 Dummy motives for FlatList (bottom)
 const dummyMotives = [
@@ -338,13 +340,13 @@ export default function Motives() {
                 style={[styles.friendButton, styles.acceptButton]}
                 onPress={() => handleAcceptFriend(friend.id)}
               >
-                <Ionicons name="checkmark" size={24} color="#fff" />
+                <Ionicons name="checkmark" size={24} color={colors.chipSelectedText} />
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.friendButton, styles.rejectButton]}
                 onPress={() => handleRejectFriend(friend.id)}
               >
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={colors.chipSelectedText} />
               </TouchableOpacity>
             </View>
           </View>
@@ -355,7 +357,7 @@ export default function Motives() {
 
   const renderPublicMotives = () => {
     if (loadingPublicMotives) {
-      return <ActivityIndicator size="large" color="#e91e63" style={{ marginTop: 30 }} />;
+      return <ActivityIndicator size="large" color={colors.primaryPink} style={{ marginTop: 30 }} />;
     }
   
     const safePublicMotives = Array.isArray(publicMotives) ? publicMotives : [];
@@ -373,7 +375,7 @@ export default function Motives() {
             )}
             <Text style={styles.title}>{motive.title}</Text>
             <Text style={styles.user}>{motive.description}</Text>
-            <Text style={[styles.user, { color: "#e91e63", fontWeight: 'bold' }]}>
+            <Text style={[styles.user, { color: colors.primaryPink, fontWeight: 'bold' }]}>
               {motive.category}
             </Text>
           </View>
@@ -384,7 +386,7 @@ export default function Motives() {
 
   const renderFriendsMotives = () => {
     if (loadingFriendsMotives) {
-      return <ActivityIndicator size="large" color="#e91e63" style={{ marginTop: 30 }} />;
+      return <ActivityIndicator size="large" color={colors.primaryPink} style={{ marginTop: 30 }} />;
     }
   
     const safeFriendsMotives = Array.isArray(friendsMotives) ? friendsMotives : [];
@@ -402,7 +404,7 @@ export default function Motives() {
             )}
             <Text style={styles.title}>{motive.title}</Text>
             <Text style={styles.user}>{motive.description}</Text>
-            <Text style={[styles.user, { color: "#4CAF50", fontWeight: 'bold' }]}>
+            <Text style={[styles.user, { color: colors.featureGreen, fontWeight: 'bold' }]}>
               {motive.category}
             </Text>
           </View>
@@ -429,7 +431,7 @@ export default function Motives() {
                 onPress={() => setIsFilterModalVisible(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.icon} />
               </TouchableOpacity>
             </View>
 
@@ -446,9 +448,9 @@ export default function Motives() {
                 step={1}
                 value={filters.distance}
                 onValueChange={(value) => handleFilterChange('distance', value)}
-                minimumTrackTintColor="#e91e63"
-                maximumTrackTintColor="#ddd"
-                thumbTintColor="#e91e63"
+                minimumTrackTintColor={colors.primaryPink}
+                maximumTrackTintColor={colors.sliderTrack}
+                thumbTintColor={colors.primaryPink}
               />
               <View style={styles.distanceMarkers}>
                 <Text style={styles.markerText}>1 km</Text>
@@ -516,6 +518,353 @@ export default function Motives() {
     );
   };
 
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  // Move styles here so colors is in scope
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    fixedHeader: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 50,
+      paddingTop: 60,
+      zIndex: 20,
+      backgroundColor: 'transparent',
+    },
+    pageTitle: {
+      fontSize: 30,
+      fontWeight: "bold",
+      color: colors.text,
+      paddingHorizontal: 10,
+    },
+    searchBar: {
+      width: "90%",
+      alignSelf: "center",
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.searchBarContrastBg,
+      borderRadius: 25,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      marginBottom: 16,
+      marginTop: 20,
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.text,
+    },
+    toggleContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      paddingHorizontal: 20,
+    },
+    toggleButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      alignItems: "center",
+    },
+    activeButton: {
+      backgroundColor: colors.primaryPink,
+    },
+    toggleText: {
+      color: colors.toggleText,
+      fontWeight: "500",
+      fontSize: 14,
+    },
+    activeText: {
+      color: colors.toggleActiveText,
+      fontWeight: "600",
+    },
+    card: {
+      marginBottom: 20,
+      backgroundColor: colors.cardBg,
+      borderRadius: 12,
+      padding: 12,
+      shadowColor: colors.cardShadow,
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    image: {
+      width: "100%",
+      height: 180,
+      borderRadius: 10,
+      marginBottom: 10,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 4,
+      color: colors.cardTitle,
+    },
+    user: {
+      fontSize: 14,
+      color: colors.cardUser,
+    },
+    mapButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      shadowColor: colors.mapButtonShadow,
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+      backgroundColor: colors.mapButtonBg,
+    },
+    stickyTabsContainer: {
+      backgroundColor: colors.background,
+      paddingVertical: 10,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.border,
+      zIndex: 10,
+    },
+    activeIndicator: {
+      marginTop: 4,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.primaryPink,
+    },
+    headerCard: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: height * 0.28,
+      backgroundColor: colors.cardBg,
+      borderBottomLeftRadius: 40,
+      borderBottomRightRadius: 40,
+      paddingTop: 100,
+      paddingHorizontal: 24,
+      shadowColor: colors.cardShadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
+      zIndex: 10,
+    },
+    headerContent: {
+      flex: 1,
+    },
+    sectionTitleContainer: {
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      marginBottom: 10,
+    },
+    sectionTitle: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: colors.sectionTitle,
+      textAlign: "center",
+    },
+    suggestedFriendsContainer: {
+      padding: 20,
+      marginTop: 20,
+    },
+    suggestedFriendsTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 15,
+      color: colors.sectionTitle,
+    },
+    suggestedFriendCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.friendCardBg,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: colors.friendCardShadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    friendAvatar: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      marginRight: 16,
+      borderWidth: 2,
+      borderColor: colors.cardBg,
+      shadowColor: colors.friendCardShadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    friendInfo: {
+      flex: 1,
+    },
+    friendName: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.friendName,
+      marginBottom: 2,
+    },
+    friendUsername: {
+      fontSize: 14,
+      color: colors.friendUsername,
+      marginBottom: 4,
+    },
+    mutualFriends: {
+      fontSize: 13,
+      color: colors.friendMutual,
+      fontWeight: '500',
+    },
+    friendActions: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    friendButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: colors.friendCardShadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    acceptButton: {
+      backgroundColor: colors.friendButtonAccept,
+    },
+    rejectButton: {
+      backgroundColor: colors.friendButtonReject,
+    },
+    filterButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.filterButtonBg,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: colors.filterButtonShadow,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'transparent',
+      justifyContent: 'flex-end',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    modalContent: {
+      backgroundColor: colors.modalBg,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      maxHeight: '80%',
+      shadowColor: colors.cardShadow,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.modalTitle,
+    },
+    closeButton: {
+      padding: 5,
+    },
+    filterSection: {
+      marginBottom: 25,
+    },
+    filterLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.filterLabel,
+      marginBottom: 10,
+    },
+    filterOptions: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    filterOption: {
+      paddingHorizontal: 15,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: colors.filterOptionBg,
+      borderWidth: 1,
+      borderColor: colors.filterOptionBorder,
+    },
+    filterOptionSelected: {
+      backgroundColor: colors.filterOptionSelectedBg,
+      borderColor: colors.filterOptionSelectedBorder,
+    },
+    filterOptionText: {
+      color: colors.filterOptionText,
+      fontSize: 14,
+    },
+    filterOptionTextSelected: {
+      color: colors.filterOptionTextSelected,
+    },
+    applyButton: {
+      backgroundColor: colors.applyButtonBg,
+      padding: 15,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginTop: 20,
+    },
+    applyButtonText: {
+      color: colors.applyButtonText,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    distanceHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    distanceValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.distanceValue,
+    },
+    slider: {
+      width: '100%',
+      height: 40,
+    },
+    distanceMarkers: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: 10,
+      marginTop: -10,
+    },
+    markerText: {
+      fontSize: 12,
+      color: colors.markerText,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       {/* Fixed Header Elements */}
@@ -525,7 +874,7 @@ export default function Motives() {
           onPress={() => router.push("../maps/_index")}
           style={styles.mapButton}
         >
-          <Ionicons name="map-outline" size={24} color="#e91e63" />
+          <Ionicons name="map-outline" size={24} color={colors.primaryPink} />
         </TouchableOpacity>
       </View>
 
@@ -543,10 +892,10 @@ export default function Motives() {
         <Animated.View style={[styles.headerContent, { opacity: headerOpacity }]}>
           {/* Search Bar */}
           <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#aaa" style={{ marginRight: 8 }} />
+            <Ionicons name="search" size={20} color={colors.icon} style={{ marginRight: 8 }} />
             <TextInput
               placeholder="Search motives..."
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.inputPlaceholder}
               style={styles.input}
               value={search}
               onChangeText={setSearch}
@@ -555,7 +904,7 @@ export default function Motives() {
               style={styles.filterButton}
               onPress={() => setIsFilterModalVisible(true)}
             >
-              <Ionicons name="options-outline" size={20} color="#666" />
+              <Ionicons name="options-outline" size={20} color={colors.icon} />
             </TouchableOpacity>
           </View>
 
@@ -602,7 +951,7 @@ export default function Motives() {
       >
         {(getTabData() || []).map((item) => {
           if (isCarouselItem(item)) {
-            return <CarouselRow key={item.id} title={item.title} data={item.data} />;
+            return <CarouselRow key={item.id} title={item.title} data={item.data} titleStyle={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, marginBottom: 19, color: colors.sectionTitle }} />;
           } else if (isTitleItem(item)) {
             return (
               <View key={item.id} style={styles.sectionTitleContainer}>
@@ -618,344 +967,3 @@ export default function Motives() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f4f6f8",
-  },
-  fixedHeader: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 50,
-    paddingTop: 60,
-    zIndex: 20,
-    backgroundColor: 'transparent',
-  },
-  pageTitle: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#000",
-    paddingHorizontal: 10,
-  },
-  searchBar: {
-    width: "90%",
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f1f1f1",
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 16,
-    marginTop: 20,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333",
-  },
-  toggleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingHorizontal: 20,
-  },
-  toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignItems: "center",
-  },
-  activeButton: {
-    backgroundColor: "#e91e63",
-  },
-  toggleText: {
-    color: "rgba(0,0,0,0.5)",
-    fontWeight: "500",
-    fontSize: 14,
-  },
-  activeText: {
-    color: "#000",
-    fontWeight: "600",
-  },
-  card: {
-    marginBottom: 20,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  image: {
-    width: "100%",
-    height: 180,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  user: {
-    fontSize: 14,
-    color: "#666",
-  },
-  mapButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  stickyTabsContainer: {
-    backgroundColor: "#efe7ee",
-    paddingVertical: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
-    zIndex: 10,
-  },
-  activeIndicator: {
-    marginTop: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#e91e63",
-  },
-  headerCard: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: height * 0.28,
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    paddingTop: 100,
-    paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 10,
-  },
-  headerContent: {
-    flex: 1,
-  },
-  sectionTitleContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
-  },
-  suggestedFriendsContainer: {
-    padding: 20,
-    marginTop: 20,
-  },
-  suggestedFriendsTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-  suggestedFriendCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  friendAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    marginRight: 16,
-    borderWidth: 2,
-    borderColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  friendInfo: {
-    flex: 1,
-  },
-  friendName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
-  },
-  friendUsername: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  mutualFriends: {
-    fontSize: 13,
-    color: '#888',
-    fontWeight: '500',
-  },
-  friendActions: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  friendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  acceptButton: {
-    backgroundColor: '#4CAF50',
-  },
-  rejectButton: {
-    backgroundColor: '#FF5252',
-  },
-  filterButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    justifyContent: 'flex-end',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 5,
-  },
-  filterSection: {
-    marginBottom: 25,
-  },
-  filterLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
-  },
-  filterOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  filterOption: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f1f1f1',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  filterOptionSelected: {
-    backgroundColor: '#e91e63',
-    borderColor: '#e91e63',
-  },
-  filterOptionText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  filterOptionTextSelected: {
-    color: '#fff',
-  },
-  applyButton: {
-    backgroundColor: '#e91e63',
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  applyButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  distanceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  distanceValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#e91e63',
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  distanceMarkers: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    marginTop: -10,
-  },
-  markerText: {
-    fontSize: 12,
-    color: '#666',
-  },
-});

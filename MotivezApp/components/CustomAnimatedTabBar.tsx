@@ -3,6 +3,8 @@ import { View, TouchableOpacity, StyleSheet, Dimensions, Animated } from "react-
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useTheme } from "../lib/ThemeContext";
+import { getColors } from "../lib/colors";
 
 const { width } = Dimensions.get("window");
 
@@ -17,6 +19,8 @@ export default function CustomAnimatedTabBar({ state, descriptors, navigation }:
   const TAB_BAR_WIDTH = 300;
   const TAB_WIDTH = TAB_BAR_WIDTH / state.routes.length;
   const pillOffset = (TAB_WIDTH - TAB_WIDTH * 0.8) / 2;
+  const { theme } = useTheme();
+  const colors = getColors(theme);
 
   useEffect(() => {
     Animated.spring(translateX, {
@@ -28,13 +32,14 @@ export default function CustomAnimatedTabBar({ state, descriptors, navigation }:
   }, [state.index]);
 
   return (
-    <View style={[styles.container, { width: TAB_BAR_WIDTH }]}>
+    <View style={[styles.container, { width: TAB_BAR_WIDTH, backgroundColor: colors.tabBarBackground }]}>
       <Animated.View
         style={[
           styles.indicator,
           {
             width: TAB_WIDTH * 0.8,
             transform: [{ translateX }],
+            backgroundColor: colors.tabPillBackground,
           },
         ]}
       />
@@ -65,13 +70,13 @@ export default function CustomAnimatedTabBar({ state, descriptors, navigation }:
               <MaterialCommunityIcons
                 name="cards"
                 size={32}
-                color={isFocused ? "#e91e63" : "#aaa"}
+                color={isFocused ? "#e91e63" : colors.secondary}
               />
             ) : (
               <Ionicons
                 name={ICONS[index] as any}
                 size={32}
-                color={isFocused ? "#e91e63" : "#aaa"}
+                color={isFocused ? "#e91e63" : colors.secondary}
               />
             )}
           </TouchableOpacity>
@@ -86,7 +91,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 70,
     alignSelf: "center",
-    backgroundColor: "#fff",
     borderRadius: 35,
     marginBottom: 20,
     shadowColor: "#000",
@@ -110,7 +114,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     height: 50,
-    backgroundColor: "#ffe4ec",
     borderRadius: 25,
     zIndex: 0,
     left: 0,
