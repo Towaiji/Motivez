@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "flex-start",
     marginLeft: 60,
-    marginTop: -28,
+    marginTop: -27,
   },
   subtext: {
     fontSize: 16,

@@ -1,13 +1,54 @@
 import { transform } from '@babel/core';
-import React, { useState, useRef, JSX } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView } from 'react-native';
+import React, { useState, useRef, JSX, useEffect } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
+import { fetchPlaceDetails } from '@/lib/fetchPlaceDetails';
+import { updatePreference, sortCardsByPreference } from '@/lib/userPreferences';
 import { useTheme } from '../lib/ThemeContext';
 import { getColors } from '../lib/colors';
 
 const { width, height } = Dimensions.get('window');
+
+// Variety of place types to fetch
+const placeTypes = [
+  'restaurant',
+  'bar',
+  'cafe',
+  'park',
+  'museum',
+  'movie_theater',
+  'gym',
+  'shopping_mall',
+  'night_club',
+  'tourist_attraction',
+];
+
+
+// Helper to calculate distance between two coordinates in km
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Convert Google price_level to a friendly string
+const formatPriceLevel = (level?: number | null): string => {
+  if (level === null || level === undefined) return 'N/A';
+  const mapping = ['Free', '$', '$$', '$$$', '$$$$'];
+  return mapping[level] ?? 'N/A';
+};
 
 // Type definitions
 interface Friend {
@@ -27,12 +68,15 @@ interface Card {
   rating: number;
   reviews: number;
   openHours: string;
+  weeklyHours: string[];
   features: string[];
   friends: Friend[];
+  latitude: number;
+  longitude: number;
 }
 
-// Enhanced mock data with more details
-const cards: Card[] = [
+// fallback if API fails
+const defaultCards: Card[] = [
   {
     id: '1',
     title: 'Axe Throwing',
@@ -51,6 +95,9 @@ const cards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 43.6529,
+    longitude: -79.3849,
+    weeklyHours: []
   },
   {
     id: '2',
@@ -69,6 +116,9 @@ const cards: Card[] = [
       { username: 'sara', avatar: { uri: 'https://randomuser.me/api/portraits/women/68.jpg' } },
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
+    latitude: 43.65107,
+    longitude: -79.347015,
+    weeklyHours: []
   },
   {
     id: '3',
@@ -86,6 +136,9 @@ const cards: Card[] = [
     friends: [
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 43.65107,
+    longitude: -79.347015,
+    weeklyHours: []
   },
   {
     id: '4',
@@ -105,6 +158,9 @@ const cards: Card[] = [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
       { username: 'zain', avatar: { uri: 'https://randomuser.me/api/portraits/men/36.jpg' } },
     ],
+    latitude: 43.6532,
+    longitude: -79.3832,
+    weeklyHours: []
   },
   {
     id: '5',
@@ -122,11 +178,16 @@ const cards: Card[] = [
     friends: [
       { username: 'mohammed', avatar: { uri: 'https://randomuser.me/api/portraits/men/72.jpg' } },
     ],
+    latitude: 43.6529,
+    longitude: -79.3849,
+    weeklyHours: []
   },
 ];
 
 const DeckSwiper: React.FC = () => {
   const swiperRef = useRef<Swiper<Card>>(null);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const { theme } = useTheme();
@@ -434,12 +495,14 @@ const DeckSwiper: React.FC = () => {
 
   const handleSwipeRight = (index: number): void => {
     console.log('Liked:', cards[index]?.title);
+    updatePreference(cards[index]?.vibes || [], true);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'like')
   };
 
   const handleSwipeLeft = (index: number): void => {
     console.log('Skipped:', cards[index]?.title);
+    updatePreference(cards[index]?.vibes || [], false);
     // Placeholder for future backend logging
     // sendSwipeToBackend(cards[index], 'skip')
   };
@@ -450,6 +513,13 @@ const DeckSwiper: React.FC = () => {
   const resetDeck = (): void => {
     setAllSwiped(false);
     setSwiperKey(prev => prev + 1); // Force re-render of swiper
+    setLoading(true);
+    loadPlaces();
+  };
+
+  const formatVibe = (vibe: string): string => {
+    const withSpaces = vibe.replace(/_/g, ' ');
+    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1).toLowerCase();
   };
 
   const openCardDetails = (card: Card): void => {
@@ -462,11 +532,99 @@ const DeckSwiper: React.FC = () => {
     setSelectedCard(null);
   };
 
+  const loadPlaces = async (): Promise<void> => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Location permission not granted');
+        setLoading(false);
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const randomTypes = Array.from(
+        new Set(
+          Array.from({ length: 3 }, () =>
+            placeTypes[Math.floor(Math.random() * placeTypes.length)]
+          )
+        )
+      );
+      const resultsArrays = await Promise.all(
+        randomTypes.map((t) =>
+          fetchNearbyPlaces(loc.coords.latitude, loc.coords.longitude, t)
+        )
+      );
+      const results = resultsArrays.flat();
+
+      if (results && results.length > 0) {
+        // Remove duplicate places that might appear across queries
+        const uniqueMap = new Map<string, any>();
+        results.forEach((p: any) => {
+          const id = p.place_id || p.id;
+          if (id && !uniqueMap.has(id)) {
+            uniqueMap.set(id, p);
+          }
+        });
+        const unique = Array.from(uniqueMap.values());
+        const shuffled = unique.sort(() => Math.random() - 0.5);
+        const mapped = await Promise.all(
+          shuffled.map(async (place: any): Promise<Card> => {
+            const lat = place.geometry?.location?.lat || 43.65107;
+            const lng = place.geometry?.location?.lng || -79.347015;
+            const dist = getDistanceKm(
+              loc.coords.latitude,
+              loc.coords.longitude,
+              lat,
+              lng
+            ).toFixed(1);
+
+            const details = await fetchPlaceDetails(place.place_id);
+            const priceLevel = details?.price_level ?? place.price_level;
+            return {
+              id: place.place_id || place.id?.toString() || Math.random().toString(),
+              title: place.name,
+              location: place.vicinity || place.formatted_address || 'Unknown',
+              distance: `${dist} km`,
+              vibes: place.types || [],
+              description: details?.editorial_summary?.overview || '',
+              price: formatPriceLevel(priceLevel),
+              duration: 'N/A',
+              rating: place.rating || 0,
+              reviews: place.user_ratings_total || 0,
+              openHours: place.opening_hours ? (place.opening_hours.open_now ? 'Open now' : 'Closed') : '',
+              weeklyHours: details?.opening_hours?.weekday_text || [],
+              features: [],
+              friends: [],
+              latitude: lat,
+              longitude: lng,
+            };
+          })
+        );
+        const sorted: Card[] = await sortCardsByPreference(mapped as Card[]);
+        setCards(sorted);
+      } else {
+        const sorted: Card[] = await sortCardsByPreference(defaultCards as Card[]);
+        setCards(sorted);
+      }
+    } catch (err) {
+      console.error('Error loading nearby places', err);
+      const sorted = await sortCardsByPreference(defaultCards);
+      setCards(sorted);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPlaces();
+  }, []);
+
+
   const renderStars = (rating: number): JSX.Element[] => {
     const stars: JSX.Element[] = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<Feather key={i} name="star" size={16} color={colors.starYellow} style={{ marginRight: 2 }} />);
     }
@@ -478,7 +636,11 @@ const DeckSwiper: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {allSwiped ? (
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : allSwiped ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>Time for a Break!</Text>
           <Text style={styles.emptySubtitle}>Check back later for new adventures</Text>
@@ -492,70 +654,74 @@ const DeckSwiper: React.FC = () => {
           ref={swiperRef}
           cards={cards}
           renderCard={(card: Card) => (
-            <TouchableOpacity 
-              style={styles.card} 
+            <TouchableOpacity
+              style={styles.cardWrapper}
               onPress={() => openCardDetails(card)}
               activeOpacity={0.95}
             >
-              <Text style={styles.title}>{card.title}</Text>
+              <View style={styles.card}>
+                <Text style={styles.title}>{card.title}</Text>
 
-              <View style={styles.row}>
-                <Feather name="map-pin" size={16} color={colors.icon} style={styles.icon} />
-                <Text style={[styles.details, { color: colors.text }]}>{card.location}</Text>
-              </View>
-
-              <View style={styles.row}>
-                <Feather name="navigation" size={16} color={colors.icon} style={styles.icon} />
-                <Text style={styles.details}>{card.distance}</Text>
-              </View>
-
-              {/* Vibe Pills replacing the type line */}
-              <View style={styles.vibePillsContainer}>
-                {card.vibes.map((vibe: string) => (
-                  <View key={vibe} style={styles.vibePill}>
-                    <Text style={styles.vibePillText}>{vibe}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {card.friends && card.friends.length > 0 && (
-                <View style={styles.friendRow}>
-                  <View style={styles.avatarGroup}>
-                    {card.friends.slice(0, 5).map((friend: Friend, index: number) => (
-                      <View key={friend.username} style={[styles.avatarContainer, { marginLeft: index === 0 ? 0 : -12 }]}>
-                        <Image source={friend.avatar} style={styles.avatarImage} />
-                      </View>
-                    ))}
-                  </View>
-                  <Text style={styles.friendText}>Friends have visited</Text>
+                <View style={styles.row}>
+                  <Feather name="map-pin" size={16} color="black" style={styles.icon} />
+                  <Text style={styles.details}>{card.location}</Text>
                 </View>
-              )}
 
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                initialRegion={{
-                  latitude: 43.65107,       
-                  longitude: -79.347015,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                showsUserLocation={false}
-                showsMyLocationButton={false}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: 43.65107,
-                    longitude: -79.347015,
-                  }}
-                  title="Activity Location"
-                />
-              </MapView>
+                <View style={styles.row}>
+                  <Feather name="navigation" size={16} color="black" style={styles.icon} />
+                  <Text style={styles.details}>{card.distance}</Text>
+                </View>
+
+                {/* Vibe Pills replacing the type line */}
+                <View style={styles.vibePillsContainer}>
+                  {card.vibes.map((vibe: string) => (
+                    <View key={vibe} style={styles.vibePill}>
+                      <Text style={styles.vibePillText}>{formatVibe(vibe)}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {card.friends && card.friends.length > 0 && (
+                  <View style={styles.friendRow}>
+                    <View style={styles.avatarGroup}>
+                      {card.friends.slice(0, 5).map((friend: Friend, index: number) => (
+                        <View key={friend.username} style={[styles.avatarContainer, { marginLeft: index === 0 ? 0 : -12 }]}>
+                          <Image source={friend.avatar} style={styles.avatarImage} />
+                        </View>
+                      ))}
+                    </View>
+                    <Text style={styles.friendText}>Friends have visited</Text>
+                  </View>
+                )}
+
+                <View style={styles.mapContainer}>
+                  <MapView
+                    provider={PROVIDER_GOOGLE}
+                    style={StyleSheet.absoluteFillObject}
+                    initialRegion={{
+                      latitude: card.latitude,
+                      longitude: card.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    showsUserLocation={false}
+                    showsMyLocationButton={false}
+                  >
+                    <Marker
+                      coordinate={{
+                        latitude: card.latitude,
+                        longitude: card.longitude,
+                      }}
+                      title="Activity Location"
+                    />
+                  </MapView>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
-      
+
           onSwiped={(index: number) => console.log('Swiped index:', index)}
           onSwipedAll={() => {
             console.log('All cards swiped');
@@ -563,7 +729,7 @@ const DeckSwiper: React.FC = () => {
           }}
           onSwipedRight={handleSwipeRight}
           onSwipedLeft={handleSwipeLeft}
-          
+
           // 🔥 Native Stack Effect
           stackSize={3}
           showSecondCard={true}
@@ -657,8 +823,12 @@ const DeckSwiper: React.FC = () => {
                   <Text style={styles.reviewsText}>({selectedCard.reviews} reviews)</Text>
                 </View>
 
-                {/* Description */}
-                <Text style={styles.descriptionText}>{selectedCard.description}</Text>
+                {selectedCard.description && (
+                  <Text style={styles.descriptionText}>
+                    {selectedCard.description || 'No description available.'}
+                  </Text>
+
+                )}
 
                 {/* Key Info */}
                 <View style={styles.infoGrid}>
@@ -678,6 +848,9 @@ const DeckSwiper: React.FC = () => {
                 <View style={styles.hoursSection}>
                   <Text style={styles.sectionTitle}>Hours</Text>
                   <Text style={styles.hoursText}>{selectedCard.openHours}</Text>
+                  {selectedCard.weeklyHours.map((h: string, idx: number) => (
+                    <Text key={idx} style={styles.hoursText}>{h}</Text>
+                  ))}
                 </View>
 
                 {/* Vibes */}
@@ -686,23 +859,11 @@ const DeckSwiper: React.FC = () => {
                   <View style={styles.modalVibePillsContainer}>
                     {selectedCard.vibes.map((vibe: string) => (
                       <View key={vibe} style={styles.modalVibePill}>
-                        <Text style={styles.modalVibePillText}>{vibe}</Text>
+                        <Text style={styles.modalVibePillText}>{formatVibe(vibe)}</Text>
                       </View>
                     ))}
                   </View>
                 </View>
-
-                {/* Features */}
-                <View style={styles.featuresSection}>
-                  <Text style={styles.sectionTitle}>Features</Text>
-                  {selectedCard.features.map((feature: string, index: number) => (
-                    <View key={index} style={styles.featureItem}>
-                      <Feather name="check" size={16} color={colors.featureGreen} />
-                      <Text style={styles.featureText}>{feature}</Text>
-                    </View>
-                  ))}
-                </View>
-
                 {/* Friends */}
                 {selectedCard.friends && selectedCard.friends.length > 0 && (
                   <View style={styles.friendsSection}>
@@ -725,8 +886,8 @@ const DeckSwiper: React.FC = () => {
                     provider={PROVIDER_GOOGLE}
                     style={styles.modalMap}
                     initialRegion={{
-                      latitude: 43.65107,       
-                      longitude: -79.347015,
+                      latitude: selectedCard.latitude,
+                      longitude: selectedCard.longitude,
                       latitudeDelta: 0.01,
                       longitudeDelta: 0.01,
                     }}
@@ -735,8 +896,8 @@ const DeckSwiper: React.FC = () => {
                   >
                     <Marker
                       coordinate={{
-                        latitude: 43.65107,
-                        longitude: -79.347015,
+                        latitude: selectedCard.latitude,
+                        longitude: selectedCard.longitude,
                       }}
                       title={selectedCard.title}
                       description={selectedCard.location}
@@ -750,6 +911,366 @@ const DeckSwiper: React.FC = () => {
       </Modal>
     </View>
   );
-}; 
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  cardWrapper: {
+    width: width * 0.85,
+    height: height * 0.6,
+    marginTop: -55, //adjusts the height of the card
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 8,
+    backgroundColor: '#f2f2f2',
+  },
+
+  card: {
+    flex: 1,
+    borderRadius: 30,
+    padding: 20,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    paddingTop: 30,
+    overflow: 'hidden',
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  details: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 5,
+  },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+
+  icon: {
+    marginRight: 8,
+  },
+
+  mapContainer: {
+    width: '100%',
+    height: 250,
+    borderRadius: 30,
+    overflow: 'hidden',
+  },
+
+  vibePillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 20,
+  },
+
+  vibePill: {
+    backgroundColor: 'rgba(100, 150, 240, 0.2)', // light pastel blue
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    marginRight: 6,
+    marginBottom: 0,
+  },
+
+  vibePillText: {
+    fontSize: 12,
+    color: '#264653', // dark teal blue
+    fontWeight: '600',
+  },
+
+  resetButton: {
+    marginTop: 20,
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignSelf: 'center',
+  },
+
+  resetButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+
+  emptyState: {
+    paddingTop: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    position: 'absolute',
+  },
+
+  emptyTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 10,
+  },
+
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+
+  friendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  avatarGroup: {
+    flexDirection: 'row',
+    marginRight: 8,
+  },
+
+  avatarContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: '#eee',
+  },
+
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+
+  friendText: {
+    fontSize: 14,
+    color: '#555',
+    fontWeight: '500',
+  },
+
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    paddingTop: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+
+  closeButton: {
+    padding: 5,
+    marginRight: 15,
+  },
+
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+
+  modalContent: {
+    padding: 20,
+  },
+
+  locationSection: {
+    marginBottom: 15,
+  },
+
+  modalLocationText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+
+  modalDistanceText: {
+    fontSize: 16,
+    color: '#666',
+  },
+
+  ratingSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+
+  starsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+
+  ratingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 5,
+  },
+
+  reviewsText: {
+    fontSize: 14,
+    color: '#666',
+  },
+
+  descriptionText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 20,
+  },
+
+  infoGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+
+  infoItem: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginHorizontal: 5,
+  },
+
+  infoLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 5,
+    marginBottom: 2,
+  },
+
+  infoValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10,
+    color: '#333',
+  },
+
+  hoursSection: {
+    marginBottom: 20,
+  },
+
+  hoursText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+
+  vibesSection: {
+    marginBottom: 20,
+  },
+
+  modalVibePillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+
+  modalVibePill: {
+    backgroundColor: 'rgba(100, 150, 240, 0.2)',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+
+  modalVibePillText: {
+    fontSize: 14,
+    color: '#264653',
+    fontWeight: '600',
+  },
+
+  featuresSection: {
+    marginBottom: 20,
+  },
+
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  featureText: {
+    fontSize: 14,
+    color: '#333',
+    marginLeft: 8,
+  },
+
+  friendsSection: {
+    marginBottom: 20,
+  },
+
+  modalFriendsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+
+  modalFriendItem: {
+    alignItems: 'center',
+    marginRight: 20,
+    marginBottom: 10,
+  },
+
+  modalFriendAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 5,
+  },
+
+  modalFriendName: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+  },
+
+  mapSection: {
+    marginBottom: 20,
+  },
+
+  modalMap: {
+    width: '100%',
+    height: 250,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+});
 
 export default DeckSwiper;
