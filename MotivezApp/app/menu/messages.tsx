@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatTime } from '../lib/formatTime';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
 
 interface Chat {
   id: string;
@@ -37,6 +39,48 @@ export default function MessagesScreen() {
     // Add more friends as needed
   ]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
+    headerTitle: { flex: 1, fontSize: 22, fontWeight: 'bold', color: colors.text, marginLeft: 12 },
+    addButton: { marginLeft: 8 },
+    emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
+    emptyIcon: { marginBottom: 16 },
+    emptyText: { fontSize: 18, color: colors.secondary, textAlign: 'center', marginBottom: 8 },
+    emptySubText: { fontSize: 14, color: colors.secondary, textAlign: 'center' },
+    list: { backgroundColor: colors.background },
+    chatRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, paddingHorizontal: 16, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
+    chatAvatar: { width: 54, height: 54, borderRadius: 27, marginRight: 14, backgroundColor: colors.inputBackground },
+    chatInfo: { flex: 1 },
+    chatName: { fontSize: 16, fontWeight: 'bold', color: colors.text },
+    chatLastMsg: { fontSize: 14, color: colors.secondary, marginTop: 2 },
+    chatTime: { fontSize: 12, color: colors.secondary, marginLeft: 8 },
+    unreadBadge: { backgroundColor: colors.primaryPink, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 8 },
+    unreadText: { color: colors.chipSelectedText, fontSize: 12, fontWeight: 'bold' },
+    fab: { position: 'absolute', bottom: 30, right: 30, backgroundColor: colors.primaryBlue, borderRadius: 30, width: 60, height: 60, alignItems: 'center', justifyContent: 'center', shadowColor: colors.icon, shadowOpacity: 0.2, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 6 },
+    fabIcon: { color: colors.chipSelectedText },
+    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: theme === 'dark' ? 'rgba(20,20,20,0.7)' : 'rgba(0,0,0,0.5)', zIndex: 100 },
+    modal: { backgroundColor: colors.modalBackground, borderRadius: 18, padding: 24, margin: 24 },
+    modalTitle: { fontSize: 20, fontWeight: 'bold', color: colors.modalText, marginBottom: 12 },
+    modalInput: { backgroundColor: colors.inputBackground, color: colors.text, borderRadius: 10, padding: 12, fontSize: 16, marginBottom: 16 },
+    modalButton: { backgroundColor: colors.primaryPink, borderRadius: 10, padding: 12, alignItems: 'center', marginTop: 8 },
+    modalButtonText: { color: colors.chipSelectedText, fontWeight: 'bold', fontSize: 16 },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: 8 },
+    chatTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 2 },
+    lastMessage: { fontSize: 15, color: colors.secondary, maxWidth: '97%' },
+    backButton: { width: 32, alignItems: 'flex-start' },
+    loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingText: { marginTop: 12, fontSize: 16, color: colors.secondary },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    listContent: { paddingTop: 12, paddingBottom: 40 },
+    friendItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+    selectedFriendItem: { backgroundColor: theme === 'dark' ? colors.inputBackground : colors.card },
+    modalButtons: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 20 },
+  });
 
   useEffect(() => {
     fetchChats();
@@ -139,7 +183,7 @@ export default function MessagesScreen() {
       style={styles.chatRow}
       onPress={() => router.push(`/menu/messages/${item.id}`)}
     >
-      <Image source={{ uri: item.avatar_url || undefined }} style={styles.avatar} />
+      <Image source={{ uri: item.avatar_url || undefined }} style={styles.chatAvatar} />
       <View style={styles.chatInfo}>
         <View style={styles.chatTitleRow}>
           <Text style={styles.chatName}>{item.name}</Text>
@@ -160,26 +204,26 @@ export default function MessagesScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.container}>
         {/* Top Bar */}
-        <View style={styles.topBar}>
+        <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.icon} />
           </TouchableOpacity>
-          <Text style={styles.topTitle}>Messages</Text>
+          <Text style={styles.headerTitle}>Messages</Text>
           <TouchableOpacity onPress={toggleModal}>
-            <Ionicons name="add" size={28} color="#333" />
+            <Ionicons name="add" size={28} color={colors.icon} />
           </TouchableOpacity>
         </View>
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primaryBlue} />
             <Text style={styles.loadingText}>Loading Messages...</Text>
           </View>
         ) : chats.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="chatbubble-outline" size={60} color="#cccccc" />
+            <Ionicons name="chatbubble-outline" size={60} color={colors.secondary} />
             <Text style={styles.emptyText}>No chats yet. Start planning a Motive!</Text>
           </View>
         ) : (
@@ -198,8 +242,8 @@ export default function MessagesScreen() {
           transparent={true}
           onRequestClose={toggleModal}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+          <View style={styles.overlay}>
+            <View style={styles.modal}>
               <Text style={styles.modalTitle}>Select Friends</Text>
               {friends.map((friend) => (
                 <TouchableOpacity
@@ -215,10 +259,10 @@ export default function MessagesScreen() {
               ))}
               <View style={styles.modalButtons}>
                 <TouchableOpacity style={styles.modalButton} onPress={createNewChat}>
-                  <Text>Create Chat</Text>
+                  <Text style={styles.modalButtonText}>Create Chat</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalButton} onPress={toggleModal}>
-                  <Text>Cancel</Text>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -228,154 +272,3 @@ export default function MessagesScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f4f6f8',
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
-    justifyContent: 'space-between', // Added to push the add button to the right
-  },
-  backButton: {
-    width: 32,
-    alignItems: 'flex-start',
-  },
-  topTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333333',
-    textAlign: 'center',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#555555',
-  },
-  listContent: {
-    paddingTop: 12,
-    paddingBottom: 40,
-  },
-  chatRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    backgroundColor: '#fff',
-    marginBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
-  },
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    marginRight: 12,
-  },
-  chatInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  chatTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: 2,
-  },
-  chatName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-    marginRight: 6,
-  },
-  chatTime: {
-    fontSize: 12,
-    color: '#999',
-  },
-  lastMessage: {
-    fontSize: 15,
-    color: '#666',
-    maxWidth: '97%',
-  },
-  unreadBadge: {
-    backgroundColor: '#e91e63',
-    minWidth: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  unreadText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-    paddingHorizontal: 6,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    marginTop: 10,
-    fontSize: 18,
-    color: '#888',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  friendItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  selectedFriendItem: {
-    backgroundColor: '#e0e0e0',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-  },
-  modalButton: {
-    padding: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
-  },
-});

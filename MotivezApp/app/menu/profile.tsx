@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
+import { useAuth } from '../_layout';
 
 const createdMotives = [
   { id: '1', image: 'https://picsum.photos/300/300?random=11' },
@@ -46,7 +49,95 @@ const itemSize = (screenWidth - gridSpacing * (numCols + 1)) / numCols;
 
 export default function Profile() {
   const router = useRouter();
+  const { profile } = useAuth(); // <-- get profile from context
   const [tab, setTab] = useState<'created' | 'attending' | 'friends'>('created');
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    backButton: {
+      position: 'absolute',
+      top: 50,
+      left: 16,
+      zIndex: 10,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      marginTop: 10,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.inputBackground,
+    },
+    info: {
+      marginLeft: 16,
+      flex: 1,
+    },
+    username: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: colors.text,
+    },
+    bio: {
+      fontSize: 14,
+      color: colors.secondary,
+      marginTop: 4,
+    },
+    stats: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+      marginHorizontal: 16,
+    },
+    statBlock: {
+      alignItems: 'center',
+    },
+    statNumber: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.text,
+    },
+    statLabel: {
+      fontSize: 12,
+      color: colors.secondary,
+      marginTop: 2,
+    },
+    tabBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+    },
+    grid: {
+      padding: gridSpacing,
+    },
+    gridImage: {
+      width: itemSize,
+      height: itemSize,
+      margin: gridSpacing / 2,
+      borderRadius: 6,
+      backgroundColor: '#ccc',
+    },
+    friendAvatar: {
+      width: itemSize,
+      height: itemSize,
+      margin: gridSpacing / 2,
+      borderRadius: itemSize / 2,
+      backgroundColor: '#ccc',
+    },
+  });
 
   return (
     <>
@@ -54,18 +145,22 @@ export default function Profile() {
       <SafeAreaView style={styles.safeArea}>
         {/* Back Button */}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="#333" />
+          <Ionicons name="arrow-back" size={28} color={colors.icon} />
         </TouchableOpacity>
 
         {/* Profile Header */}
         <View style={styles.header}>
           <Image
-            source={{ uri: 'https://i.pravatar.cc/150?u=motive_user' }}
+            source={{ uri: profile?.avatar_url || 'https://i.pravatar.cc/150?u=motive_user' }}
             style={styles.avatar}
           />
           <View style={styles.info}>
-            <Text style={styles.username}>@motive_user</Text>
-            <Text style={styles.bio}>Exploring new places, one motive at a time 🌍</Text>
+            <Text style={styles.username}>
+              {profile?.username ? `@${profile.username}` : '@motive_user'}
+            </Text>
+            <Text style={styles.bio}>
+              {profile?.bio || 'Exploring new places, one motive at a time 🌍'}
+            </Text>
           </View>
         </View>
 
@@ -91,21 +186,21 @@ export default function Profile() {
             <Ionicons
               name="grid-outline"
               size={28}
-              color={tab === 'created' ? '#e91e63' : '#666'}
+              color={tab === 'created' ? colors.primaryPink : colors.icon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setTab('attending')}>
             <Ionicons
               name="calendar-outline"
               size={28}
-              color={tab === 'attending' ? '#e91e63' : '#666'}
+              color={tab === 'attending' ? colors.primaryPink : colors.icon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setTab('friends')}>
             <Ionicons
               name="people-outline"
               size={28}
-              color={tab === 'friends' ? '#e91e63' : '#666'}
+              color={tab === 'friends' ? colors.primaryPink : colors.icon}
             />
           </TouchableOpacity>
         </View>
@@ -136,84 +231,3 @@ export default function Profile() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#efe7ee' },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    zIndex: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 10,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  info: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  username: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  bio: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
-  },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-    marginHorizontal: 16,
-  },
-  statBlock: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
-  grid: {
-    padding: gridSpacing,
-  },
-  gridImage: {
-    width: itemSize,
-    height: itemSize,
-    margin: gridSpacing / 2,
-    borderRadius: 6,
-    backgroundColor: '#ccc',
-  },
-  friendAvatar: {
-    width: itemSize,
-    height: itemSize,
-    margin: gridSpacing / 2,
-    borderRadius: itemSize / 2,
-    backgroundColor: '#ccc',
-  },
-});

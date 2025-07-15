@@ -26,17 +26,22 @@ type Activity = {
 export default function CarouselRow({
   title, 
   data,
+  titleStyle,
 }: {
   title: string; 
-  data: Activity[]
+  data: Activity[];
+  titleStyle?: any;
 }) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const router = useRouter();
 
+  // Ensure data is always an array
+  const safeData = Array.isArray(data) ? data : [];
+
   const carouselData: (Activity | { id: string})[] = [
     { id: "left-spacer" },
-    ...data,
+    ...safeData,
     { id: "right-spacer" },
   ];
 
@@ -63,16 +68,13 @@ export default function CarouselRow({
       pathname: "/motive-detail",
       params: {
         id: activityItem.id,
-        title: activityItem.title,
-        description: activityItem.description || '',
-        image: activityItem.image,
       },
     });
   };
 
   return (
     <View style={{ marginBottom: 35 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginLeft: 16, marginBottom: 19 }}>
+      <Text style={titleStyle || { fontSize: 20, fontWeight: "bold", marginLeft: 16, marginBottom: 19 }}>
         {title}
       </Text>
 

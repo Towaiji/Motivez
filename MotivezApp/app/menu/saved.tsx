@@ -11,6 +11,8 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../../lib/ThemeContext';
+import { getColors } from '../../lib/colors';
 
 // Dummy saved motives
 const dummySaved = [
@@ -44,6 +46,8 @@ export default function SavedScreen() {
   const router = useRouter();
   const [saved, setSaved] = useState<typeof dummySaved>([]);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const colors = getColors(theme);
 
   useEffect(() => {
     // Simulate API fetch delay
@@ -59,17 +63,34 @@ export default function SavedScreen() {
       <View style={styles.info}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.meta}>
-          <Ionicons name="location-outline" size={15} color="#007AFF" /> {item.location}
+          <Ionicons name="location-outline" size={15} color={colors.icon} /> {item.location}
         </Text>
         <Text style={styles.meta}>
-          <Ionicons name="calendar-outline" size={15} color="#e91e63" /> {item.date}
+          <Ionicons name="calendar-outline" size={15} color={colors.secondary} /> {item.date}
         </Text>
         <Text style={styles.meta}>
-          <Ionicons name="bookmark-outline" size={15} color="#333" /> Saved by: {item.savedBy}
+          <Ionicons name="bookmark-outline" size={15} color={colors.secondary} /> Saved by: {item.savedBy}
         </Text>
       </View>
     </View>
   );
+
+  const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.background },
+    topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 20, paddingBottom: 10, backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border },
+    backButton: { width: 32, alignItems: 'flex-start' },
+    topTitle: { flex: 1, fontSize: 20, fontWeight: '600', color: colors.text, textAlign: 'center' },
+    loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    loadingText: { marginTop: 12, fontSize: 16, color: colors.secondary },
+    listContent: { padding: 12, paddingBottom: 40 },
+    card: { backgroundColor: colors.card, borderRadius: 12, marginBottom: 16, shadowColor: colors.icon, shadowOpacity: 0.08, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 3, overflow: 'hidden' },
+    image: { width: 90, height: 90, borderTopLeftRadius: 12, borderBottomLeftRadius: 12 },
+    info: { flex: 1, padding: 12, justifyContent: 'center' },
+    title: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 4 },
+    meta: { fontSize: 13, color: colors.secondary, marginTop: 2 },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    emptyText: { marginTop: 12, fontSize: 17, color: colors.secondary, textAlign: 'center', fontWeight: '500' },
+  });
 
   return (
     <>
@@ -78,7 +99,7 @@ export default function SavedScreen() {
         {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#333" />
+            <Ionicons name="arrow-back" size={28} color={colors.icon} />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Saved</Text>
           <View style={{ width: 32 }} /> {/* Spacer to center title */}
@@ -86,12 +107,12 @@ export default function SavedScreen() {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color={colors.primaryBlue} />
             <Text style={styles.loadingText}>Loading saved Motivez...</Text>
           </View>
         ) : saved.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="bookmark-outline" size={60} color="#cccccc" />
+            <Ionicons name="bookmark-outline" size={60} color={colors.icon} />
             <Text style={styles.emptyText}>No saved Motivez yet.</Text>
           </View>
         ) : (
@@ -107,92 +128,4 @@ export default function SavedScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f4f6f8',
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#dddddd',
-  },
-  backButton: {
-    width: 32,
-    alignItems: 'flex-start',
-  },
-  topTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333333',
-    textAlign: 'center',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#555555',
-  },
-  listContent: {
-    padding: 12,
-    paddingBottom: 40,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  image: {
-    width: 90,
-    height: 90,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  info: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  meta: {
-    fontSize: 13,
-    color: '#555',
-    marginTop: 2,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    marginTop: 12,
-    fontSize: 17,
-    color: '#888',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-});
 

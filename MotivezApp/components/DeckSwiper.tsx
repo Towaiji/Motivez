@@ -8,6 +8,8 @@ import * as Location from 'expo-location';
 import { fetchNearbyPlaces } from '@/lib/fetchNearbyPlaces';
 import { fetchPlaceDetails } from '@/lib/fetchPlaceDetails';
 import { updatePreference, sortCardsByPreference } from '@/lib/userPreferences';
+import { useTheme } from '../lib/ThemeContext';
+import { getColors } from '../lib/colors';
 
 const { width, height } = Dimensions.get('window');
 
@@ -188,6 +190,308 @@ const DeckSwiper: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+
+  // Move styles here so colors is in scope
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 40,
+      paddingBottom: 40,
+    },
+    card: {
+      width: width * 0.85,
+      height: height * 0.6,
+      borderRadius: 30,
+      padding: 20,
+      marginTop: -55, //adjusts the heigh of the card
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      paddingTop: 30,
+      shadowColor: colors.icon,
+      shadowOpacity: 0.1,
+      shadowOffset: { width: 0, height: 5 },
+      shadowRadius: 10,
+      elevation: 8,
+      flex: 0.6,
+      backgroundColor: colors.card,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      marginBottom: 10,
+      color: colors.text,
+    },
+    details: {
+      fontSize: 16,
+      marginBottom: 5,
+      color: colors.secondary,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    icon: {
+      marginRight: 8,
+    },
+    map: {
+      width: '100%',
+      height: 250,
+      borderRadius: 30,
+      overflow: 'hidden',
+    },
+    vibePillsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 20,
+    },
+    vibePill: {
+      backgroundColor: colors.vibePillBackground,
+      borderRadius: 12,
+      paddingVertical: 4,
+      paddingHorizontal: 12,
+      marginRight: 6,
+      marginBottom: 0,
+    },
+    vibePillText: {
+      fontSize: 12,
+      color: colors.pillText,
+      fontWeight: '600',
+    },
+    resetButton: {
+      marginTop: 20,
+      backgroundColor: colors.primaryBlue,
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      borderRadius: 25,
+      alignSelf: 'center',
+    },
+    resetButtonText: {
+      fontWeight: '600',
+      fontSize: 16,
+      textAlign: 'center',
+      color: colors.modalText,
+    },
+    emptyState: {
+      paddingTop: 200,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+      position: 'absolute',
+    },
+    emptyTitle: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 10,
+    },
+    emptySubtitle: {
+      fontSize: 16,
+      color: colors.secondary,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    friendRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    avatarGroup: {
+      flexDirection: 'row',
+      marginRight: 8,
+    },
+    avatarContainer: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      overflow: 'hidden',
+      borderWidth: 2,
+      borderColor: colors.lightBorder,
+      backgroundColor: colors.lightCard,
+    },
+    avatarImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    friendText: {
+      fontSize: 14,
+      color: colors.secondary,
+      fontWeight: '500',
+    },
+    // Modal Styles
+    modalContainer: {
+      flex: 1,
+      backgroundColor: colors.modalBackground,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 20,
+      paddingTop: 50,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.lightBorder,
+    },
+    closeButton: {
+      padding: 5,
+      marginRight: 15,
+    },
+    modalTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      flex: 1,
+      color: colors.modalText,
+    },
+    modalContent: {
+      padding: 20,
+    },
+    locationSection: {
+      marginBottom: 15,
+    },
+    modalLocationText: {
+      fontSize: 16,
+      color: colors.modalText,
+      fontWeight: '500',
+    },
+    modalDistanceText: {
+      fontSize: 16,
+      color: colors.secondary,
+    },
+    ratingSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    starsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: 10,
+    },
+    ratingText: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: 5,
+      color: colors.modalText,
+    },
+    reviewsText: {
+      fontSize: 14,
+      color: colors.secondary,
+    },
+    descriptionText: {
+      fontSize: 16,
+      lineHeight: 24,
+      color: colors.modalText,
+      marginBottom: 20,
+    },
+    infoGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    infoItem: {
+      flex: 1,
+      alignItems: 'center',
+      padding: 15,
+      backgroundColor: colors.lightCard,
+      borderRadius: 12,
+      marginHorizontal: 5,
+    },
+    infoLabel: {
+      fontSize: 12,
+      color: colors.secondary,
+      marginTop: 5,
+      marginBottom: 2,
+    },
+    infoValue: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.modalText,
+      textAlign: 'center',
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      marginBottom: 10,
+      color: colors.modalText,
+    },
+    hoursSection: {
+      marginBottom: 20,
+    },
+    hoursText: {
+      fontSize: 14,
+      color: colors.secondary,
+      lineHeight: 20,
+    },
+    vibesSection: {
+      marginBottom: 20,
+    },
+    modalVibePillsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    modalVibePill: {
+      backgroundColor: colors.vibePillBackground,
+      borderRadius: 20,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      marginRight: 8,
+      marginBottom: 8,
+    },
+    modalVibePillText: {
+      fontSize: 14,
+      color: colors.pillText,
+      fontWeight: '600',
+    },
+    featuresSection: {
+      marginBottom: 20,
+    },
+    featureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    featureText: {
+      fontSize: 14,
+      color: colors.modalText,
+      marginLeft: 8,
+    },
+    friendsSection: {
+      marginBottom: 20,
+    },
+    modalFriendsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    modalFriendItem: {
+      alignItems: 'center',
+      marginRight: 20,
+      marginBottom: 10,
+    },
+    modalFriendAvatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      marginBottom: 5,
+    },
+    modalFriendName: {
+      fontSize: 12,
+      color: colors.modalText,
+      fontWeight: '500',
+    },
+    mapSection: {
+      marginBottom: 20,
+    },
+    modalMap: {
+      width: '100%',
+      height: 300,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+  });
 
   const handleSwipeRight = (index: number): void => {
     console.log('Liked:', cards[index]?.title);
@@ -322,10 +626,10 @@ const DeckSwiper: React.FC = () => {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Feather key={i} name="star" size={16} color="#FFD700" style={{ marginRight: 2 }} />);
+      stars.push(<Feather key={i} name="star" size={16} color={colors.starYellow} style={{ marginRight: 2 }} />);
     }
     if (hasHalfStar) {
-      stars.push(<Feather key="half" name="star" size={16} color="#FFD700" style={{ marginRight: 2 }} />);
+      stars.push(<Feather key="half" name="star" size={16} color={colors.starYellow} style={{ marginRight: 2 }} />);
     }
     return stars;
   };
@@ -442,8 +746,8 @@ const DeckSwiper: React.FC = () => {
               title: 'NOPE',
               style: {
                 label: {
-                  backgroundColor: 'red',
-                  color: 'white',
+                  backgroundColor: colors.overlayRed,
+                  color: colors.modalText,
                   fontSize: 24,
                   opacity: 0.8,
                   transform: [{ scale: 1 }],
@@ -461,8 +765,8 @@ const DeckSwiper: React.FC = () => {
               title: 'GO',
               style: {
                 label: {
-                  backgroundColor: 'green',
-                  color: 'white',
+                  backgroundColor: colors.overlayGreen,
+                  color: colors.modalText,
                   fontSize: 24,
                   opacity: 0.8,
                   transform: [{ scale: 1 }],
@@ -492,7 +796,7 @@ const DeckSwiper: React.FC = () => {
             <>
               <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={closeCardDetails} style={styles.closeButton}>
-                  <Feather name="x" size={24} color="#333" />
+                  <Feather name="x" size={24} color={colors.icon} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>{selectedCard.title}</Text>
               </View>
@@ -501,11 +805,11 @@ const DeckSwiper: React.FC = () => {
                 {/* Location and Distance */}
                 <View style={styles.locationSection}>
                   <View style={styles.row}>
-                    <Feather name="map-pin" size={18} color="#333" style={styles.icon} />
+                    <Feather name="map-pin" size={18} color={colors.icon} style={styles.icon} />
                     <Text style={styles.modalLocationText}>{selectedCard.location}</Text>
                   </View>
                   <View style={styles.row}>
-                    <Feather name="navigation" size={18} color="#333" style={styles.icon} />
+                    <Feather name="navigation" size={18} color={colors.icon} style={styles.icon} />
                     <Text style={styles.modalDistanceText}>{selectedCard.distance}</Text>
                   </View>
                 </View>
@@ -529,12 +833,12 @@ const DeckSwiper: React.FC = () => {
                 {/* Key Info */}
                 <View style={styles.infoGrid}>
                   <View style={styles.infoItem}>
-                    <Feather name="dollar-sign" size={16} color="#666" />
+                    <Feather name="dollar-sign" size={16} color={colors.secondary} />
                     <Text style={styles.infoLabel}>Price</Text>
                     <Text style={styles.infoValue}>{selectedCard.price}</Text>
                   </View>
                   <View style={styles.infoItem}>
-                    <Feather name="clock" size={16} color="#666" />
+                    <Feather name="clock" size={16} color={colors.secondary} />
                     <Text style={styles.infoLabel}>Duration</Text>
                     <Text style={styles.infoValue}>{selectedCard.duration}</Text>
                   </View>
@@ -560,7 +864,6 @@ const DeckSwiper: React.FC = () => {
                     ))}
                   </View>
                 </View>
-
                 {/* Friends */}
                 {selectedCard.friends && selectedCard.friends.length > 0 && (
                   <View style={styles.friendsSection}>

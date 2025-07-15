@@ -10,19 +10,11 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      config: {
-        googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
-      },
       supportsTablet: true
     },
     android: {
       adaptiveIcon: {
         backgroundColor: "#ffffff"
-      },
-      config: {
-        googleMaps: {
-          apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY  // Changed this
-        }
       }
     },
     web: {
@@ -50,5 +42,6 @@ export default {
       supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     }
+
   }
 };
