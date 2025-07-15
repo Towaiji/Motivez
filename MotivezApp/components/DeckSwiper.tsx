@@ -193,7 +193,7 @@ const DeckSwiper: React.FC = () => {
   const { theme } = useTheme();
   const colors = getColors(theme);
 
-  // Move styles here so colors is in scope
+  // THEME-AWARE STYLES
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -202,22 +202,26 @@ const DeckSwiper: React.FC = () => {
       paddingTop: 40,
       paddingBottom: 40,
     },
-    card: {
+    cardWrapper: {
       width: width * 0.85,
       height: height * 0.6,
+      marginTop: -55,
       borderRadius: 30,
-      padding: 20,
-      marginTop: -55, //adjusts the heigh of the card
-      justifyContent: 'flex-start',
-      alignItems: 'flex-start',
-      paddingTop: 30,
       shadowColor: colors.icon,
       shadowOpacity: 0.1,
       shadowOffset: { width: 0, height: 5 },
       shadowRadius: 10,
       elevation: 8,
-      flex: 0.6,
       backgroundColor: colors.card,
+    },
+    card: {
+      flex: 1,
+      borderRadius: 30,
+      padding: 20,
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+      paddingTop: 30,
+      overflow: 'hidden',
     },
     title: {
       fontSize: 28,
@@ -227,8 +231,8 @@ const DeckSwiper: React.FC = () => {
     },
     details: {
       fontSize: 16,
-      marginBottom: 5,
       color: colors.secondary,
+      marginBottom: 5,
     },
     row: {
       flexDirection: 'row',
@@ -238,7 +242,7 @@ const DeckSwiper: React.FC = () => {
     icon: {
       marginRight: 8,
     },
-    map: {
+    mapContainer: {
       width: '100%',
       height: 250,
       borderRadius: 30,
@@ -275,6 +279,11 @@ const DeckSwiper: React.FC = () => {
       fontSize: 16,
       textAlign: 'center',
       color: colors.modalText,
+    },
+    loaderContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     emptyState: {
       paddingTop: 200,
@@ -487,7 +496,7 @@ const DeckSwiper: React.FC = () => {
     },
     modalMap: {
       width: '100%',
-      height: 300,
+      height: 250,
       borderRadius: 12,
       overflow: 'hidden',
     },
