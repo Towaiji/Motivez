@@ -961,8 +961,6 @@ export default function Motives() {
           }
           return null;
         })}
-        {selected === 'public' && renderPublicMotives()}
-        {selected === 'close-friends' && renderFriendsMotives()}
         {renderSuggestedFriends()}
       </Animated.ScrollView>
       {renderFilterModal()}
