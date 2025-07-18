@@ -1,5 +1,3 @@
-// app/menu/calendar.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -14,23 +12,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import { supabase } from '../../lib/supabaseClient';
 
-// Dummy motives/events by date
-const motivesByDate: Record<string, { id: string; title: string; time: string }[]> = {
-  '2025-06-05': [
-    { id: '1', title: 'Go-Karting Night', time: '7:00 PM' },
-    { id: '2', title: 'Trivia Night', time: '9:00 PM' },
-  ],
-  '2025-06-08': [
-    { id: '3', title: 'Beach Bonfire', time: '6:30 PM' },
-  ],
-  '2025-06-14': [
-    { id: '4', title: 'Jazz in the Park', time: '4:00 PM' },
-  ],
-};
+interface MotiveItem {
+  id: string;
+  title: string;
+  time: string;
+  rawTime: string;
+}
 
 export default function CalendarScreen() {
   const router = useRouter();
-  const [motivesByDate, setMotivesByDate] = useState<Record<string, { id: string; title: string; time: string }[]>>({});
+  const [motivesByDate, setMotivesByDate] = useState<Record<string, MotiveItem[]>>({});
   const [selected, setSelected] = useState<string>('');
 
   useEffect(() => {
@@ -38,7 +29,6 @@ export default function CalendarScreen() {
       const { data, error } = await supabase
         .from('motives')
         .select('id, title, start_time')
-        .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true });
 
       if (error) {
@@ -46,45 +36,68 @@ export default function CalendarScreen() {
         return;
       }
 
-      const grouped: Record<string, { id: string; title: string; time: string }[]> = {};
-      data?.forEach(motive => {
-        const date = motive.start_time?.split('T')[0];
-        if (!date) return;
-        const time = new Date(motive.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const grouped: Record<string, MotiveItem[]> = {};
+
+      data?.forEach((motive) => {
+        if (!motive.start_time) return;
+
+        const timeObj = new Date(motive.start_time);
+        const date = timeObj.toISOString().split('T')[0];
+        const time = timeObj.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+
         if (!grouped[date]) grouped[date] = [];
-        grouped[date].push({ id: motive.id, title: motive.title, time });
+        grouped[date].push({
+          id: motive.id,
+          title: motive.title,
+          time,
+          rawTime: motive.start_time,
+        });
       });
 
+      for (const date in grouped) {
+        grouped[date].sort((a, b) => new Date(a.rawTime).getTime() - new Date(b.rawTime).getTime());
+      }
+
+      console.log('Grouped motives:', grouped);
+
       setMotivesByDate(grouped);
-      setSelected(prev => prev || Object.keys(grouped)[0] || '');
+
+      const today = new Date().toISOString().split('T')[0];
+      const allDates = Object.keys(grouped);
+      setSelected(allDates.includes(today) ? today : allDates[0] || '');
     };
 
     fetchMotives();
   }, []);
 
-  // Marked dates for the calendar
   const markedDates = Object.keys(motivesByDate).reduce((acc, date) => {
-    acc[date] = { marked: true, dotColor: '#007AFF', selected: date === selected, selectedColor: '#e91e63' };
+    acc[date] = {
+      marked: true,
+      dotColor: '#007AFF',
+      selected: date === selected,
+      selectedColor: '#e91e63',
+    };
     return acc;
   }, {} as Record<string, any>);
 
-  // Motives for the selected day
   const motives = motivesByDate[selected] || [];
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea}>
-        {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Calendar</Text>
-          <View style={{ width: 32 }} /> {/* Spacer */}
+          <View style={{ width: 32 }} />
         </View>
 
-        {/* Calendar */}
         <Calendar
           markedDates={markedDates}
           onDayPress={(day: { dateString: string }) => setSelected(day.dateString)}
@@ -107,7 +120,6 @@ export default function CalendarScreen() {
           style={styles.calendar}
         />
 
-        {/* Motives for selected day */}
         <View style={styles.motiveList}>
           <Text style={styles.subheading}>
             {motives.length > 0
@@ -116,7 +128,7 @@ export default function CalendarScreen() {
           </Text>
           <FlatList
             data={motives}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.motiveItem}>
                 <Ionicons name="calendar-outline" size={22} color="#007AFF" style={{ marginRight: 10 }} />
@@ -124,9 +136,7 @@ export default function CalendarScreen() {
                 <Text style={styles.motiveTime}>@ {item.time}</Text>
               </View>
             )}
-            ListEmptyComponent={
-              <Text style={styles.empty}>—</Text>
-            }
+            ListEmptyComponent={<Text style={styles.empty}>—</Text>}
           />
         </View>
       </SafeAreaView>
@@ -211,4 +221,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
