@@ -30,15 +30,20 @@ export default function AddFriendsScreen() {
   }, []);
 
   async function fetchProfiles() {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, name, username, avatar_url');
-    if (data) {
-      const filtered = data.filter(p => p.id !== user?.id);
-      setProfiles(filtered as Profile[]);
-    }
-    setLoading(false);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, username');
+
+  if (error) {
+    console.error('Error fetching profiles:', error);
+    return;
   }
+
+  if (data) {
+    setProfiles(data as Profile[]);
+  }
+  setLoading(false);
+}
 
   const filteredProfiles = profiles.filter(p =>
     `${p.name ?? ''} ${p.username ?? ''}`
