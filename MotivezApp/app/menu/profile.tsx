@@ -62,6 +62,12 @@ export default function Profile() {
       left: 16,
       zIndex: 10,
     },
+    editButton: {
+      position: 'absolute',
+      top: 50,
+      right: 16,
+      zIndex: 10,
+    },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -146,6 +152,14 @@ export default function Profile() {
         {/* Back Button */}
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color={colors.icon} />
+        </TouchableOpacity>
+
+        {/* Edit Profile */}
+        <TouchableOpacity
+          onPress={() => router.push('/settings/edit-profile')}
+          style={styles.editButton}
+        >
+          <Ionicons name="create-outline" size={24} color={colors.icon} />
         </TouchableOpacity>
 
         {/* Profile Header */}
