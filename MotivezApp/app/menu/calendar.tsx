@@ -1,6 +1,6 @@
 // app/menu/calendar.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
+import { supabase } from '../../lib/supabaseClient';
 
 // Dummy motives/events by date
 const motivesByDate: Record<string, { id: string; title: string; time: string }[]> = {
@@ -29,7 +30,37 @@ const motivesByDate: Record<string, { id: string; title: string; time: string }[
 
 export default function CalendarScreen() {
   const router = useRouter();
-  const [selected, setSelected] = useState<string>(Object.keys(motivesByDate)[0] || '');
+  const [motivesByDate, setMotivesByDate] = useState<Record<string, { id: string; title: string; time: string }[]>>({});
+  const [selected, setSelected] = useState<string>('');
+
+  useEffect(() => {
+    const fetchMotives = async () => {
+      const { data, error } = await supabase
+        .from('motives')
+        .select('id, title, start_time')
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true });
+
+      if (error) {
+        console.error('Motives fetch error:', error);
+        return;
+      }
+
+      const grouped: Record<string, { id: string; title: string; time: string }[]> = {};
+      data?.forEach(motive => {
+        const date = motive.start_time?.split('T')[0];
+        if (!date) return;
+        const time = new Date(motive.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push({ id: motive.id, title: motive.title, time });
+      });
+
+      setMotivesByDate(grouped);
+      setSelected(prev => prev || Object.keys(grouped)[0] || '');
+    };
+
+    fetchMotives();
+  }, []);
 
   // Marked dates for the calendar
   const markedDates = Object.keys(motivesByDate).reduce((acc, date) => {
