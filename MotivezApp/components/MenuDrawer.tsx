@@ -217,7 +217,7 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
             <TouchableOpacity
               style={styles.drawerItemRow}
               onPress={() => {
-                /* Launch your “Add Friends” flow here */
+                router.push("/menu/add-friends");
                 onClose();
               }}
             >
