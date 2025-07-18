@@ -40,7 +40,8 @@ export default function AddFriendsScreen() {
   }
 
   if (data) {
-    setProfiles(data as Profile[]);
+    const filtered = data.filter((profile) => profile.id !== user?.id);
+    setProfiles(filtered as Profile[]);
   }
   setLoading(false);
 }
