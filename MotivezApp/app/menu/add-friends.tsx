@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,29 +34,49 @@ export default function AddFriendsScreen() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [sendingTo, setSendingTo] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfiles();
   }, []);
 
   async function fetchProfiles() {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, username');
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, username');
 
-  if (error) {
-    console.error('Error fetching profiles:', error);
-    return;
+    if (error) {
+      console.error('Error fetching profiles:', error);
+      return;
+    }
+
+    if (data) {
+      const filtered = data.filter((profile) => profile.id !== user?.id);
+      setProfiles(filtered as Profile[]);
+    }
+    setLoading(false);
   }
 
-  if (data) {
-    const filtered = data.filter((profile) => profile.id !== user?.id);
-    setProfiles(filtered as Profile[]);
-  }
-  setLoading(false);
-}
+  async function sendFriendRequest(receiverId: string) {
+    setSendingTo(receiverId);
 
-  const filteredProfiles = profiles.filter(p =>
+    const { error } = await supabase.from('friend_requests').insert({
+      sender_id: user?.id,
+      receiver_id: receiverId,
+      status: 'pending',
+    });
+
+    setSendingTo(null);
+
+    if (error) {
+      console.error('Error sending request:', error);
+      Alert.alert('Error', 'Could not send friend request.');
+    } else {
+      Alert.alert('Success', 'Friend request sent!');
+    }
+  }
+
+  const filteredProfiles = profiles.filter((p) =>
     `${p.name ?? ''} ${p.username ?? ''}`
       .toLowerCase()
       .includes(search.toLowerCase())
@@ -55,15 +85,27 @@ export default function AddFriendsScreen() {
   const renderItem = ({ item }: { item: Profile }) => (
     <View style={styles.profileRow}>
       <Image
-        source={{ uri: item.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'M')}` }}
+        source={{
+          uri:
+            item.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'M')}`,
+        }}
         style={styles.avatar}
       />
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.username}>@{item.username}</Text>
       </View>
-      <TouchableOpacity style={styles.addButton}>
-        <Ionicons name="person-add" size={22} color={colors.primaryBlue} />
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => sendFriendRequest(item.id)}
+        disabled={sendingTo === item.id}
+      >
+        {sendingTo === item.id ? (
+          <ActivityIndicator size="small" color={colors.primaryBlue} />
+        ) : (
+          <Ionicons name="person-add" size={22} color={colors.primaryBlue} />
+        )}
       </TouchableOpacity>
     </View>
   );

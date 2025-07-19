@@ -12,75 +12,86 @@ import {
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../_layout';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// Dummy friend data (replace with real API data)
-const dummyFriends = [
-  {
-    id: '1',
-    name: 'Sara Ahmed',
-    avatar: 'https://i.pravatar.cc/150?u=sara.ahmed',
-    status: 'Online',
-  },
-  {
-    id: '2',
-    name: 'Jay Patel',
-    avatar: 'https://i.pravatar.cc/150?u=jay.patel',
-    status: 'Offline',
-  },
-  {
-    id: '3',
-    name: 'Lee Wong',
-    avatar: 'https://i.pravatar.cc/150?u=lee.wong',
-    status: 'Online',
-  },
-  {
-    id: '4',
-    name: 'Maria Garcia',
-    avatar: 'https://i.pravatar.cc/150?u=maria.garcia',
-    status: 'Offline',
-  },
-  {
-    id: '5',
-    name: 'Alex Johnson',
-    avatar: 'https://i.pravatar.cc/150?u=alex.johnson',
-    status: 'Online',
-  },
-  {
-    id: '6',
-    name: 'Nina Kapoor',
-    avatar: 'https://i.pravatar.cc/150?u=nina.kapoor',
-    status: 'Offline',
-  },
-];
+interface Friend {
+  id: string;
+  name: string | null;
+  username: string | null;
+}
 
 export default function FriendsScreen() {
   const router = useRouter();
-  const [friends, setFriends] = useState<typeof dummyFriends>([]);
+  const { user } = useAuth();
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API call delay
-    setTimeout(() => {
-      setFriends(dummyFriends);
-      setLoading(false);
-    }, 800);
-  }, []);
+    if (user) fetchFriends();
+  }, [user]);
 
-  const renderFriend = ({ item }: { item: typeof dummyFriends[0] }) => (
+  async function fetchFriends() {
+    setLoading(true);
+
+    // Fetch all friendships where current user is involved
+    const { data: friendships, error } = await supabase
+      .from('friendships')
+      .select('user1_id, user2_id');
+
+    if (error) {
+      console.error('Error fetching friendships:', error);
+      setLoading(false);
+      return;
+    }
+
+    // Find all user IDs that are friends with current user
+    const friendIds = (friendships || [])
+      .map(f =>
+        f.user1_id === user?.id ? f.user2_id :
+          f.user2_id === user?.id ? f.user1_id :
+            null
+      )
+      .filter(Boolean);
+
+    if (friendIds.length === 0) {
+      setFriends([]);
+      setLoading(false);
+      return;
+    }
+
+    // Batch fetch all friend profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, name, username')
+      .in('id', friendIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      setLoading(false);
+      return;
+    }
+
+    setFriends(profiles || []);
+    setLoading(false);
+  }
+
+
+  const renderFriend = ({ item }: { item: Friend }) => (
     <View style={styles.friendCard}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image
+        source={{
+          uri:
+            item.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'M')}`,
+        }}
+        style={styles.avatar}
+      />
       <View style={styles.friendInfo}>
         <Text style={styles.friendName}>{item.name}</Text>
-        <Text style={styles.friendStatus}>
-          {item.status === 'Online' ? (
-            <Text style={{ color: '#4CAF50' }}>●</Text>
-          ) : (
-            <Text style={{ color: '#999999' }}>●</Text>
-          )}{' '}
-          {item.status}
-        </Text>
+        <Text style={styles.friendStatus}>@{item.username}</Text>
       </View>
       <TouchableOpacity style={styles.chatButton}>
         <Ionicons name="chatbubble-ellipses-outline" size={22} color="#007AFF" />
@@ -92,13 +103,12 @@ export default function FriendsScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea}>
-        {/* Top Bar */}
         <View style={styles.topBar}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.topTitle}>Friends</Text>
-          <View style={{ width: 32 }} /> {/* Spacer to center title */}
+          <View style={{ width: 32 }} />
         </View>
 
         {loading ? (

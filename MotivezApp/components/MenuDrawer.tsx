@@ -225,6 +225,17 @@ export default function MenuDrawer({ isVisible, onClose }: MenuDrawerProps) {
               <Text style={styles.drawerItemText}>Add / Invite Friends</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={styles.drawerItemRow}
+              onPress={() => {
+                router.push("/menu/FriendRequests");
+                onClose();
+              }}
+            >
+              <Ionicons name="person-add-outline" size={22} color={colors.drawerItemIcon} />
+              <Text style={styles.drawerItemText}>Friend requests</Text>
+            </TouchableOpacity>
+
             <View style={styles.sectionDivider} />
 
             {/* ==== 2) Social / Community Section ==== */}
